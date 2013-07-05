@@ -1,0 +1,346 @@
+/*
+	Example Styling for the Photo Wall combined with the Photo Map
+*/
+
+@media all {
+
+	@import "compass/css3";
+	@import "compass/utilities";
+
+	/*
+		typography
+	*/
+
+	html {
+		font-family : Sans-Serif;
+		font-size : 100%;
+		height : 100%;
+	}
+	body {
+		_height : 100%;
+		line-height : 1.3;
+		margin : 0;
+		min-height : 100%;
+		overflow : hidden;
+		padding : 0;
+	}
+	h1 {
+		font-size : 22px;
+	}
+	h2 {
+		font-size : 18px;
+	}
+	h3 {
+		font-size : 16px;
+	}
+	h1, h2, h3, p, ul, dl, table {
+		margin-top : 0;
+		margin-bottom : 0.5rem;
+		margin-bottom : 8px\9;
+	}
+	a {
+		color : #000086;
+	}
+
+	/*
+		header
+	*/
+
+	body {
+		> header.title {
+			border-radius : 0;
+			text-align : left;
+			position : absolute;
+			height : 60px;
+			left : 0;
+			right : 0;
+			top : 0;
+			z-index : 2;
+			h1 {
+				display : inline-block;
+				margin : 0;
+				vertical-align : middle;
+				a {
+					color : #fff;
+					text-decoration : none;
+				}
+			}
+		}
+		> header.subtitle {
+			@include box-shadow(inset 0 0 15px rgba(0, 0, 0, 0.5));
+			background : silver url(../img/background.jpg) repeat 50% 50%;
+			position : absolute;
+			height : 60px;
+			left : 0;
+			padding : 18px 0;
+			right : 0;
+			text-align : center;
+			top : 62px;
+			z-index : 2;
+			h2 {
+				display : inline-block;
+				margin : 0;
+				vertical-align : middle;
+			}
+			nav {
+				display : inline-block;
+				height : 60px;
+				margin : 0 0 0 10px;
+				overflow : hidden;
+				vertical-align : middle;
+			}
+		}
+	}
+
+	/*
+		signage
+	*/
+
+	.sign {
+		background-color : #000086;
+		@include background(#000086 linear-gradient(top, #2f2f7b 0%, #000062 10%, #000086 100%));
+		@include box-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
+		border-top : solid 1px rgba(255, 255, 255, 0.1);
+		border-right : solid 1px rgba(0, 0, 0, 0.2);
+		border-bottom : solid 1px rgba(0, 0, 0, 0.2);
+		border-left : solid 1px rgba(255, 255, 255, 0.1);
+		border-radius : 3px;
+		color : #fff;
+		display : inline-block;
+		font-size : 22px;
+		font-weight : normal;
+		height : 60px;
+		line-height : 59px;
+		padding : 0 15px 0 5px;
+		vertical-align : middle;
+		&:before {
+			content : '';
+			display : inline-block;
+			height : 50px;
+			vertical-align : middle;
+			width : 50px;
+		}
+		&.from {
+			display : none;
+		}
+		&.to {
+			overflow : hidden;
+			padding : 0;
+			text-indent : 65px;
+			white-space : nowrap;
+			width : 60px;
+			&:before {
+				background : Transparent url(../img/to.png) no-repeat 50% 50%;
+				display : block;
+				height : 60px;
+				margin : 0;
+				width : 60px;
+			}
+		}
+		&.park {
+			background-color : #4b6455;
+			@include background(linear-gradient(top, #6d8073 0%, #587360 10%, #4b6455 100%));
+			color : #efd4a3;
+			text-shadow : -1px -1px 1px #96865a;
+			&:before {
+				@include box-shadow(inset 1px 1px 2px rgba(0, 0, 0, 0.5));
+				background : #5a8476 url(../img/walking.png) no-repeat 50% 50%;
+				margin : 0 10px 0 0;
+			}
+		}
+		&.train {
+			&:before {
+				background : Transparent url(../img/train.png) no-repeat 50% 50%;
+				margin : 0 -2px 0 -5px;
+			}
+		}
+		&.bus {
+			&:before {
+				background : Transparent url(../img/bus.png) no-repeat 50% 50%;
+				margin : 0 -2px 0 -5px;
+			}
+		}
+		&.ferry {
+			&:before {
+				background : Transparent url(../img/ferry.png) no-repeat 50% 50%;
+				margin : 0 -2px 0 -5px;
+			}
+		}
+	}
+
+	/*
+		menu
+	*/
+
+	body {
+		> nav {
+			background : #fff none;
+			bottom : 0;
+			display : block;
+			left : 0;
+			margin : 0;
+			overflow : auto;
+			-webkit-overflow-scrolling: touch;
+			padding : 0;
+			position : absolute;
+			right : 0;
+			top : 62px;
+			z-index : 1;
+			p {
+				margin : 1em;
+			}
+			menu {
+				display : block;
+				margin : 0;
+				padding : 0;
+				li {
+					@include box-shadow(inset 0 0 15px rgba(0, 0, 0, 0.5));
+					background-position : 50% 50%;
+					list-style-type : none;
+					margin : 0;
+					padding : 0;
+					a {
+						display : block;
+						height : 60px;
+						padding : 18px 0;
+						text-align : center;
+						text-decoration : none;
+					}
+				}
+			}
+		}
+	}
+
+	/*
+		photo wall
+	*/
+
+	body {
+		.photowall {
+			background : #000;
+			bottom : 0;
+			height : auto;
+			max-height : 100%;
+			position : absolute;
+			right : 0;
+			top : 158px;
+			width : 50%;
+			z-index : 1;
+			> ul {
+				max-height : 100%;
+			}
+		}
+	}
+
+	/*
+		photo map
+	*/
+
+	body {
+		.photomap {
+			bottom : 0;
+			height : auto;
+			left : 0;
+			max-height : 100%;
+			position : absolute;
+			top : 158px;
+			width : 50%;
+			z-index : 1;
+		}
+	}
+
+	/*
+		popup
+	*/
+
+	a.popup-opener {
+		color : #fff;
+		display : inline-block;
+		font-size : 14px;
+		line-height : 1;
+		text-shadow : 0 1px 1px rgba(0, 0, 0, 0.5);
+		text-align : center;
+		&:before {
+			background : Transparent url(../img/notes.png) no-repeat 50% 50%;
+			content : '';
+			display : block;
+			height : 40px;
+			margin : 0 auto 3px auto;
+			vertical-align : middle;
+			width : 40px;
+		}
+	}
+	.popup {
+		@include box-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+		@include transition(opacity ease 500ms);
+		-webkit-transition : -webkit-opacity ease 500ms;
+		background : #fff;
+		border-radius : 10px;
+		bottom : 0;
+		padding : 2%;
+		position : absolute;
+		right : 0;
+		top : 158px;
+		width : 46%;
+		z-index : 2;
+		.popup-closer {
+			@include box-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+			background : #333;
+			border-radius : 50% 50%;
+			border : solid 2px #fff;
+			color : #fff;
+			cursor : pointer;
+			font-size : 17px;
+			font-weight : bold;
+			position : absolute;
+			line-height : 21px;
+			right : 10px;
+			text-align : center;
+			text-decoration : none;
+			top : 10px;
+			width : 24px;
+			height : 24px;
+		}
+		&.popup-open {
+			opacity : 1;
+			-webkit-opacity : 1;
+			visibility : visible;
+		}
+		&.popup-closed {
+			opacity : 0;
+			-webkit-opacity : 0;
+			visibility : hidden;
+		}
+	}
+
+}
+@media (min-width: 1200px) {}
+@media (min-width: 980px) and (max-width: 1199px) {}
+@media (min-width: 768px) and (max-width: 979px) {}
+@media (max-width: 767px) {}
+@media (max-width: 480px) {}
+@media print {
+
+	body header {
+		display : none !important;
+	}
+	body .popup {
+		opacity : 1 !important;
+		-webkit-opacity : 1 !important;
+		visibility : visible !important;
+		width : 96% !important;
+		bottom : 0 !important;
+		top : 50% !important;
+		z-index : 10 !important;
+	}
+	body .photomap {
+		width : 100% !important;
+		top : 0 !important;
+		bottom : 50% !important;
+		z-index : 10 !important;
+	}
+	body .photowall {
+		display : none !important;
+	}
+
+}
