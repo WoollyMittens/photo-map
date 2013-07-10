@@ -39,8 +39,8 @@
 		{
 
 			// compensate for missing dimensions
-			if (!isset($sliceWidth)) $sliceWidth = $this->imageWidth / $this->imageHeight * $sliceHeight;
-			if (!isset($sliceHeight)) $sliceHeight = $this->imageHeight / $this->imageWidth * $sliceWidth;
+			if (!isset($sliceWidth)) $sliceWidth = $this->cropWidth / $this->cropHeight * $sliceHeight;
+			if (!isset($sliceHeight)) $sliceHeight = $this->cropHeight / $this->cropWidth * $sliceWidth;
 
 			// create a canvas for the slice
 			$this->slice = imagecreatetruecolor($sliceWidth, $sliceHeight);
@@ -53,8 +53,8 @@
 				0,
 				round($this->cropLeft),
 				round($this->cropTop),
-				$sliceWidth,
-				$sliceHeight,
+				round($sliceWidth),
+				round($sliceHeight),
 				round($this->cropWidth),
 				round($this->cropHeight)
 			);
