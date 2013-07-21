@@ -176,7 +176,7 @@
 				}
 			},
 			redraw : function (settings) {
-				var a, b, last, c, d, proportionalWidth, subtotalWidth = 0, currentRow = [];
+				var a, b, last, c, d, compatibilityWidth, proportionalWidth, subtotalWidth = 0, currentRow = [];
 				// for every image
 				for (a = 0 , b = settings.images.objects.length, last = b - 1; a < b; a += 1) {
 					// calculate its width proportional to the given row height
@@ -190,14 +190,24 @@
 					});
 					// if the subtotal exceeds a row's width
 					if (subtotalWidth >= settings.col || a === last) {
+						// if the last image sticks out too far, discard it
+					//	if (subtotalWidth - settings.col > proportionalWidth / 2) {
+					//		currentRow.length -= 1;
+					//		subtotalWidth -= proportionalWidth;
+					//		a -= 1;
+					//	}
 						// if this is the last row and it has less orphans than allowed
 						if (a === last && currentRow.length <= settings.orphans) {
 							subtotalWidth = settings.col;
 						}
 						// for all the entries in the subtotal array
 						for (c = 0 , d = currentRow.length; c < d; c += 1) {
-							// convert the estimated width to a % of the row
-							currentRow[c].object.style.width =   (currentRow[c].proportionalWidth / subtotalWidth * 100)  + '%';
+							// convert the estimated width to a % of the row of pixels for older browsers
+							compatibilityWidth = (settings.fallback) ?
+								Math.round(currentRow[c].proportionalWidth / subtotalWidth * (settings.col - 18))  + 'px':
+								(currentRow[c].proportionalWidth / subtotalWidth * 100)  + '%';
+							// apply the new size settings
+							currentRow[c].object.style.width = compatibilityWidth;
 							currentRow[c].object.style.height = 'auto';
 						}
 						// clear the subtotal

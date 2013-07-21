@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<title>useful.photomap.js: Photo Map</title>
 		<style>
 			html { font-family:Sans-Serif; font-size:75%; height:100%; }
@@ -14,7 +15,6 @@
 		<link rel="stylesheet" href="./css/photocombi.css"/>
 		<!--[if lte IE 9]>
 			<meta http-equiv="imagetoolbar" content="no"/>
-			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 			<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 			<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
@@ -81,6 +81,7 @@
 						'row' : 150,
 						'orphans' : 2,
 						'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}',
+						'fallback' : navigator.userAgent.match(/msie 8|msie 7|msie 6/gi),
 						'opened' : function (image, link) {
 							useful.photomap.exif.load(image.getAttribute('src'), photomapSettings);
 						},
