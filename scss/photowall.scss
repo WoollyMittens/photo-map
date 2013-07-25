@@ -1,17 +1,17 @@
 /*
 	Example Styling for a Photo Wall
 */
-
 @media all {
-
 	@import "compass/css3";
 	@import "compass/utilities";
-
 	.photowall {
 		margin : 0;
 		padding : 0;
 		position : relative;
 		width : 100%;
+		* {
+			@include box-sizing(border-box);
+		}
 		ul {
 			-webkit-overflow-scrolling: touch;
 			display : block;
@@ -109,7 +109,6 @@
 	.photowall-active {
 		visibility : visible;
 	}
-
 }
 @media (min-width: 1200px) {}
 @media (min-width: 980px) and (max-width: 1199px) {}

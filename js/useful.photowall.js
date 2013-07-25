@@ -145,7 +145,7 @@
 			close : function (settings) {
 				// if there is a popup
 				if (settings.popup) {
-					// trigger the opened event if available
+					// trigger the closed event if available
 					if (settings.closed !== null) {
 						settings.closed();
 					}
@@ -222,12 +222,16 @@
 			},
 			clicked : function (index, settings) {
 				settings.images.objects[index].onclick = function () {
+					var allowedToOpen;
 					// trigger the opened event if available
 					if (settings.opened !== null) {
-						settings.opened(settings.images.objects[index], settings.images.links[index]);
+						// catch the reply from the opened event
+						allowedToOpen = settings.opened(settings.images.objects[index], settings.images.links[index]);
 					}
-					// open the popup
-					photowall.details.show(index, settings);
+					// open the popup, if there was no reply or a positive reply
+					if (typeof(allowedToOpen) === 'undefined' || allowedToOpen === null || allowedToOpen) {
+						photowall.details.show(index, settings);
+					}
 					// cancel the click
 					return false;
 				};

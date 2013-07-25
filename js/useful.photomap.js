@@ -57,6 +57,9 @@
 				min = (exif.GPS.GPSLatitude[1].match(/\//)) ? parseInt(exif.GPS.GPSLatitude[1].split('/')[0]) / parseInt(exif.GPS.GPSLatitude[1].split('/')[1]) : parseInt(exif.GPS.GPSLatitude[1]);
 				sec = (exif.GPS.GPSLatitude[2].match(/\//)) ? parseInt(exif.GPS.GPSLatitude[2].split('/')[0]) / parseInt(exif.GPS.GPSLatitude[2].split('/')[1]) : parseInt(exif.GPS.GPSLatitude[2]);
 				settings.indicator.lat = (deg + min/60 + sec/3600) * (exif.GPS.GPSLatitudeRef == "N" ? 1 : -1);
+if (typeof(console) !== 'undefined') {
+	console.log(settings.indicator);
+}
 				// render the indicator
 				photomap.indicator.add(settings);
 			},
@@ -117,11 +120,22 @@
 				settings.map.object.addLayer(layerCycleMap);
 				var layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
 				settings.map.object.addLayer(layerMapnik);
+				// get the duration of the walk
+				photomap.map.duration(settings);
 				// get the centre of the map
 				photomap.map.centre(settings);
 				// centre the map on the coordinates
 				settings.map.centre.lonLat = new OpenLayers.LonLat(settings.map.centre.lon, settings.map.centre.lat).transform(new OpenLayers.Projection("EPSG:4326"), settings.map.object.getProjectionObject());
 				settings.map.object.setCenter(settings.map.centre.lonLat, settings.zoom);
+			},
+			duration : function (settings) {
+				var start, end, points = settings.gpxDOM.getElementsByTagName('trkpt');
+				// if the duration placeholder and the time markers exist
+				if (settings.duration && points[0].getElementsByTagName('time').length > 0) {
+					start = new Date(points[0].getElementsByTagName('time')[0].firstChild.nodeValue);
+					end = new Date(points[points.length - 1].getElementsByTagName('time')[0].firstChild.nodeValue);
+					settings.duration.innerHTML = Math.round((end.getTime() - start.getTime()) / 3600000) + ' hours' ;
+				}
 			},
 			centre : function (settings) {
 				var a, b, points, totLat = 0, totLon = 0;
