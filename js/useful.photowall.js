@@ -30,19 +30,17 @@
 			photowall.prepare(settings);
 			// construct the spinner
 			photowall.busy.build(settings);
-			// if the page has already loaded
-			if (document.readyState === "complete") {
-				// update the display
-				photowall.thumbnails.measure(settings);
-				photowall.thumbnails.redraw(settings);
-			} else {
-				// wait for the page to load first
-				useful.events.add(window, 'load', function () {
-					// update the display
+			// check every once in a while to see if the image dimensions are known yet
+			settings.wait = setInterval(function () {
+				if (photowall.thumbnails.complete(settings)){
+					// cancel the checking
+					clearTimeout(settings.wait);
+					// measure the dimensions
 					photowall.thumbnails.measure(settings);
+					// construct the wall
 					photowall.thumbnails.redraw(settings);
-				});
-			}
+				}
+			}, 500);
 		},
 		prepare : function (settings) {
 			// remove the white space
@@ -76,6 +74,7 @@
 					// create a container for the popup
 					settings.popup = document.createElement('div');
 					settings.popup.className = 'photowall-detail photowall-detail-passive';
+					settings.popup.className += (settings.maximise) ? ' photowall-detail-maximise' : '';
 					// add a close gadget
 					photowall.details.addCloser(settings);
 					// add the popup to the parent
@@ -87,35 +86,27 @@
 				}
 			},
 			addImage : function (index, settings) {
-				var parentWidth, parentHeight, parentAspect, image, imageWidth, imageHeight, imageCaption;
+				var popupWidth, popupHeight, popupAspect, image, imageWidth, imageHeight, imageSrc, imageSize, imageCaption;
 				// measure the parent
-				parentWidth = settings.parent.offsetWidth;
-				parentHeight = settings.parent.offsetHeight;
-				parentAspect = parentHeight / parentWidth;
+				popupWidth = settings.popup.offsetWidth;
+				popupHeight = settings.popup.offsetHeight;
+				popupAspect = popupHeight / popupWidth;
 				// based on the dimensions of the thumbnail, determine the size of the zoomed image
-				if (settings.images.aspects[index] > parentAspect) {
-					imageWidth = parentHeight / settings.images.aspects[index];
-					imageHeight = parentHeight;
-				} else {
-					imageWidth = parentWidth;
-					imageHeight = parentWidth * settings.images.aspects[index];
-				}
+				imageSize = (settings.images.aspects[index] > popupAspect) ? 'height=' + popupHeight : 'width=' + popupWidth;
+				// get the source of the image
+				imageSrc = settings.images.links[index].getAttribute('href');
 				// get a possible caption
 				imageCaption = settings.images.links[index].getAttribute('title') || settings.images.objects[index].getAttribute('alt');
 				// build the zoomed image
 				image = document.createElement('img');
 				image.className = 'photowall-image';
 				image.setAttribute('alt', imageCaption);
-				image.onload = function () {
-					photowall.details.open(settings);
-				};
-				// centre the zoomed image
-				image.style.marginTop = Math.round((parentHeight - imageHeight) / 2) + 'px';
+				image.onload = photowall.details.open(settings);
 				// add the image to the popup
 				settings.popup.appendChild(image);
 				// load the image
 				image.src = (settings.slice) ?
-					settings.slice.replace('{src}', settings.images.links[index].getAttribute('href')).replace('{width}', Math.round(imageWidth)).replace('{height}', Math.round(imageHeight)):
+					settings.slice.replace('{src}', imageSrc).replace('{size}', imageSize):
 					settings.images.links[index];
 			},
 			addCloser : function (settings) {
@@ -126,42 +117,59 @@
 				closer.innerHTML = 'x';
 				closer.href = '#close';
 				// add the close event handler
-				closer.onclick = function () {
-					photowall.details.close(settings);
-					return false;
-				};
+				closer.onclick = photowall.details.close(settings);
 				// add the close gadget to the image
 				settings.popup.appendChild(closer);
 			},
 			open : function (settings) {
-				// if there is a popup
-				if (settings.popup) {
-					// hide the busy indicator
-					photowall.busy.hide(settings);
-					// reveal it
-					settings.popup.className = settings.popup.className.replace(/-passive/gi, '-active');
+				return function () {
+					var image;
+					// if there is a popup
+					if (settings.popup) {
+						// hide the busy indicator
+						photowall.busy.hide(settings);
+						// centre the image
+						image = settings.popup.getElementsByTagName('img')[0];
+						image.style.marginTop = Math.round((settings.popup.offsetHeight - image.offsetHeight) / 2) + 'px';
+						// reveal it
+						settings.popup.className = settings.popup.className.replace(/-passive/gi, '-active');
+					}
 				}
 			},
 			close : function (settings) {
-				// if there is a popup
-				if (settings.popup) {
-					// trigger the closed event if available
-					if (settings.closed !== null) {
-						settings.closed();
+				return function () {
+					// if there is a popup
+					if (settings.popup) {
+						// trigger the closed event if available
+						if (settings.closed !== null) {
+							settings.closed();
+						}
+						// unreveal the popup
+						settings.popup.className = settings.popup.className.replace(/-active/gi, '-passive');
+						// and after a while
+						setTimeout(function () {
+							// remove it
+							settings.parent.removeChild(settings.popup);
+							// remove its reference
+							settings.popup = null;
+						}, 500);
 					}
-					// unreveal the popup
-					settings.popup.className = settings.popup.className.replace(/-active/gi, '-passive');
-					// and after a while
-					setTimeout(function () {
-						// remove it
-						settings.parent.removeChild(settings.popup);
-						// remove its reference
-						settings.popup = null;
-					}, 500);
+					// cancel the click
+					return false;
 				}
 			}
 		},
 		thumbnails : {
+			complete : function (settings) {
+				var a, b, passed = true;
+				// for all the images
+				for (a = 0 , b = settings.images.objects.length; a < b; a += 1) {
+					// if any of the images doesn't have a valid height
+					passed = passed && settings.images.objects[a].offsetWidth > 2;
+				}
+				// return the result
+				return passed;
+			},
 			measure : function (settings) {
 				var a, b;
 				// for all images
@@ -215,13 +223,13 @@
 						subtotalWidth = 0;
 					}
 					// add an event handler to the image
-					photowall.thumbnails.clicked(a, settings);
+					settings.images.objects[a].onclick = photowall.thumbnails.clicked(a, settings);
 				}
 				// communicate the active state
 				settings.parent.className = settings.parent.className.replace('-passive', '-active');
 			},
 			clicked : function (index, settings) {
-				settings.images.objects[index].onclick = function () {
+				return function () {
 					var allowedToOpen;
 					// trigger the opened event if available
 					if (settings.opened !== null) {

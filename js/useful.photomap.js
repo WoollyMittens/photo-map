@@ -129,12 +129,41 @@ if (typeof(console) !== 'undefined') {
 				settings.map.object.setCenter(settings.map.centre.lonLat, settings.zoom);
 			},
 			duration : function (settings) {
-				var start, end, points = settings.gpxDOM.getElementsByTagName('trkpt');
+				var time, start, end, points = settings.gpxDOM.getElementsByTagName('trkpt');
 				// if the duration placeholder and the time markers exist
 				if (settings.duration && points[0].getElementsByTagName('time').length > 0) {
-					start = new Date(points[0].getElementsByTagName('time')[0].firstChild.nodeValue);
-					end = new Date(points[points.length - 1].getElementsByTagName('time')[0].firstChild.nodeValue);
-					settings.duration.innerHTML = Math.round((end.getTime() - start.getTime()) / 3600000) + ' hours' ;
+					// get the start time
+					time = points[0].getElementsByTagName('time')[0].firstChild.nodeValue;
+					start = new Date(time);
+					// if the date could not be interpreted
+					if (isNaN(start)) {
+						// split the string up manually as a fall back
+						start = new Date(
+							parseInt(time.split('-')[0]),
+							parseInt(time.split('-')[1]) + 1,
+							parseInt(time.split('-')[2]),
+							parseInt(time.split('T')[1]),
+							parseInt(time.split(':')[1]),
+							parseInt(time.split(':')[2])
+						);
+					}
+					// get the start time
+					time = points[points.length - 1].getElementsByTagName('time')[0].firstChild.nodeValue;
+					end = new Date(time);
+					// if the date could not be interpreted
+					if (isNaN(end)) {
+						// split the string up manually as a fall back
+						end = new Date(
+							parseInt(time.split('-')[0]),
+							parseInt(time.split('-')[1]) + 1,
+							parseInt(time.split('-')[2]),
+							parseInt(time.split('T')[1]),
+							parseInt(time.split(':')[1]),
+							parseInt(time.split(':')[2])
+						);
+					}
+					// write the duration to the document
+					settings.duration.innerHTML = (!isNaN(start)) ? Math.round((end.getTime() - start.getTime()) / 3600000, 10) + ' hours' : '- hours';
 				}
 			},
 			centre : function (settings) {

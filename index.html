@@ -79,8 +79,9 @@
 					var photowallSettings;
 					photowallSettings = {
 						'row' : 150,
-						'orphans' : 2,
-						'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}',
+						'orphans' : 0,
+						'maximise' : false,
+						'slice' : './php/imageslice.php?src=../{src}&{size}',
 						'fallback' : navigator.userAgent.match(/msie 8|msie 7|msie 6/gi),
 						'opened' : function (image, link) {
 							useful.photomap.exif.load(image.getAttribute('src'), photomapSettings);
