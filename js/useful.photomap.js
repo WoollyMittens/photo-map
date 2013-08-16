@@ -38,8 +38,12 @@
 				useful.request.send({
 					url : settings.exif.replace('{src}', src),
 					post : null,
-					onProgress : function (reply) {return reply},
-					onFailure : function (reply) {return reply},
+					onProgress : function (reply) {
+						return reply;
+					},
+					onFailure : function (reply) {
+						return reply;
+					},
 					onSuccess : function (reply) {
 						photomap.exif.convert(useful.request.decode(reply.responseText), settings);
 					}
@@ -48,20 +52,35 @@
 			convert : function (exif, settings) {
 				var deg, min, sec;
 				// longitude
-				deg = (exif.GPS.GPSLongitude[0].match(/\//)) ? parseInt(exif.GPS.GPSLongitude[0].split('/')[0]) / parseInt(exif.GPS.GPSLongitude[0].split('/')[1]) : parseInt(exif.GPS.GPSLongitude[0]);
-				min = (exif.GPS.GPSLongitude[1].match(/\//)) ? parseInt(exif.GPS.GPSLongitude[1].split('/')[0]) / parseInt(exif.GPS.GPSLongitude[1].split('/')[1]) : parseInt(exif.GPS.GPSLongitude[1]);
-				sec = (exif.GPS.GPSLongitude[2].match(/\//)) ? parseInt(exif.GPS.GPSLongitude[2].split('/')[0]) / parseInt(exif.GPS.GPSLongitude[2].split('/')[1]) : parseInt(exif.GPS.GPSLongitude[2]);
-				settings.indicator.lon = (deg + min/60 + sec/3600) * (exif.GPS.GPSLongitudeRef == "W" ? -1 : 1);
+				deg = (exif.GPS.GPSLongitude[0].match(/\//)) ?
+					parseInt(exif.GPS.GPSLongitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[0].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLongitude[0], 10);
+				min = (exif.GPS.GPSLongitude[1].match(/\//)) ?
+					parseInt(exif.GPS.GPSLongitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[1].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLongitude[1], 10);
+				sec = (exif.GPS.GPSLongitude[2].match(/\//)) ?
+					parseInt(exif.GPS.GPSLongitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[2].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLongitude[2], 10);
+				settings.indicator.lon = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLongitudeRef === "W" ? -1 : 1);
 				// latitude
-				deg = (exif.GPS.GPSLatitude[0].match(/\//)) ? parseInt(exif.GPS.GPSLatitude[0].split('/')[0]) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1]) : parseInt(exif.GPS.GPSLatitude[0]);
-				min = (exif.GPS.GPSLatitude[1].match(/\//)) ? parseInt(exif.GPS.GPSLatitude[1].split('/')[0]) / parseInt(exif.GPS.GPSLatitude[1].split('/')[1]) : parseInt(exif.GPS.GPSLatitude[1]);
-				sec = (exif.GPS.GPSLatitude[2].match(/\//)) ? parseInt(exif.GPS.GPSLatitude[2].split('/')[0]) / parseInt(exif.GPS.GPSLatitude[2].split('/')[1]) : parseInt(exif.GPS.GPSLatitude[2]);
-				settings.indicator.lat = (deg + min/60 + sec/3600) * (exif.GPS.GPSLatitudeRef == "N" ? 1 : -1);
-if (typeof(console) !== 'undefined') {
-	console.log(settings.indicator);
-}
+				deg = (exif.GPS.GPSLatitude[0].match(/\//)) ?
+					parseInt(exif.GPS.GPSLatitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLatitude[0], 10);
+				min = (exif.GPS.GPSLatitude[1].match(/\//)) ?
+					parseInt(exif.GPS.GPSLatitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[1].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLatitude[1], 10);
+				sec = (exif.GPS.GPSLatitude[2].match(/\//)) ?
+					parseInt(exif.GPS.GPSLatitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[2].split('/')[1], 10):
+					parseInt(exif.GPS.GPSLatitude[2], 10);
+				settings.indicator.lat = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLatitudeRef === "N" ? 1 : -1);
+				// temporary console report
+				if (typeof(console) !== 'undefined') {
+					console.log(settings.indicator);
+				}
 				// render the indicator
 				photomap.indicator.add(settings);
+				// focus the map on the indicator
+				photomap.indicator.focus(settings);
 			},
 			unload : function (settings) {
 				// remove the indicator
@@ -139,12 +158,12 @@ if (typeof(console) !== 'undefined') {
 					if (isNaN(start)) {
 						// split the string up manually as a fall back
 						start = new Date(
-							parseInt(time.split('-')[0]),
-							parseInt(time.split('-')[1]) + 1,
-							parseInt(time.split('-')[2]),
-							parseInt(time.split('T')[1]),
-							parseInt(time.split(':')[1]),
-							parseInt(time.split(':')[2])
+							parseInt(time.split('-')[0], 10),
+							parseInt(time.split('-')[1], 10) + 1,
+							parseInt(time.split('-')[2], 10),
+							parseInt(time.split('T')[1], 10),
+							parseInt(time.split(':')[1], 10),
+							parseInt(time.split(':')[2], 10)
 						);
 					}
 					// get the start time
@@ -154,12 +173,12 @@ if (typeof(console) !== 'undefined') {
 					if (isNaN(end)) {
 						// split the string up manually as a fall back
 						end = new Date(
-							parseInt(time.split('-')[0]),
-							parseInt(time.split('-')[1]) + 1,
-							parseInt(time.split('-')[2]),
-							parseInt(time.split('T')[1]),
-							parseInt(time.split(':')[1]),
-							parseInt(time.split(':')[2])
+							parseInt(time.split('-')[0], 10),
+							parseInt(time.split('-')[1], 10) + 1,
+							parseInt(time.split('-')[2], 10),
+							parseInt(time.split('T')[1], 10),
+							parseInt(time.split(':')[1], 10),
+							parseInt(time.split(':')[2], 10)
 						);
 					}
 					// write the duration to the document
