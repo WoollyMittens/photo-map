@@ -17,8 +17,8 @@ $iconSize : 64px;
 	text-indent : ($size + 10) + px;
 	white-space : nowrap;
 	/* Because of Internet Explorer 8 we can't have nice thing. */
-	overflow : visible\9;
-	text-indent : -999em\9;
+	overflow : visible;
+	text-indent : -999em;
 }
 
 @mixin iconCenter ($size:32) {
