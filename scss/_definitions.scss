@@ -8,7 +8,9 @@ $color-passive : #ff6a00;
 $color-active : #d45800;
 $color-hover : #ff9800;
 $color-disabled : #7f7f7f;
+$color-highlight : #eeeeee;
 $iconSize : 64px;
+$remSize : 12;
 
 @mixin iconParent ($size:32) {
 	overflow : hidden;
@@ -34,47 +36,55 @@ $iconSize : 64px;
 }
 
 @mixin rem ($name:'', $value:'') {
-	#{$name} : (16 * $value) + px;
+	#{$name} : ($remSize * $value) + px;
 	#{$name} : $value + rem;
 }
 
 @mixin rems ($name:'', $top:'', $right:'', $bottom:'', $left:'') {
 	@if $top != '' {
-		#{$name}-top : (16 * $top) + px;
+		#{$name}-top : ($remSize * $top) + px;
 		#{$name}-top : $top + rem;
 	}
 	@if $right != '' {
-		#{$name}-right : (16 * $right) + px;
+		#{$name}-right : ($remSize * $right) + px;
 		#{$name}-right : $right + rem;
 	}
 	@if $bottom != '' {
-		#{$name}-bottom : (16 * $bottom) + px;
+		#{$name}-bottom : ($remSize * $bottom) + px;
 		#{$name}-bottom : $bottom + rem;
 	}
 	@if $left != '' {
-		#{$name}-left : (16 * $left) + px;
+		#{$name}-left : ($remSize * $left) + px;
 		#{$name}-left : $left + rem;
 	}
 }
 
 @mixin text ($size) {
 	@if $size == s {
-		font-size : 14px;
+		font-size : ($remSize * 1.571) + 'px';
 		font-size : 1.571rem;
 	} @else if $size == m {
-		font-size : 16px;
+		font-size : ($remSize * 1) + 'px';
 		font-size : 1rem;
 	} @else if $size == l {
-		font-size : 20px;
+		font-size : ($remSize * 1.25) + 'px';
 		font-size : 1.25rem;
 	} @else if $size == xl {
-		font-size : 26px;
+		font-size : ($remSize * 1.625) + 'px';
 		font-size : 1.625rem;
 	} @else if $size == xxl {
-		font-size : 30px;
+		font-size : ($remSize * 1.875) + 'px';
 		font-size : 1.875rem;
 	} @else {
-		font-size : (16 * $size) + 'px';
+		font-size : ($remSize * $size) + 'px';
 		font-size : $size + 'rem';
 	}
+}
+
+@mixin vendors ($name:'', $value:'') {
+	-o-#{$name} : #{$value};
+	-ms-#{$name} : #{$value};
+	-moz-#{$name} : #{$value};
+	-webkit-#{$name} : #{$value};
+	#{$name} : #{$value};
 }

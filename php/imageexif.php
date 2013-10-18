@@ -12,17 +12,6 @@
 			$exif = exif_read_data($src, 0, true);
 			if(isset($callBack)) echo $callBack . '(';
 			echo json_encode($exif);
-			/*
-			echo '{"foo":"bar"';
-			foreach ($exif as $key => $section) {
-				echo ',"' . $key . '":{"foo":"bar"';
-				foreach ($section as $name => $val) {
-						echo ',"' . $name . '":' . json_encode($val);
-				}
-				echo '}';
-			}
-			echo '}';
-			*/
 			if(isset($callBack)) echo ');';
 		}
 

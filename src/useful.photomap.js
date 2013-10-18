@@ -47,6 +47,7 @@
 		};
 		this.exif.convert = function (exif, context) {
 			var deg, min, sec;
+console.log(exif);
 			// longitude
 			deg = (exif.GPS.GPSLongitude[0].match(/\//)) ?
 				parseInt(exif.GPS.GPSLongitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[0].split('/')[1], 10):
