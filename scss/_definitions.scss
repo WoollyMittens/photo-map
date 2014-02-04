@@ -1,7 +1,9 @@
 /*
 	Definitions
 */
-
+/*
+	Constants
+*/
 $color-background : #ffffff;
 $color-text : #1e1e1e;
 $color-passive : #ff6a00;
@@ -11,7 +13,18 @@ $color-disabled : #7f7f7f;
 $color-highlight : #eeeeee;
 $iconSize : 64px;
 $remSize : 12;
-
+/*
+	Hides text in the margin
+*/
+@mixin obfuscate ($distance:100) {
+	overflow : hidden;
+	text-align : left;
+	text-indent : ($distance + 10) + px;
+	white-space : nowrap;
+}
+/*
+	Turns a button into an icon
+*/
 @mixin iconParent ($size:32) {
 	overflow : hidden;
 	position : relative;
@@ -22,7 +35,9 @@ $remSize : 12;
 	overflow : visible;
 	text-indent : -999em;
 }
-
+/*
+	Centres a graphic inside an icon
+*/
 @mixin iconCenter ($size:32) {
 	content : '';
 	display : block;
@@ -34,12 +49,16 @@ $remSize : 12;
 	top : 50%;
 	width : $size + px;
 }
-
+/*
+	Offers both the pixel and rem value of a single property
+*/
 @mixin rem ($name:'', $value:'') {
 	#{$name} : ($remSize * $value) + px;
 	#{$name} : $value + rem;
 }
-
+/*
+	Offers both the pixel and rem values of a shorthand property
+*/
 @mixin rems ($name:'', $top:'', $right:'', $bottom:'', $left:'') {
 	@if $top != '' {
 		#{$name}-top : ($remSize * $top) + px;
@@ -58,33 +77,51 @@ $remSize : 12;
 		#{$name}-left : $left + rem;
 	}
 }
-
+/*
+	Offers the text size as both the pixel and rem value
+*/
 @mixin text ($size) {
 	@if $size == s {
-		font-size : ($remSize * 1.571) + 'px';
-		font-size : 1.571rem;
+		font-size : ($remSize * 0.875) + px;
+		font-size : 0.875rem;
 	} @else if $size == m {
-		font-size : ($remSize * 1) + 'px';
+		font-size : ($remSize * 1) + px;
 		font-size : 1rem;
 	} @else if $size == l {
-		font-size : ($remSize * 1.25) + 'px';
+		font-size : ($remSize * 1.25) + px;
 		font-size : 1.25rem;
 	} @else if $size == xl {
-		font-size : ($remSize * 1.625) + 'px';
+		font-size : ($remSize * 1.625) + px;
 		font-size : 1.625rem;
 	} @else if $size == xxl {
-		font-size : ($remSize * 1.875) + 'px';
+		font-size : ($remSize * 1.875) + px;
 		font-size : 1.875rem;
 	} @else {
-		font-size : ($remSize * $size) + 'px';
-		font-size : $size + 'rem';
+		font-size : ($remSize * $size) + px;
+		font-size : $size + rem;
 	}
 }
-
+/*
+	Adds vendor prefixed to a property
+*/
 @mixin vendors ($name:'', $value:'') {
 	-o-#{$name} : #{$value};
 	-ms-#{$name} : #{$value};
 	-moz-#{$name} : #{$value};
 	-webkit-#{$name} : #{$value};
 	#{$name} : #{$value};
+}
+/*
+	Applies the "clearfix" hack to a container with floating content
+*/
+@mixin clearfix () {
+	*zoom: 1;
+	&:after {
+		clear: both;
+		content: " ";
+		display: block;
+		font-size: 0;
+		height: 0;
+		visibility: hidden;
+	}
 }

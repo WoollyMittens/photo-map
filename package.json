@@ -1,0 +1,14 @@
+{
+  "name": "useful-aspectratio",
+  "version": "0.0.0",
+  "devDependencies": {
+    "grunt": "",
+    "grunt-contrib-watch": "",
+    "grunt-contrib-compass": "",
+    "grunt-contrib-uglify": "",
+    "grunt-contrib-concat": "",
+    "grunt-contrib-jshint": "",
+    "sass": "",
+    "compass": ""
+  }
+}

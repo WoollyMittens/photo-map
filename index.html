@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<title>useful.photomap.js: Photo Map</title>
+		<title>useful-photomap.js: Photo Map</title>
 		<style>
 			html { font-family:Sans-Serif; font-size:75%; height:100%; }
 			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:1%; }
@@ -16,8 +16,8 @@
 		<!--[if lte IE 9]>
 			<meta http-equiv="imagetoolbar" content="no"/>
 			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-			<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-			<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+			<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+			<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.js"></script>
 		<![endif]-->
 	</head>
 	<body>
@@ -32,11 +32,11 @@
 			<aside>
 
 				<!-- Cut below this -->
-				<style>@import url("./css/photomap.css")</style>
+				<style>@import url("./css/useful-photomap.css")</style>
 				<figure id="testmap" class="photomap"></figure>
 				<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 				<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-				<script src="./js/photomap.min.js"></script>
+				<script src="./js/useful-photomap.js"></script>
 				<script>
 				//<!--
 					var combiPhotomap = new useful.Photomap( document.getElementById('testmap'), {
