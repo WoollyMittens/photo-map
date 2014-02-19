@@ -12,7 +12,7 @@
 			.example-left > article, .example-left > aside { width:48%; padding:1%; float:left; }
 			.example-right > article, .example-right > aside { width:48%; padding:1%; float:right; }
 		</style>
-		<link rel="stylesheet" href="./css/photocombi.css"/>
+		<link rel="stylesheet" href="./inc/css/photocombi.css"/>
 		<!--[if lte IE 9]>
 			<meta http-equiv="imagetoolbar" content="no"/>
 			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -32,29 +32,29 @@
 			<aside>
 
 				<!-- Cut below this -->
-				<style>@import url("./css/useful-photomap.css")</style>
+				<style>@import url("./inc/css/useful-photomap.css")</style>
 				<figure id="testmap" class="photomap"></figure>
 				<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 				<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-				<script src="./js/useful-photomap.js"></script>
+				<script src="./inc/js/useful-photomap.js"></script>
 				<script>
 				//<!--
 					var combiPhotomap = new useful.Photomap( document.getElementById('testmap'), {
-						'gpx' : './assets/cowan-taffyslookout-brooklyn.xml',
-						'exif' : './php/imageexif.php?src=../{src}',
+						'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
+						'exif' : './inc/php/imageexif.php?src=../../{src}',
 						'zoom' : 13,
 						'markers' : {
 							'start' : {
-								'icon' : './img/marker-train.png',
+								'icon' : './inc/img/marker-train.png',
 								'description' : 'Transport to this location: <a href="http://131500.com.au">131500.com.au</a>'
 							},
 							'end' : {
-								'icon' : './img/marker-train.png',
+								'icon' : './inc/img/marker-train.png',
 								'description' : 'Transport from this location: <a href="http://131500.com.au">131500.com.au</a>'
 							}
 						},
 						'indicator' : {
-							'icon' : './img/marker-photo.png',
+							'icon' : './inc/img/marker-photo.png',
 							'description' : 'Photo taken at this location.'
 						}
 					});
@@ -71,13 +71,13 @@
 					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
 				</style>
 				<ul id="testImages">
-					<li><a href="./assets/P6098685P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6098685P.jpg"/></a></li>
-					<li><a href="./assets/P6098815P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6098815P.jpg"/></a></li>
-					<li><a href="./assets/P6098876P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6098876P.jpg"/></a></li>
-					<li><a href="./assets/P6098922P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6098922P.jpg"/></a></li>
-					<li><a href="./assets/P6098939P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6098939P.jpg"/></a></li>
-					<li><a href="./assets/P6099010P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6099010P.jpg"/></a></li>
-					<li><a href="./assets/P6099096P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./assets/P6099096P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098685P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098685P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098815P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098815P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098876P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098876P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098922P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098922P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098939P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098939P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099010P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6099010P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099096P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6099096P.jpg"/></a></li>
 				</ul>
 			</article>
 		</section>

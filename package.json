@@ -8,6 +8,8 @@
     "grunt-contrib-uglify": "",
     "grunt-contrib-concat": "",
     "grunt-contrib-jshint": "",
+    "grunt-contrib-copy": "",
+    "grunt-contrib-connect": "",
     "sass": "",
     "compass": ""
   }
