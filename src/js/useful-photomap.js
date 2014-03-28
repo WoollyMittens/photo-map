@@ -23,6 +23,8 @@
 		this.start = function () {
 			this.busy.setup(this);
 			this.gpx.load(this);
+			// disable the start function so it can't be started twice
+			this.start = function () {};
 		};
 		this.busy = {};
 		this.busy.setup = function () {};
@@ -316,6 +318,8 @@ console.log(exif);
 			this.cfg.indicator.description = description;
 			this.exif.load(source, this);
 		};
+		// go
+		this.start();
 	};
 
 }(window.useful = window.useful || {}));

@@ -5,6 +5,7 @@
   /*
   	Photo Map
   */
+  /* line 10, ../../src/scss/useful-photomap.scss */
   .photomap {
     display: block;
     height: 400px;
@@ -12,6 +13,7 @@
     padding: 0;
     width: 100%;
   }
+  /* line 16, ../../src/scss/useful-photomap.scss */
   .photomap .olControlAttribution {
     bottom: 0.5em;
   }
