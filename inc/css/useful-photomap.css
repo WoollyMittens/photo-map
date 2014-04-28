@@ -1,11 +1,1182 @@
 /*
 	Reference Styling for an Open Street Map Implementation
 */
+/*
+	Definitions
+*/
+/*
+	Constants
+*/
+/*
+	Hides text in the margin
+*/
+/*
+	Turns a button into an icon
+*/
+/*
+	Centres a graphic inside an icon
+*/
+/*
+	Offers both the pixel and rem value of a single property
+*/
+/*
+	Offers both the pixel and rem values of a shorthand property
+*/
+/*
+	Offers the text size as both the pixel and rem value
+*/
+/*
+	Adds vendor prefixed to a property
+*/
+/*
+	Applies the "clearfix" hack to a container with floating content
+*/
+/*
+	Typography
+*/
+@media all {
+  /*
+  	The root element
+  */
+  /* line 8, ../../src/scss/_typography.scss */
+  html {
+    font-family: Tahoma, Verdana, Arial, Sans-Serif;
+    font-size: 75%;
+    height: 100%;
+  }
+
+  /*
+  	Sections
+  */
+  /* line 16, ../../src/scss/_typography.scss */
+  body {
+    font-size: 12px;
+    font-size: 1rem;
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    padding-top: 0px;
+    padding-top: 0rem;
+    padding-right: 0px;
+    padding-right: 0rem;
+    padding-bottom: 0px;
+    padding-bottom: 0rem;
+    padding-left: 0px;
+    padding-left: 0rem;
+    line-height: 21.6px;
+    line-height: 1.8rem;
+    background: #eee;
+    color: #333;
+    _height: 100%;
+    min-height: 100%;
+  }
+
+  /* line 26, ../../src/scss/_typography.scss */
+  h1, h2, h3, h4, h5, h6 {
+    font-size: 12px;
+    font-size: 1rem;
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 6px;
+    margin-bottom: 0.5rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    display: block;
+    font-weight: normal;
+  }
+
+  /* line 32, ../../src/scss/_typography.scss */
+  h1 {
+    font-size: 22.5px;
+    font-size: 1.875rem;
+  }
+
+  /* line 35, ../../src/scss/_typography.scss */
+  h2 {
+    font-size: 19.5px;
+    font-size: 1.625rem;
+  }
+
+  /* line 38, ../../src/scss/_typography.scss */
+  h3 {
+    font-size: 15px;
+    font-size: 1.25rem;
+  }
+
+  /* line 41, ../../src/scss/_typography.scss */
+  address {
+    display: block;
+    font-style: normal;
+  }
+
+  /* line 45, ../../src/scss/_typography.scss */
+  section, nav, article, aside, hgroup, header, footer {
+    display: block;
+  }
+
+  /*
+  	Grouping content
+  */
+  /* line 51, ../../src/scss/_typography.scss */
+  p {
+    font-size: 12px;
+    font-size: 1rem;
+    display: block;
+  }
+
+  /* line 55, ../../src/scss/_typography.scss */
+  hr {
+    margin-top: 12px;
+    margin-top: 1rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 12px;
+    margin-bottom: 1rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    background-color: #333;
+    border: none;
+    clear: both;
+    color: #333;
+    display: block;
+    height: 1px;
+    width: 100%;
+  }
+
+  /* line 65, ../../src/scss/_typography.scss */
+  ul {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 12px;
+    margin-bottom: 1rem;
+    margin-left: 24px;
+    margin-left: 2rem;
+    padding-top: 0px;
+    padding-top: 0rem;
+    padding-right: 0px;
+    padding-right: 0rem;
+    padding-bottom: 0px;
+    padding-bottom: 0rem;
+    padding-left: 0px;
+    padding-left: 0rem;
+    display: block;
+  }
+
+  /* line 71, ../../src/scss/_typography.scss */
+  dl {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 12px;
+    margin-bottom: 1rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    display: block;
+  }
+
+  /* line 75, ../../src/scss/_typography.scss */
+  dt {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    display: block;
+    font-weight: bold;
+  }
+
+  /* line 80, ../../src/scss/_typography.scss */
+  dd {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    display: block;
+  }
+
+  /* line 84, ../../src/scss/_typography.scss */
+  pre, dialog, blockquote, ol {
+    display: block;
+  }
+
+  /*
+  	Text-level semantics
+  */
+  /* line 90, ../../src/scss/_typography.scss */
+  a {
+    color: #ff6a00;
+    text-decoration: underline;
+  }
+
+  /* line 94, ../../src/scss/_typography.scss */
+  a:hover {
+    color: #ff9800;
+    text-decoration: underline;
+  }
+
+  /* line 98, ../../src/scss/_typography.scss */
+  sub {
+    line-height: 0;
+  }
+
+  /* line 101, ../../src/scss/_typography.scss */
+  sup {
+    line-height: 0;
+  }
+
+  /* line 104, ../../src/scss/_typography.scss */
+  time, progress, meter {
+    display: block;
+  }
+
+  /*
+  	Embedded content
+  */
+  /* line 110, ../../src/scss/_typography.scss */
+  img {
+    border: none;
+    vertical-align: middle;
+  }
+
+  /* line 114, ../../src/scss/_typography.scss */
+  figure, figcaption, video, audio, canvas {
+    display: block;
+  }
+
+  /* Tabular data */
+  /* line 118, ../../src/scss/_typography.scss */
+  table {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 12px;
+    margin-bottom: 1rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    border-collapse: collapse;
+  }
+
+  /* line 122, ../../src/scss/_typography.scss */
+  caption {
+    font-size: 15px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  /* line 128, ../../src/scss/_typography.scss */
+  tr {
+    vertical-align: top;
+  }
+  /* line 130, ../../src/scss/_typography.scss */
+  tr:nth-child(2n) {
+    background-color: #eeeeee;
+  }
+
+  /* line 132, ../../src/scss/_typography.scss */
+  th, td {
+    padding-top: 6px;
+    padding-top: 0.5rem;
+    padding-right: 12px;
+    padding-right: 1rem;
+    padding-bottom: 6px;
+    padding-bottom: 0.5rem;
+    padding-left: 12px;
+    padding-left: 1rem;
+  }
+
+  /* line 135, ../../src/scss/_typography.scss */
+  th, th a, th a:hover {
+    background-color: #ff9800;
+    color: #fff;
+    font-weight: normal;
+    white-space: nowrap;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  /*
+  	Forms
+  */
+  /* line 146, ../../src/scss/_typography.scss */
+  form {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+  }
+
+  /* line 149, ../../src/scss/_typography.scss */
+  fieldset {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 12px;
+    margin-bottom: 1rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    padding-top: 0px;
+    padding-top: 0rem;
+    padding-right: 0px;
+    padding-right: 0rem;
+    padding-bottom: 0px;
+    padding-bottom: 0rem;
+    padding-left: 0px;
+    padding-left: 0rem;
+    display: block;
+    border: none;
+  }
+
+  /* line 155, ../../src/scss/_typography.scss */
+  legend {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 6px;
+    margin-bottom: 0.5rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    display: block;
+    font-weight: bold;
+  }
+
+  /* line 161, ../../src/scss/_typography.scss */
+  input, button, select, textarea {
+    font-size: 12px;
+    font-size: 1rem;
+    font-family: Tahoma, Verdana, Arial, Sans-Serif;
+    vertical-align: baseline;
+  }
+
+  /* line 166, ../../src/scss/_typography.scss */
+  input[type=color], input[type=range], input[type=number], input[type=date], input[type=text], input[type=password], input[type=email], select, textarea {
+    -webkit-box-shadow: inset 0 0 5px #cccccc;
+    -moz-box-shadow: inset 0 0 5px #cccccc;
+    box-shadow: inset 0 0 5px #cccccc;
+    height: 36px;
+    height: 3rem;
+    font-size: 12px;
+    font-size: 1rem;
+    padding: 8.4px;
+    padding: 0.7rem;
+    margin-top: 8.4px;
+    margin-top: 0.7rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 8.4px;
+    margin-bottom: 0.7rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    background: #fff;
+    border: solid 1px #333;
+    font-family: Arial, Sans-Serif;
+  }
+
+  /* line 176, ../../src/scss/_typography.scss */
+  input[type=checkbox], input[type=radio] {
+    margin-top: 8.4px;
+    margin-top: 0.7rem;
+    margin-right: 3.6px;
+    margin-right: 0.3rem;
+    margin-bottom: 8.4px;
+    margin-bottom: 0.7rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+  }
+
+  /* line 179, ../../src/scss/_typography.scss */
+  select {
+    height: 36px;
+    height: 3rem;
+    padding: 8.4px;
+    padding: 0.7rem;
+  }
+
+  /* line 183, ../../src/scss/_typography.scss */
+  textarea {
+    height: 120px;
+    height: 10rem;
+    padding: 8.4px;
+    padding: 0.7rem;
+  }
+
+  /* line 187, ../../src/scss/_typography.scss */
+  button, .button {
+    -webkit-transition-property: background-color;
+    -moz-transition-property: background-color;
+    -o-transition-property: background-color;
+    transition-property: background-color;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+    height: 36px;
+    height: 3rem;
+    line-height: 36px;
+    line-height: 3rem;
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    padding-top: 0px;
+    padding-top: 0rem;
+    padding-right: 12px;
+    padding-right: 1rem;
+    padding-bottom: 0px;
+    padding-bottom: 0rem;
+    padding-left: 12px;
+    padding-left: 1rem;
+    background-color: #ff6a00;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    overflow: visible;
+    text-decoration: none;
+  }
+  /* line 202, ../../src/scss/_typography.scss */
+  button:hover, .button:hover {
+    background-color: #ff9800;
+    color: #fff;
+    text-decoration: none;
+  }
+  /* line 207, ../../src/scss/_typography.scss */
+  button.disabled, button.disabled:hover, .button.disabled, .button.disabled:hover {
+    background-color: #7f7f7f;
+  }
+
+  /*
+  	Interactive elements
+  */
+  /* line 214, ../../src/scss/_typography.scss */
+  menu {
+    margin-top: 0px;
+    margin-top: 0rem;
+    margin-right: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0px;
+    margin-bottom: 0rem;
+    margin-left: 0px;
+    margin-left: 0rem;
+    padding-top: 0px;
+    padding-top: 0rem;
+    padding-right: 0px;
+    padding-right: 0rem;
+    padding-bottom: 0px;
+    padding-bottom: 0rem;
+    padding-left: 0px;
+    padding-left: 0rem;
+    display: block;
+  }
+
+  /*
+  	Miscellaneous elements
+  */
+  /* line 222, ../../src/scss/_typography.scss */
+  div {
+    display: block;
+  }
+}
+@media (max-width: 480px) {
+  /* line 231, ../../src/scss/_typography.scss */
+  html {
+    font-size: 62.5%;
+  }
+}
+/* required styles */
+/* line 12, ../../src/scss/_leaflet.scss */
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-map-pane svg,
+.leaflet-map-pane canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* line 17, ../../src/scss/_leaflet.scss */
+.leaflet-container {
+  overflow: hidden;
+  -ms-touch-action: none;
+}
+
+/* line 23, ../../src/scss/_leaflet.scss */
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+/* line 30, ../../src/scss/_leaflet.scss */
+.leaflet-safari .leaflet-tile {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* hack that prevents hw layers "stretching" when loading new tiles */
+/* line 34, ../../src/scss/_leaflet.scss */
+.leaflet-safari .leaflet-tile-container {
+  width: 1600px;
+  height: 1600px;
+  -webkit-transform-origin: 0 0;
+}
+
+/* line 40, ../../src/scss/_leaflet.scss */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  display: block;
+}
+
+/* map is broken in FF if you have max-width: 100% on tiles */
+/* line 44, ../../src/scss/_leaflet.scss */
+.leaflet-container img {
+  max-width: none !important;
+}
+
+/* stupid Android 2 doesn't understand "max-width: none" properly */
+/* line 48, ../../src/scss/_leaflet.scss */
+.leaflet-container img.leaflet-image-layer {
+  max-width: 15000px !important;
+}
+
+/* line 51, ../../src/scss/_leaflet.scss */
+.leaflet-tile {
+  filter: inherit;
+  visibility: hidden;
+}
+
+/* line 55, ../../src/scss/_leaflet.scss */
+.leaflet-tile-loaded {
+  visibility: inherit;
+}
+
+/* line 58, ../../src/scss/_leaflet.scss */
+.leaflet-zoom-box {
+  width: 0;
+  height: 0;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  z-index: 8;
+}
+
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+/* line 66, ../../src/scss/_leaflet.scss */
+.leaflet-overlay-pane svg {
+  -moz-user-select: none;
+}
+
+/* line 70, ../../src/scss/_leaflet.scss */
+.leaflet-pane {
+  z-index: 4;
+}
+
+/* line 72, ../../src/scss/_leaflet.scss */
+.leaflet-tile-pane {
+  z-index: 2;
+}
+
+/* line 73, ../../src/scss/_leaflet.scss */
+.leaflet-overlay-pane {
+  z-index: 4;
+}
+
+/* line 74, ../../src/scss/_leaflet.scss */
+.leaflet-shadow-pane {
+  z-index: 5;
+}
+
+/* line 75, ../../src/scss/_leaflet.scss */
+.leaflet-marker-pane {
+  z-index: 6;
+}
+
+/* line 76, ../../src/scss/_leaflet.scss */
+.leaflet-popup-pane {
+  z-index: 7;
+}
+
+/* line 78, ../../src/scss/_leaflet.scss */
+.leaflet-map-pane canvas {
+  z-index: 1;
+}
+
+/* line 79, ../../src/scss/_leaflet.scss */
+.leaflet-map-pane svg {
+  z-index: 2;
+}
+
+/* line 81, ../../src/scss/_leaflet.scss */
+.leaflet-vml-shape {
+  width: 1px;
+  height: 1px;
+}
+
+/* line 85, ../../src/scss/_leaflet.scss */
+.lvml {
+  behavior: url(#default#VML);
+  display: inline-block;
+  position: absolute;
+}
+
+/* control positioning */
+/* line 94, ../../src/scss/_leaflet.scss */
+.leaflet-control {
+  position: relative;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+/* line 100, ../../src/scss/_leaflet.scss */
+.leaflet-top,
+.leaflet-bottom {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* line 105, ../../src/scss/_leaflet.scss */
+.leaflet-top {
+  top: 0;
+}
+
+/* line 108, ../../src/scss/_leaflet.scss */
+.leaflet-right {
+  right: 0;
+}
+
+/* line 111, ../../src/scss/_leaflet.scss */
+.leaflet-bottom {
+  bottom: 0;
+}
+
+/* line 114, ../../src/scss/_leaflet.scss */
+.leaflet-left {
+  left: 0;
+}
+
+/* line 117, ../../src/scss/_leaflet.scss */
+.leaflet-control {
+  float: left;
+  clear: both;
+}
+
+/* line 121, ../../src/scss/_leaflet.scss */
+.leaflet-right .leaflet-control {
+  float: right;
+}
+
+/* line 124, ../../src/scss/_leaflet.scss */
+.leaflet-top .leaflet-control {
+  margin-top: 10px;
+}
+
+/* line 127, ../../src/scss/_leaflet.scss */
+.leaflet-bottom .leaflet-control {
+  margin-bottom: 10px;
+}
+
+/* line 130, ../../src/scss/_leaflet.scss */
+.leaflet-left .leaflet-control {
+  margin-left: 10px;
+}
+
+/* line 133, ../../src/scss/_leaflet.scss */
+.leaflet-right .leaflet-control {
+  margin-right: 10px;
+}
+
+/* zoom and fade animations */
+/* line 141, ../../src/scss/_leaflet.scss */
+.leaflet-fade-anim .leaflet-tile,
+.leaflet-fade-anim .leaflet-popup {
+  opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+
+/* line 149, ../../src/scss/_leaflet.scss */
+.leaflet-fade-anim .leaflet-tile-loaded,
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+  opacity: 1;
+}
+
+/* line 153, ../../src/scss/_leaflet.scss */
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  -moz-transition: -moz-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  -o-transition: -o-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+}
+
+/* line 160, ../../src/scss/_leaflet.scss */
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+
+/* line 167, ../../src/scss/_leaflet.scss */
+.leaflet-zoom-anim .leaflet-zoom-hide {
+  visibility: hidden;
+}
+
+/* cursors */
+/* line 174, ../../src/scss/_leaflet.scss */
+.leaflet-clickable {
+  cursor: pointer;
+}
+
+/* line 177, ../../src/scss/_leaflet.scss */
+.leaflet-container {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+
+/* line 182, ../../src/scss/_leaflet.scss */
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-clickable {
+  cursor: crosshair;
+}
+
+/* line 186, ../../src/scss/_leaflet.scss */
+.leaflet-popup-pane,
+.leaflet-control {
+  cursor: auto;
+}
+
+/* line 190, ../../src/scss/_leaflet.scss */
+.leaflet-dragging .leaflet-container,
+.leaflet-dragging .leaflet-clickable {
+  cursor: move;
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+}
+
+/* visual tweaks */
+/* line 199, ../../src/scss/_leaflet.scss */
+.leaflet-container {
+  background: #ddd;
+  outline: 0;
+}
+
+/* line 203, ../../src/scss/_leaflet.scss */
+.leaflet-container a {
+  color: #0078A8;
+}
+
+/* line 206, ../../src/scss/_leaflet.scss */
+.leaflet-container a.leaflet-active {
+  outline: 2px solid orange;
+}
+
+/* line 209, ../../src/scss/_leaflet.scss */
+.leaflet-zoom-box {
+  border: 2px dotted #38f;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* general typography */
+/* line 216, ../../src/scss/_leaflet.scss */
+.leaflet-container {
+  font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+/* general toolbar styles */
+/* line 223, ../../src/scss/_leaflet.scss */
+.leaflet-bar {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  border-radius: 4px;
+}
+
+/* line 228, ../../src/scss/_leaflet.scss */
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: black;
+}
+
+/* line 240, ../../src/scss/_leaflet.scss */
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  display: block;
+}
+
+/* line 245, ../../src/scss/_leaflet.scss */
+.leaflet-bar a:hover {
+  background-color: #f4f4f4;
+}
+
+/* line 248, ../../src/scss/_leaflet.scss */
+.leaflet-bar a:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+/* line 252, ../../src/scss/_leaflet.scss */
+.leaflet-bar a:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-bottom: none;
+}
+
+/* line 257, ../../src/scss/_leaflet.scss */
+.leaflet-bar a.leaflet-disabled {
+  cursor: default;
+  background-color: #f4f4f4;
+  color: #bbb;
+}
+
+/* line 263, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-bar a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+}
+
+/* zoom control */
+/* line 273, ../../src/scss/_leaflet.scss */
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  font: bold 18px 'Lucida Console', Monaco, monospace;
+  text-indent: 1px;
+}
+
+/* line 277, ../../src/scss/_leaflet.scss */
+.leaflet-control-zoom-out {
+  font-size: 20px;
+}
+
+/* line 281, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-control-zoom-in {
+  font-size: 22px;
+}
+
+/* line 284, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-control-zoom-out {
+  font-size: 24px;
+}
+
+/* layers control */
+/* line 291, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  background: #fff;
+  border-radius: 5px;
+}
+
+/* line 296, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers-toggle {
+  background-image: url(images/layers.png);
+  width: 36px;
+  height: 36px;
+}
+
+/* line 301, ../../src/scss/_leaflet.scss */
+.leaflet-retina .leaflet-control-layers-toggle {
+  background-image: url(images/layers-2x.png);
+  background-size: 26px 26px;
+}
+
+/* line 305, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-control-layers-toggle {
+  width: 44px;
+  height: 44px;
+}
+
+/* line 310, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+  display: none;
+}
+
+/* line 313, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+  display: block;
+  position: relative;
+}
+
+/* line 317, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers-expanded {
+  padding: 6px 10px 6px 6px;
+  color: #333;
+  background: #fff;
+}
+
+/* line 322, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers-selector {
+  margin-top: 2px;
+  position: relative;
+  top: 1px;
+}
+
+/* line 327, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers label {
+  display: block;
+}
+
+/* line 330, ../../src/scss/_leaflet.scss */
+.leaflet-control-layers-separator {
+  height: 0;
+  border-top: 1px solid #ddd;
+  margin: 5px -10px 5px -6px;
+}
+
+/* attribution and scale controls */
+/* line 339, ../../src/scss/_leaflet.scss */
+.leaflet-container .leaflet-control-attribution {
+  background: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* line 345, ../../src/scss/_leaflet.scss */
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+  padding: 0 5px;
+  color: #333;
+}
+
+/* line 349, ../../src/scss/_leaflet.scss */
+.leaflet-control-attribution a {
+  text-decoration: none;
+}
+
+/* line 352, ../../src/scss/_leaflet.scss */
+.leaflet-control-attribution a:hover {
+  text-decoration: underline;
+}
+
+/* line 356, ../../src/scss/_leaflet.scss */
+.leaflet-container .leaflet-control-attribution,
+.leaflet-container .leaflet-control-scale {
+  font-size: 11px;
+}
+
+/* line 359, ../../src/scss/_leaflet.scss */
+.leaflet-left .leaflet-control-scale {
+  margin-left: 5px;
+}
+
+/* line 362, ../../src/scss/_leaflet.scss */
+.leaflet-bottom .leaflet-control-scale {
+  margin-bottom: 5px;
+}
+
+/* line 365, ../../src/scss/_leaflet.scss */
+.leaflet-control-scale-line {
+  border: 2px solid #777;
+  border-top: none;
+  line-height: 1.1;
+  padding: 2px 5px 1px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* line 379, ../../src/scss/_leaflet.scss */
+.leaflet-control-scale-line:not(:first-child) {
+  border-top: 2px solid #777;
+  border-bottom: none;
+  margin-top: -2px;
+}
+
+/* line 384, ../../src/scss/_leaflet.scss */
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+  border-bottom: 2px solid #777;
+}
+
+/* line 390, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  box-shadow: none;
+}
+
+/* line 394, ../../src/scss/_leaflet.scss */
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-clip: padding-box;
+}
+
+/* popup */
+/* line 402, ../../src/scss/_leaflet.scss */
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+/* line 406, ../../src/scss/_leaflet.scss */
+.leaflet-popup-content-wrapper {
+  padding: 1px;
+  text-align: left;
+  border-radius: 12px;
+}
+
+/* line 411, ../../src/scss/_leaflet.scss */
+.leaflet-popup-content {
+  margin: 13px 19px;
+  line-height: 1.4;
+}
+
+/* line 415, ../../src/scss/_leaflet.scss */
+.leaflet-popup-content p {
+  margin: 18px 0;
+}
+
+/* line 418, ../../src/scss/_leaflet.scss */
+.leaflet-popup-tip-container {
+  margin: 0 auto;
+  width: 40px;
+  height: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* line 425, ../../src/scss/_leaflet.scss */
+.leaflet-popup-tip {
+  width: 17px;
+  height: 17px;
+  padding: 1px;
+  margin: -10px auto 0;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+/* line 439, ../../src/scss/_leaflet.scss */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: white;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* line 444, ../../src/scss/_leaflet.scss */
+.leaflet-container a.leaflet-popup-close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 4px 0 0;
+  text-align: center;
+  width: 18px;
+  height: 14px;
+  font: 16px/14px Tahoma, Verdana, sans-serif;
+  color: #c3c3c3;
+  text-decoration: none;
+  font-weight: bold;
+  background: transparent;
+}
+
+/* line 458, ../../src/scss/_leaflet.scss */
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #999;
+}
+
+/* line 461, ../../src/scss/_leaflet.scss */
+.leaflet-popup-scrolled {
+  overflow: auto;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+
+/* line 467, ../../src/scss/_leaflet.scss */
+.leaflet-oldie .leaflet-popup-content-wrapper {
+  zoom: 1;
+}
+
+/* line 470, ../../src/scss/_leaflet.scss */
+.leaflet-oldie .leaflet-popup-tip {
+  width: 24px;
+  margin: 0 auto;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+  filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+}
+
+/* line 477, ../../src/scss/_leaflet.scss */
+.leaflet-oldie .leaflet-popup-tip-container {
+  margin-top: -1px;
+}
+
+/* line 484, ../../src/scss/_leaflet.scss */
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+  border: 1px solid #999;
+}
+
+/* div icon */
+/* line 491, ../../src/scss/_leaflet.scss */
+.leaflet-div-icon {
+  background: #fff;
+  border: 1px solid #666;
+}
+
 @media all {
   /*
   	Photo Map
   */
-  /* line 10, ../../src/scss/useful-photomap.scss */
+  /* line 15, ../../src/scss/useful-photomap.scss */
   .photomap {
     display: block;
     height: 400px;
@@ -13,7 +1184,7 @@
     padding: 0;
     width: 100%;
   }
-  /* line 16, ../../src/scss/useful-photomap.scss */
+  /* line 21, ../../src/scss/useful-photomap.scss */
   .photomap .olControlAttribution {
     bottom: 0.5em;
   }

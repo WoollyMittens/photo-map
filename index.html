@@ -34,12 +34,16 @@
 				<!-- Cut below this -->
 				<style>@import url("./inc/css/useful-photomap.css")</style>
 				<figure id="testmap" class="photomap"></figure>
+				<p id="duration"></p>
 				<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 				<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
 				<script src="./inc/js/useful-photomap.js"></script>
 				<script>
 				//<!--
 					var combiPhotomap = new useful.Photomap( document.getElementById('testmap'), {
+						'duration' : document.getElementById('duration'),
+						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+						'tiles' : './inc/tiles/{z}/{x}/{y}.png',
 						'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
 						'exif' : './inc/php/imageexif.php?src=../../{src}',
 						'zoom' : 13,
@@ -70,13 +74,13 @@
 					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
 				</style>
 				<ul id="testImages">
-					<li><a href="./inc/small/P6098685P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098685P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098815P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098815P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098876P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098876P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098922P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098922P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098939P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6098939P.jpg"/></a></li>
-					<li><a href="./inc/small/P6099010P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6099010P.jpg"/></a></li>
-					<li><a href="./inc/small/P6099096P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this.getAttribute('href'), this.getAttribute('title')); return false;"><img alt="" src="./inc/small/P6099096P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098685P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098685P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098815P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098815P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098876P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098876P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098922P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098922P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098939P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098939P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099010P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6099010P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099096P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6099096P.jpg"/></a></li>
 				</ul>
 			</article>
 		</section>
