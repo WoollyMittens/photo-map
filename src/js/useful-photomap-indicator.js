@@ -5,12 +5,12 @@
 	useful.PhotomapIndicator = function (parent) {
 		this.parent = parent;
 		this.add = function () {
-			var cfg = this.parent.cfg, icon, indicator = cfg.indicator;
+			var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
 			// if the indicator has coordinates
 			if (indicator.lon && indicator.lat) {
 				// remove any previous indicator
 				if (indicator.object) {
-					cfg.map.object.removeLayer(indicator.object);
+					map.object.removeLayer(indicator.object);
 				}
 				// create the icon
 				icon = L.icon({
@@ -23,34 +23,44 @@
 					[indicator.lat, indicator.lon],
 					{'icon': icon}
 				);
-				indicator.object.addTo(cfg.map.object);
+				indicator.object.addTo(map.object);
 				// add the popup to the marker
 				indicator.popup = indicator.object.bindPopup(indicator.description);
 				// add the click handler
 				indicator.object.on('click', this.onIndicatorClicked(indicator));
+				// focus the map on the indicator
+				this.focus();
 			}
 		};
 		this.onIndicatorClicked = function (indicator) {
 			var context = this;
 			return function (evt) {
 				// show the indicator message in a balloon
-				indicator.object.openPopup();
+				if (indicator.object) { indicator.object.openPopup(); }
 			};
 		};
 		this.remove = function () {
-			var cfg = this.parent.cfg;
+			var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
 			// remove the balloon
-			this.parent.balloon.remove();
+			indicator.object.closePopup();
 			// remove the indicator
-			if (cfg.indicator.object) {
-				cfg.map.object.removeLayer(cfg.indicator.object);
-				cfg.indicator.object = null;
+			if (indicator.object) {
+				map.object.removeLayer(indicator.object);
+				indicator.object = null;
 			}
+			// unfocus the indicator
+			this.unfocus();
 		};
 		this.focus = function () {
 			var cfg = this.parent.cfg;
 			// focus the map on the indicator
 			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			// call for a  redraw
+			this.parent.redraw();
+		};
+		this.unfocus = function () {
+			// re-centre the map
+			this.parent.map.centre();
 		};
 	};
 

@@ -35,17 +35,19 @@
 				<style>@import url("./inc/css/useful-photomap.css")</style>
 				<figure id="testmap" class="photomap"></figure>
 				<p id="duration"></p>
-				<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
-				<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+				<script src="./inc/js/cache.js"></script>
 				<script src="./inc/js/useful-photomap.js"></script>
 				<script>
 				//<!--
 					var combiPhotomap = new useful.Photomap( document.getElementById('testmap'), {
 						'duration' : document.getElementById('duration'),
-						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 						'tiles' : './inc/tiles/{z}/{x}/{y}.png',
+						//'tiles' : 'http://c.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 						'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
 						'exif' : './inc/php/imageexif.php?src=../../{src}',
+						'key' : 'cowan-taffyslookout-brooklyn',
+						'cache' : cache,
 						'zoom' : 13,
 						'markers' : {
 							'start' : {

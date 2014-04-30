@@ -19,6 +19,10 @@
 			this.centre();
 			// get the duration of the walk
 			this.duration();
+			// refresh the map after scrolling
+			var context = this;
+			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
+			cfg.map.object.on('zoomend', function (e) { context.parent.redraw(); });
 		};
 		this.duration = function () {
 			var time, start, end, cfg = this.parent.cfg, points = cfg.gpxDOM.getElementsByTagName('trkpt');
@@ -79,6 +83,8 @@
 			};
 			// apply the centre
 			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+			// call for a redraw
+			this.parent.redraw();
 		};
 	};
 

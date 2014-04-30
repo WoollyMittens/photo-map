@@ -9397,8 +9397,18 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 	useful.PhotomapExif = function (parent) {
 		this.parent = parent;
 		this.load = function (url, onComplete) {
-			var cfg = this.parent.cfg, context = this;
-			// TODO: if the lat and lon haven't been cached
+			var cfg = this.parent.cfg, context = this,
+				key = cfg.key, path = url.split('/'), name = path[path.length - 1];
+			// if the lat and lon have been cached
+			if (cfg.cache && cfg.cache[key] && cfg.cache[key][name] && cfg.cache[key][name].lat && cfg.cache[key][name].lon) {
+				console.log('PhotomapExif: cache');
+				// send back the stored coordinates from the cache
+				onComplete({
+					'lat' : cfg.cache[key][name].lat,
+					'lon' : cfg.cache[key][name].lon,
+				});
+			// else
+			} else {
 				// retrieve the exif data of a photo
 				useful.request.send({
 					url : cfg.exif.replace('{src}', url),
@@ -9417,8 +9427,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 						onComplete(latLon);
 					}
 				});
-			// else
-				// TODO: send back the store coordinates from the cache
+			}
 		};
 		this.convert = function (exif) {
 			var deg, min, sec, lon, lat, cfg = this.parent.cfg;
@@ -9478,7 +9487,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					// call back
 					oncomplete();
 					// hide the busy indicator
-					context.parent.busy.show();
+					context.parent.busy.hide();
 				}
 			});
 		};
@@ -9493,12 +9502,12 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 	useful.PhotomapIndicator = function (parent) {
 		this.parent = parent;
 		this.add = function () {
-			var cfg = this.parent.cfg, icon, indicator = cfg.indicator;
+			var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
 			// if the indicator has coordinates
 			if (indicator.lon && indicator.lat) {
 				// remove any previous indicator
 				if (indicator.object) {
-					cfg.map.object.removeLayer(indicator.object);
+					map.object.removeLayer(indicator.object);
 				}
 				// create the icon
 				icon = L.icon({
@@ -9511,34 +9520,44 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					[indicator.lat, indicator.lon],
 					{'icon': icon}
 				);
-				indicator.object.addTo(cfg.map.object);
+				indicator.object.addTo(map.object);
 				// add the popup to the marker
 				indicator.popup = indicator.object.bindPopup(indicator.description);
 				// add the click handler
 				indicator.object.on('click', this.onIndicatorClicked(indicator));
+				// focus the map on the indicator
+				this.focus();
 			}
 		};
 		this.onIndicatorClicked = function (indicator) {
 			var context = this;
 			return function (evt) {
 				// show the indicator message in a balloon
-				indicator.object.openPopup();
+				if (indicator.object) { indicator.object.openPopup(); }
 			};
 		};
 		this.remove = function () {
-			var cfg = this.parent.cfg;
+			var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
 			// remove the balloon
-			this.parent.balloon.remove();
+			indicator.object.closePopup();
 			// remove the indicator
-			if (cfg.indicator.object) {
-				cfg.map.object.removeLayer(cfg.indicator.object);
-				cfg.indicator.object = null;
+			if (indicator.object) {
+				map.object.removeLayer(indicator.object);
+				indicator.object = null;
 			}
+			// unfocus the indicator
+			this.unfocus();
 		};
 		this.focus = function () {
 			var cfg = this.parent.cfg;
 			// focus the map on the indicator
 			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			// call for a  redraw
+			this.parent.redraw();
+		};
+		this.unfocus = function () {
+			// re-centre the map
+			this.parent.map.centre();
 		};
 	};
 
@@ -9565,6 +9584,10 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			this.centre();
 			// get the duration of the walk
 			this.duration();
+			// refresh the map after scrolling
+			var context = this;
+			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
+			cfg.map.object.on('zoomend', function (e) { context.parent.redraw(); });
 		};
 		this.duration = function () {
 			var time, start, end, cfg = this.parent.cfg, points = cfg.gpxDOM.getElementsByTagName('trkpt');
@@ -9625,6 +9648,8 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			};
 			// apply the centre
 			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+			// call for a redraw
+			this.parent.redraw();
 		};
 	};
 
@@ -9698,9 +9723,19 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			// plot the geoJson object
 			cfg.route = {};
 			cfg.route.object = L.geoJson(cfg.geoJSON, {
-				style: { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }
+				style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 			});
 			cfg.route.object.addTo(cfg.map.object);
+		};
+		// redraw the geoJSON layer
+		this.redraw = function () {
+			var cfg = this.parent.cfg;
+			if (cfg.route) {
+				// remove the layer
+				cfg.map.object.removeLayer(cfg.route.object);
+				// re-add the layer
+				this.plot();
+			}
 		};
 	};
 
@@ -9745,6 +9780,17 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			// disable the start function so it can't be started twice
 			this.start = function () {};
 		};
+		this.redraw = function () {
+			var context = this;
+			// wait for a change to redraw
+			clearTimeout(this.cfg.redrawTimeout);
+			this.cfg.redrawTimeout = setTimeout(function () {
+				// redraw the map
+				context.route.redraw();
+				// redraw the plotted route
+				context.route.redraw();
+			}, 500);
+		};
 		// components
 		this.busy = new useful.PhotomapBusy(this);
 		this.exif = new useful.PhotomapExif(this);
@@ -9765,6 +9811,9 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 				cfg.indicator.lon = coords.lon;
 				context.indicator.add();
 			});
+		};
+		this.unindicate = function () {
+			this.indicator.remove();
 		};
 		// go
 		this.start();

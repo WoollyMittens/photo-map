@@ -37,6 +37,17 @@
 			// disable the start function so it can't be started twice
 			this.start = function () {};
 		};
+		this.redraw = function () {
+			var context = this;
+			// wait for a change to redraw
+			clearTimeout(this.cfg.redrawTimeout);
+			this.cfg.redrawTimeout = setTimeout(function () {
+				// redraw the map
+				context.route.redraw();
+				// redraw the plotted route
+				context.route.redraw();
+			}, 500);
+		};
 		// components
 		this.busy = new useful.PhotomapBusy(this);
 		this.exif = new useful.PhotomapExif(this);
@@ -57,6 +68,9 @@
 				cfg.indicator.lon = coords.lon;
 				context.indicator.add();
 			});
+		};
+		this.unindicate = function () {
+			this.indicator.remove();
 		};
 		// go
 		this.start();

@@ -1184,8 +1184,4 @@
     padding: 0;
     width: 100%;
   }
-  /* line 21, ../../src/scss/useful-photomap.scss */
-  .photomap .olControlAttribution {
-    bottom: 0.5em;
-  }
 }

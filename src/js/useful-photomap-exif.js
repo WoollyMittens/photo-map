@@ -5,8 +5,18 @@
 	useful.PhotomapExif = function (parent) {
 		this.parent = parent;
 		this.load = function (url, onComplete) {
-			var cfg = this.parent.cfg, context = this;
-			// TODO: if the lat and lon haven't been cached
+			var cfg = this.parent.cfg, context = this,
+				key = cfg.key, path = url.split('/'), name = path[path.length - 1];
+			// if the lat and lon have been cached
+			if (cfg.cache && cfg.cache[key] && cfg.cache[key][name] && cfg.cache[key][name].lat && cfg.cache[key][name].lon) {
+				console.log('PhotomapExif: cache');
+				// send back the stored coordinates from the cache
+				onComplete({
+					'lat' : cfg.cache[key][name].lat,
+					'lon' : cfg.cache[key][name].lon,
+				});
+			// else
+			} else {
 				// retrieve the exif data of a photo
 				useful.request.send({
 					url : cfg.exif.replace('{src}', url),
@@ -25,8 +35,7 @@
 						onComplete(latLon);
 					}
 				});
-			// else
-				// TODO: send back the store coordinates from the cache
+			}
 		};
 		this.convert = function (exif) {
 			var deg, min, sec, lon, lat, cfg = this.parent.cfg;

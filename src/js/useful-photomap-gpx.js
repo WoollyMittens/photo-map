@@ -21,7 +21,7 @@
 					// call back
 					oncomplete();
 					// hide the busy indicator
-					context.parent.busy.show();
+					context.parent.busy.hide();
 				}
 			});
 		};
