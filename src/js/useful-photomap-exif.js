@@ -2,21 +2,22 @@
 
 	"use strict";
 
-	useful.PhotomapExif = function (parent) {
+	useful.Photomap_Exif = function (parent) {
 		this.parent = parent;
 		this.load = function (url, onComplete) {
 			var cfg = this.parent.cfg, context = this,
-				key = cfg.key, path = url.split('/'), name = path[path.length - 1];
+				path = url.split('/'), name = path[path.length - 1];
 			// if the lat and lon have been cached
-			if (cfg.cache && cfg.cache[key] && cfg.cache[key][name] && cfg.cache[key][name].lat && cfg.cache[key][name].lon) {
+			if (cfg.cache && cfg.cache[name] && cfg.cache[name].lat && cfg.cache[name].lon) {
 				console.log('PhotomapExif: cache');
 				// send back the stored coordinates from the cache
 				onComplete({
-					'lat' : cfg.cache[key][name].lat,
-					'lon' : cfg.cache[key][name].lon,
+					'lat' : cfg.cache[name].lat,
+					'lon' : cfg.cache[name].lon,
 				});
 			// else
 			} else {
+				console.log('PhotomapExif: ajax');
 				// retrieve the exif data of a photo
 				useful.request.send({
 					url : cfg.exif.replace('{src}', url),
@@ -30,7 +31,8 @@
 					onSuccess : function (reply) {
 						var json = useful.request.decode(reply.responseText);
 						var latLon = context.convert(json);
-						// TODO: cache the values
+						// cache the values
+						cfg.cache[name] = json;
 						// call back the values
 						onComplete(latLon);
 					}

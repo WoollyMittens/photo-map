@@ -49,13 +49,13 @@
 			}, 500);
 		};
 		// components
-		this.busy = new useful.PhotomapBusy(this);
-		this.exif = new useful.PhotomapExif(this);
-		this.gpx = new useful.PhotomapGpx(this);
-		this.map = new useful.PhotomapMap(this);
-		this.route = new useful.PhotomapRoute(this);
-		this.markers = new useful.PhotomapMarkers(this);
-		this.indicator = new useful.PhotomapIndicator(this);
+		this.busy = new useful.Photomap_Busy(this);
+		this.exif = new useful.Photomap_Exif(this);
+		this.gpx = new useful.Photomap_Gpx(this);
+		this.map = new useful.Photomap_Map(this);
+		this.route = new useful.Photomap_Route(this);
+		this.markers = new useful.Photomap_Markers(this);
+		this.indicator = new useful.Photomap_Indicator(this);
 		// public API
 		this.indicate = function (element) {
 			var context = this,
@@ -63,7 +63,6 @@
 				url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
 				title = element.getAttribute('data-title') || element.getAttribute('title');
 			this.exif.load(url, function (coords) {
-				cfg.indicator.description = title;
 				cfg.indicator.lat = coords.lat;
 				cfg.indicator.lon = coords.lon;
 				context.indicator.add();
@@ -71,6 +70,9 @@
 		};
 		this.unindicate = function () {
 			this.indicator.remove();
+		};
+		this.stop = function () {
+			this.map.remove();
 		};
 		// go
 		this.start();

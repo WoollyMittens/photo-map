@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapGpx = function (parent) {
+	useful.Photomap_Gpx = function (parent) {
 		this.parent = parent;
 		this.load = function (oncomplete) {
 			var cfg = this.parent.cfg, context = this;

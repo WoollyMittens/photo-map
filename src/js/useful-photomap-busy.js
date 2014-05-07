@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapBusy = function (parent) {
+	useful.Photomap_Busy = function (parent) {
 		this.parent = parent;
 		this.setup = function () {};
 		this.show = function () {};

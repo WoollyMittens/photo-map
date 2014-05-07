@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapRoute = function (parent) {
+	useful.Photomap_Route = function (parent) {
 		this.parent = parent;
 		// add the Layer with the GPX Track
 		this.plot = function () {

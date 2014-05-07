@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapMap = function (parent) {
+	useful.Photomap_Map = function (parent) {
 		this.parent = parent;
 		this.setup = function () {
 			var cfg = this.parent.cfg,
@@ -23,6 +23,13 @@
 			var context = this;
 			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
 			cfg.map.object.on('zoomend', function (e) { context.parent.redraw(); });
+		};
+		this.remove = function () {
+			var cfg = this.parent.cfg;
+			// ask leaflet to remove itself if available
+			if (cfg.map && cfg.map.object) {
+				cfg.map.object.remove();
+			}
 		};
 		this.duration = function () {
 			var time, start, end, cfg = this.parent.cfg, points = cfg.gpxDOM.getElementsByTagName('trkpt');
@@ -58,14 +65,8 @@
 						parseInt(time.split(':')[2], 10)
 					);
 				}
-				// write the duration to the document
-				cfg.duration.innerHTML = (!isNaN(start)) ? Math.round((end.getTime() - start.getTime()) / 3600000, 10) + ' hours' : '- hours';
-			}
-			if (cfg.there) {
-				cfg.there.innerHTML = cfg.markers.start.description;
-			}
-			if (cfg.back) {
-				cfg.back.innerHTML = cfg.markers.end.description;
+				// update the duration to the document
+				cfg.duration = (!isNaN(end) && !isNaN(start)) ? Math.round((end.getTime() - start.getTime()) / 3600000, 10) : cfg.duration;
 			}
 		};
 		this.centre = function () {

@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapMarkers = function (parent) {
+	useful.Photomap_Markers = function (parent) {
 		this.parent = parent;
 		// add the Layer with the permanent markers
 		this.add = function () {

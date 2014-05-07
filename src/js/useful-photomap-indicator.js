@@ -2,7 +2,7 @@
 
 	"use strict";
 
-	useful.PhotomapIndicator = function (parent) {
+	useful.Photomap_Indicator = function (parent) {
 		this.parent = parent;
 		this.add = function () {
 			var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
