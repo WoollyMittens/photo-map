@@ -7,13 +7,13 @@
 		this.load = function (url, onComplete) {
 			var cfg = this.parent.cfg, context = this,
 				path = url.split('/'), name = path[path.length - 1];
-			// if the lat and lon have been cached
-			if (cfg.cache && cfg.cache[name] && cfg.cache[name].lat && cfg.cache[name].lon) {
-				console.log('PhotomapExif: cache');
-				// send back the stored coordinates from the cache
+			// if the lat and lon have been cached in exifData
+			if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
+				console.log('PhotomapExif: exifData');
+				// send back the stored coordinates from the exifData
 				onComplete({
-					'lat' : cfg.cache[name].lat,
-					'lon' : cfg.cache[name].lon,
+					'lat' : cfg.exifData[name].lat,
+					'lon' : cfg.exifData[name].lon,
 				});
 			// else
 			} else {
@@ -31,8 +31,8 @@
 					onSuccess : function (reply) {
 						var json = useful.request.decode(reply.responseText);
 						var latLon = context.convert(json);
-						// cache the values
-						cfg.cache[name] = json;
+						// exifData the values
+						cfg.exifData[name] = json;
 						// call back the values
 						onComplete(latLon);
 					}

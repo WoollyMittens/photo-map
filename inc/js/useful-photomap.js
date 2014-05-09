@@ -9381,7 +9381,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapBusy = function (parent) {
+	useful.Photomap_Busy = function (parent) {
 		this.parent = parent;
 		this.setup = function () {};
 		this.show = function () {};
@@ -9394,21 +9394,22 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapExif = function (parent) {
+	useful.Photomap_Exif = function (parent) {
 		this.parent = parent;
 		this.load = function (url, onComplete) {
 			var cfg = this.parent.cfg, context = this,
-				key = cfg.key, path = url.split('/'), name = path[path.length - 1];
-			// if the lat and lon have been cached
-			if (cfg.cache && cfg.cache[key] && cfg.cache[key][name] && cfg.cache[key][name].lat && cfg.cache[key][name].lon) {
-				console.log('PhotomapExif: cache');
-				// send back the stored coordinates from the cache
+				path = url.split('/'), name = path[path.length - 1];
+			// if the lat and lon have been cached in exifData
+			if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
+				console.log('PhotomapExif: exifData');
+				// send back the stored coordinates from the exifData
 				onComplete({
-					'lat' : cfg.cache[key][name].lat,
-					'lon' : cfg.cache[key][name].lon,
+					'lat' : cfg.exifData[name].lat,
+					'lon' : cfg.exifData[name].lon,
 				});
 			// else
 			} else {
+				console.log('PhotomapExif: ajax');
 				// retrieve the exif data of a photo
 				useful.request.send({
 					url : cfg.exif.replace('{src}', url),
@@ -9422,7 +9423,8 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					onSuccess : function (reply) {
 						var json = useful.request.decode(reply.responseText);
 						var latLon = context.convert(json);
-						// TODO: cache the values
+						// exifData the values
+						cfg.exifData[name] = json;
 						// call back the values
 						onComplete(latLon);
 					}
@@ -9468,28 +9470,50 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapGpx = function (parent) {
+	useful.Photomap_Gpx = function (parent) {
 		this.parent = parent;
 		this.load = function (oncomplete) {
 			var cfg = this.parent.cfg, context = this;
-			// show the busy indicator
-			parent.busy.show();
-			// onload
-			useful.request.send({
-				url : cfg.gpx,
-				post : null,
-				onProgress : function () {},
-				onFailure : function () {},
-				onSuccess : function (reply) {
-					// store the result
-					cfg.gpxDOM = reply.responseXML;
-					cfg.geoJSON = toGeoJSON.gpx(reply.responseXML);
-					// call back
-					oncomplete();
-					// hide the busy indicator
-					context.parent.busy.hide();
+			// if the GPX have been cached in gpxData
+			if (cfg.gpxData) {
+				// call back
+				oncomplete();
+			// lead it from disk
+			} else {
+				// show the busy indicator
+				parent.busy.show();
+				// onload
+				useful.request.send({
+					url : cfg.gpx,
+					post : null,
+					onProgress : function () {},
+					onFailure : function () {},
+					onSuccess : function (reply) {
+						// store the result
+						cfg.gpxData = toGeoJSON.gpx(reply.responseXML);
+						// call back
+						oncomplete();
+						// hide the busy indicator
+						context.parent.busy.hide();
+					}
+				});
+			}
+		};
+		this.coordinates = function () {
+			var cfg = this.parent.cfg, gpx = cfg.gpxData, joined = [];
+			// get the line data from the geojson file
+			var geometryCoordinates = cfg.gpxData.features[0].geometry.coordinates;
+			// if the line data consists of multiple segments
+			if (geometryCoordinates[0][0] instanceof Array) {
+				// join all the segments
+				for (var a = 0, b = geometryCoordinates.length; a < b; a += 1) {
+					joined = joined.concat(geometryCoordinates[a]);
 				}
-			});
+				// store the joined segments
+				geometryCoordinates = joined;
+			}
+			// return the gps coordinates
+			return geometryCoordinates;
 		};
 	};
 
@@ -9499,7 +9523,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapIndicator = function (parent) {
+	useful.Photomap_Indicator = function (parent) {
 		this.parent = parent;
 		this.add = function () {
 			var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
@@ -9567,7 +9591,55 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapMap = function (parent) {
+	useful.Photomap_Location = function (parent) {
+		this.parent = parent;
+		this.object = null;
+		this.interval = null;
+		// add the Layer with the GPX Track
+		this.point = function () {
+			var cfg = this.parent.cfg, context = this;
+			// if geolocation is available
+			if (navigator.geolocation) {
+				// request the position
+				navigator.geolocation.getCurrentPosition(function (geo) {
+					// create the icon
+					var icon = L.icon({
+						iconUrl: cfg.pointer,
+						iconSize: [32, 32],
+						iconAnchor: [16, 32]
+					});
+					// add the marker with the icon
+					context.object = L.marker(
+						[geo.coords.latitude, geo.coords.longitude],
+						{'icon': icon}
+					);
+					context.object.addTo(cfg.map.object);
+					// update the pointer's location periodically
+					context.interval = setInterval(function () { context.redraw(); }, 5000);
+				});
+			}
+		};
+		// redraw the pointer layer
+		this.redraw = function () {
+			var cfg = this.parent.cfg, context = this;
+			// if geolocation is available
+			if (navigator.geolocation) {
+				// request the position
+				navigator.geolocation.getCurrentPosition(function (geo) {
+					// move the location pointer to the system's position
+					context.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
+				});
+			}
+		};
+	};
+
+}(window.useful = window.useful || {}));
+
+(function (useful) {
+
+	"use strict";
+
+	useful.Photomap_Map = function (parent) {
 		this.parent = parent;
 		this.setup = function () {
 			var cfg = this.parent.cfg,
@@ -9578,73 +9650,35 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			// add the tiles
 			L.tileLayer(cfg.tiles, {
 				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+				errorTileUrl: cfg.missing,
 				maxZoom: 15
 			}).addTo(cfg.map.object);
 			// get the centre of the map
 			this.centre();
-			// get the duration of the walk
-			this.duration();
 			// refresh the map after scrolling
 			var context = this;
 			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
 			cfg.map.object.on('zoomend', function (e) { context.parent.redraw(); });
 		};
-		this.duration = function () {
-			var time, start, end, cfg = this.parent.cfg, points = cfg.gpxDOM.getElementsByTagName('trkpt');
-			// if the duration placeholder and the time markers exist
-			if (cfg.duration && points[0].getElementsByTagName('time').length > 0) {
-				// get the start time
-				time = points[0].getElementsByTagName('time')[0].firstChild.nodeValue;
-				start = new Date(time);
-				// if the date could not be interpreted
-				if (isNaN(start)) {
-					// split the string up manually as a fall back
-					start = new Date(
-						parseInt(time.split('-')[0], 10),
-						parseInt(time.split('-')[1], 10) + 1,
-						parseInt(time.split('-')[2], 10),
-						parseInt(time.split('T')[1], 10),
-						parseInt(time.split(':')[1], 10),
-						parseInt(time.split(':')[2], 10)
-					);
-				}
-				// get the start time
-				time = points[points.length - 1].getElementsByTagName('time')[0].firstChild.nodeValue;
-				end = new Date(time);
-				// if the date could not be interpreted
-				if (isNaN(end)) {
-					// split the string up manually as a fall back
-					end = new Date(
-						parseInt(time.split('-')[0], 10),
-						parseInt(time.split('-')[1], 10) + 1,
-						parseInt(time.split('-')[2], 10),
-						parseInt(time.split('T')[1], 10),
-						parseInt(time.split(':')[1], 10),
-						parseInt(time.split(':')[2], 10)
-					);
-				}
-				// write the duration to the document
-				cfg.duration.innerHTML = (!isNaN(start)) ? Math.round((end.getTime() - start.getTime()) / 3600000, 10) + ' hours' : '- hours';
-			}
-			if (cfg.there) {
-				cfg.there.innerHTML = cfg.markers.start.description;
-			}
-			if (cfg.back) {
-				cfg.back.innerHTML = cfg.markers.end.description;
+		this.remove = function () {
+			var cfg = this.parent.cfg;
+			// ask leaflet to remove itself if available
+			if (cfg.map && cfg.map.object) {
+				cfg.map.object.remove();
 			}
 		};
 		this.centre = function () {
 			var a, b, points, cfg = this.parent.cfg, totLat = 0, totLon = 0;
 			// for all navigation points
-			points = cfg.gpxDOM.getElementsByTagName('trkpt');
+			points = this.parent.gpx.coordinates();
 			for (a = 0 , b = points.length; a < b; a += 1) {
-				totLat += parseFloat(points[a].getAttribute('lat'));
-				totLon += parseFloat(points[a].getAttribute('lon'));
+				totLon += points[a][0];
+				totLat += points[a][1];
 			}
 			// average the centre
 			cfg.map.centre = {
-				'lat' : totLat / points.length,
-				'lon' : totLon / points.length
+				'lon' : totLon / points.length,
+				'lat' : totLat / points.length
 			};
 			// apply the centre
 			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
@@ -9659,13 +9693,13 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapMarkers = function (parent) {
+	useful.Photomap_Markers = function (parent) {
 		this.parent = parent;
 		// add the Layer with the permanent markers
 		this.add = function () {
 			var name, marker, icon, cfg = this.parent.cfg;
 			// get the track points from the GPX file
-			cfg.trackPoints = cfg.gpxDOM.getElementsByTagName('trkpt');
+			var points = this.parent.gpx.coordinates();
 			// for all markers
 			for (name in cfg.markers) {
 				if (cfg.markers.hasOwnProperty(name)) {
@@ -9673,12 +9707,12 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					// special markers
 					switch (name) {
 						case 'start' :
-							marker.lat = cfg.trackPoints[0].getAttribute('lat');
-							marker.lon = cfg.trackPoints[0].getAttribute('lon');
+							marker.lon = points[0][0];
+							marker.lat = points[0][1];
 							break;
 						case 'end' :
-							marker.lat = cfg.trackPoints[cfg.trackPoints.length - 1].getAttribute('lat');
-							marker.lon = cfg.trackPoints[cfg.trackPoints.length - 1].getAttribute('lon');
+							marker.lon = points[points.length - 1][0];
+							marker.lat = points[points.length - 1][1];
 							break;
 					}
 					// create the icon
@@ -9715,14 +9749,14 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 	"use strict";
 
-	useful.PhotomapRoute = function (parent) {
+	useful.Photomap_Route = function (parent) {
 		this.parent = parent;
 		// add the Layer with the GPX Track
 		this.plot = function () {
 			var cfg = this.parent.cfg;
 			// plot the geoJson object
 			cfg.route = {};
-			cfg.route.object = L.geoJson(cfg.geoJSON, {
+			cfg.route.object = L.geoJson(cfg.gpxData, {
 				style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 			});
 			cfg.route.object.addTo(cfg.map.object);
@@ -9776,6 +9810,8 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 				context.markers.add();
 				// show the indicator
 				context.indicator.add();
+				// start the location pointer
+				context.location.point();
 			});
 			// disable the start function so it can't be started twice
 			this.start = function () {};
@@ -9792,13 +9828,14 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			}, 500);
 		};
 		// components
-		this.busy = new useful.PhotomapBusy(this);
-		this.exif = new useful.PhotomapExif(this);
-		this.gpx = new useful.PhotomapGpx(this);
-		this.map = new useful.PhotomapMap(this);
-		this.route = new useful.PhotomapRoute(this);
-		this.markers = new useful.PhotomapMarkers(this);
-		this.indicator = new useful.PhotomapIndicator(this);
+		this.busy = new useful.Photomap_Busy(this);
+		this.exif = new useful.Photomap_Exif(this);
+		this.gpx = new useful.Photomap_Gpx(this);
+		this.map = new useful.Photomap_Map(this);
+		this.route = new useful.Photomap_Route(this);
+		this.markers = new useful.Photomap_Markers(this);
+		this.indicator = new useful.Photomap_Indicator(this);
+		this.location = new useful.Photomap_Location(this);
 		// public API
 		this.indicate = function (element) {
 			var context = this,
@@ -9806,7 +9843,6 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 				url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
 				title = element.getAttribute('data-title') || element.getAttribute('title');
 			this.exif.load(url, function (coords) {
-				cfg.indicator.description = title;
 				cfg.indicator.lat = coords.lat;
 				cfg.indicator.lon = coords.lon;
 				context.indicator.add();
@@ -9814,6 +9850,9 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 		};
 		this.unindicate = function () {
 			this.indicator.remove();
+		};
+		this.stop = function () {
+			this.map.remove();
 		};
 		// go
 		this.start();

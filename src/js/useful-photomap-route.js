@@ -9,7 +9,7 @@
 			var cfg = this.parent.cfg;
 			// plot the geoJson object
 			cfg.route = {};
-			cfg.route.object = L.geoJson(cfg.geoJSON, {
+			cfg.route.object = L.geoJson(cfg.gpxData, {
 				style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 			});
 			cfg.route.object.addTo(cfg.map.object);

@@ -35,7 +35,8 @@
 				<style>@import url("./inc/css/useful-photomap.css")</style>
 				<figure id="testmap" class="photomap"></figure>
 				<p id="duration"></p>
-				<script src="./inc/js/cache.js"></script>
+				<script src="./inc/js/exif-data.js"></script>
+				<script src="./inc/js/gpx-data.js"></script>
 				<script src="./inc/js/useful-photomap.js"></script>
 				<script>
 				//<!--
@@ -45,8 +46,11 @@
 						//'tiles' : 'http://c.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
 						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 						'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
+						'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
 						'exif' : './inc/php/imageexif.php?src=../../{src}',
-						'cache' : cache['cowan-taffyslookout-brooklyn'],
+						'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
+						'pointer' : './inc/img/marker-location.png',
+						'missing' : './inc/img/missing.png',
 						'zoom' : 13,
 						'markers' : {
 							'start' : {

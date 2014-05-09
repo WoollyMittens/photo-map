@@ -33,6 +33,8 @@
 				context.markers.add();
 				// show the indicator
 				context.indicator.add();
+				// start the location pointer
+				context.location.point();
 			});
 			// disable the start function so it can't be started twice
 			this.start = function () {};
@@ -56,6 +58,7 @@
 		this.route = new useful.Photomap_Route(this);
 		this.markers = new useful.Photomap_Markers(this);
 		this.indicator = new useful.Photomap_Indicator(this);
+		this.location = new useful.Photomap_Location(this);
 		// public API
 		this.indicate = function (element) {
 			var context = this,

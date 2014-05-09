@@ -8,7 +8,7 @@
 		this.add = function () {
 			var name, marker, icon, cfg = this.parent.cfg;
 			// get the track points from the GPX file
-			cfg.trackPoints = cfg.gpxDOM.getElementsByTagName('trkpt');
+			var points = this.parent.gpx.coordinates();
 			// for all markers
 			for (name in cfg.markers) {
 				if (cfg.markers.hasOwnProperty(name)) {
@@ -16,12 +16,12 @@
 					// special markers
 					switch (name) {
 						case 'start' :
-							marker.lat = cfg.trackPoints[0].getAttribute('lat');
-							marker.lon = cfg.trackPoints[0].getAttribute('lon');
+							marker.lon = points[0][0];
+							marker.lat = points[0][1];
 							break;
 						case 'end' :
-							marker.lat = cfg.trackPoints[cfg.trackPoints.length - 1].getAttribute('lat');
-							marker.lon = cfg.trackPoints[cfg.trackPoints.length - 1].getAttribute('lon');
+							marker.lon = points[points.length - 1][0];
+							marker.lat = points[points.length - 1][1];
 							break;
 					}
 					// create the icon
