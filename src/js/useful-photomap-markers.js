@@ -16,12 +16,12 @@
 					// special markers
 					switch (name) {
 						case 'start' :
-							marker.lon = points[0][0];
-							marker.lat = points[0][1];
+							marker.lon = marker.lon || points[0][0];
+							marker.lat = marker.lat || points[0][1];
 							break;
 						case 'end' :
-							marker.lon = points[points.length - 1][0];
-							marker.lat = points[points.length - 1][1];
+							marker.lon = marker.lon || points[points.length - 1][0];
+							marker.lat = marker.lat || points[points.length - 1][1];
 							break;
 					}
 					// create the icon

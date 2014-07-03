@@ -42,15 +42,18 @@
 				//<!--
 					var combiPhotomap = new useful.Photomap( document.getElementById('testmap'), {
 						'duration' : document.getElementById('duration'),
-						'tiles' : './inc/tiles/{z}/{x}/{y}.png',
-						//'tiles' : 'http://c.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+						//'tiles' : 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+						//'tiles' : 'http://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png',
+						//'tiles' : 'http://4umaps.eu/{z}/{x}/{y}.png';
 						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+						'tiles' : './inc/tiles/{z}/{x}/{y}.png',
 						'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
 						'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
 						'exif' : './inc/php/imageexif.php?src=../../{src}',
 						'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
 						'pointer' : './inc/img/marker-location.png',
 						'missing' : './inc/img/missing.png',
+						'credit' : 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA',
 						'zoom' : 13,
 						'markers' : {
 							'start' : {

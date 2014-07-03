@@ -18,6 +18,8 @@
 					iconSize: [32, 32],
 					iconAnchor: [16, 32]
 				});
+				// report the location for reference
+				console.log('location:', indicator);
 				// add the marker with the icon
 				indicator.object = L.marker(
 					[indicator.lat, indicator.lon],
@@ -54,13 +56,16 @@
 		this.focus = function () {
 			var cfg = this.parent.cfg;
 			// focus the map on the indicator
-			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
 			// call for a  redraw
 			this.parent.redraw();
 		};
 		this.unfocus = function () {
-			// re-centre the map
-			this.parent.map.centre();
+			var cfg = this.parent.cfg;
+			// focus the map on the indicator
+			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			// call for a  redraw
+			this.parent.redraw();
 		};
 	};
 

@@ -9,7 +9,6 @@
 				path = url.split('/'), name = path[path.length - 1];
 			// if the lat and lon have been cached in exifData
 			if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
-				console.log('PhotomapExif: exifData');
 				// send back the stored coordinates from the exifData
 				onComplete({
 					'lat' : cfg.exifData[name].lat,
