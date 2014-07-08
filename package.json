@@ -1,5 +1,5 @@
 {
-  "name": "useful-aspectratio",
+  "name": "useful.js",
   "version": "0.0.0",
   "devDependencies": {
     "grunt": "",
@@ -10,6 +10,8 @@
     "grunt-contrib-jshint": "",
     "grunt-contrib-copy": "",
     "grunt-contrib-connect": "",
+    "grunt-font-optimizer": "",
+    "grunt-autoprefixer": "",
     "sass": "",
     "compass": ""
   }

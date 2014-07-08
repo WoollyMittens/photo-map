@@ -1,7 +1,4 @@
 /*
-	Definitions
-*/
-/*
 	Constants
 */
 $color-background : #ffffff;
@@ -25,29 +22,44 @@ $remSize : 12;
 /*
 	Turns a button into an icon
 */
-@mixin iconParent ($size:32) {
+@mixin iconParent ($size:32, $unit:px) {
 	overflow : hidden;
 	position : relative;
 	text-align : left;
-	text-indent : ($size + 10) + px;
+	text-indent : ($size + 10) + $unit;
 	white-space : nowrap;
 	/* Because of Internet Explorer 8 we can't have nice thing. */
 	overflow : visible;
 	text-indent : -999em;
 }
 /*
-	Centres a graphic inside an icon
+	Centres a graphic or glyph inside an icon
 */
-@mixin iconCenter ($size:32) {
-	content : '';
+@mixin iconCenter ($size:32, $unit:px, $char:'', $margin:0.5) {
+	content : $char;
 	display : block;
-	height : $size + px;
+	font-family : FontAwesome;
+	@if $unit == 'rem' {
+		font-size : ($size * $remSize * $margin) + px;
+		height : ($size * $remSize) + px;
+		line-height : ($size * $remSize) + px;
+		margin-left : ($size * $remSize / -2) + px;
+		margin-top : ($size * $remSize / -2) + px;
+		width : ($size * $remSize) + px;
+	}
+	@if $char != '' {
+		text-indent : 0;
+	}
+	font-size : ($size * $margin) + $unit;
+	height : $size + $unit;
+	line-height : $size + $unit;
+	margin-left : ($size / -2) + $unit;
+	margin-top : ($size / -2) + $unit;
+	width : $size + $unit;
 	position : absolute;
 	left : 50%;
-	margin-left : ($size / -2) + px;
-	margin-top : ($size / -2) + px;
+	text-align : center;
 	top : 50%;
-	width : $size + px;
 }
 /*
 	Offers both the pixel and rem value of a single property

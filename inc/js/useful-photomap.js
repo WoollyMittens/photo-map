@@ -9288,14 +9288,22 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 		serverRequest.onreadystatechange = function () {
 			request.update(serverRequest, properties);
 		};
+		// set the optional timeout
+		if (properties.timeout) {
+			serverRequest.timeout = properties.timeout;
+		}
+		// set the optional timeout handler
+		if (properties.onTimeout) {
+			serverRequest.ontimeout = properties.onTimeout;
+		}
 		// if the request is a POST
 		if (properties.post) {
 			// open the request
 			serverRequest.open('POST', properties.url, true);
 			// set its header
-			serverRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			serverRequest.setRequestHeader("Content-length", properties.post.length);
-			serverRequest.setRequestHeader("Connection", "close");
+			serverRequest.setRequestHeader("Content-type", properties.contentType || "application/x-www-form-urlencoded");
+			//serverRequest.setRequestHeader("Content-length", properties.post.length);
+			//serverRequest.setRequestHeader("Connection", "close");
 			// send the request, or fail gracefully
 			try { serverRequest.send(properties.post); }
 			catch (errorMessage) { properties.onFailure({readyState : -1, status : -1, statusText : errorMessage}); }
@@ -9319,6 +9327,15 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 				break;
 			case 304 :
 				properties.onSuccess(serverRequest, properties);
+				break;
+			case 0 :
+				// check if the data is okay before accepting it
+				try {
+					var test = JSON.parse(serverRequest.responseText);
+					properties.onSuccess(serverRequest, properties);
+				} catch (e) {
+					properties.onFailure(serverRequest, properties);
+				}
 				break;
 			default :
 				properties.onFailure(serverRequest, properties);
@@ -9373,6 +9390,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 	// public functions
 	useful.request = useful.request || {};
 	useful.request.send = request.send;
+	useful.request.deserialize = request.deserialize;
 	useful.request.decode = request.decode;
 
 }(window.useful = window.useful || {}));
@@ -9401,7 +9419,6 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 				path = url.split('/'), name = path[path.length - 1];
 			// if the lat and lon have been cached in exifData
 			if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
-				console.log('PhotomapExif: exifData');
 				// send back the stored coordinates from the exifData
 				onComplete({
 					'lat' : cfg.exifData[name].lat,
@@ -9539,6 +9556,8 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					iconSize: [32, 32],
 					iconAnchor: [16, 32]
 				});
+				// report the location for reference
+				console.log('location:', indicator);
 				// add the marker with the icon
 				indicator.object = L.marker(
 					[indicator.lat, indicator.lon],
@@ -9575,13 +9594,16 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 		this.focus = function () {
 			var cfg = this.parent.cfg;
 			// focus the map on the indicator
-			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
 			// call for a  redraw
 			this.parent.redraw();
 		};
 		this.unfocus = function () {
-			// re-centre the map
-			this.parent.map.centre();
+			var cfg = this.parent.cfg;
+			// focus the map on the indicator
+			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+			// call for a  redraw
+			this.parent.redraw();
 		};
 	};
 
@@ -9649,12 +9671,12 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			cfg.map.object = L.map(id);
 			// add the tiles
 			L.tileLayer(cfg.tiles, {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+				attribution: cfg.credit,
 				errorTileUrl: cfg.missing,
 				maxZoom: 15
 			}).addTo(cfg.map.object);
 			// get the centre of the map
-			this.centre();
+			this.beginning();
 			// refresh the map after scrolling
 			var context = this;
 			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
@@ -9666,6 +9688,26 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			if (cfg.map && cfg.map.object) {
 				cfg.map.object.remove();
 			}
+		};
+		this.beginning = function () {
+			var a, b, cfg = this.parent.cfg,
+				points = this.parent.gpx.coordinates(),
+				totLon = points[0][0] * points.length,
+				totLat = points[0][1] * points.length;
+			// for all navigation points
+			for (a = 0 , b = points.length; a < b; a += 1) {
+				totLon += points[a][0];
+				totLat += points[a][1];
+			}
+			// average the centre
+			cfg.map.centre = {
+				'lon' : totLon / points.length / 2,
+				'lat' : totLat / points.length / 2
+			};
+			// apply the centre
+			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+			// call for a redraw
+			this.parent.redraw();
 		};
 		this.centre = function () {
 			var a, b, points, cfg = this.parent.cfg, totLat = 0, totLon = 0;
@@ -9707,12 +9749,12 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 					// special markers
 					switch (name) {
 						case 'start' :
-							marker.lon = points[0][0];
-							marker.lat = points[0][1];
+							marker.lon = marker.lon || points[0][0];
+							marker.lat = marker.lat || points[0][1];
 							break;
 						case 'end' :
-							marker.lon = points[points.length - 1][0];
-							marker.lat = points[points.length - 1][1];
+							marker.lon = marker.lon || points[points.length - 1][0];
+							marker.lat = marker.lat || points[points.length - 1][1];
 							break;
 					}
 					// create the icon

@@ -33,14 +33,22 @@
 		serverRequest.onreadystatechange = function () {
 			request.update(serverRequest, properties);
 		};
+		// set the optional timeout
+		if (properties.timeout) {
+			serverRequest.timeout = properties.timeout;
+		}
+		// set the optional timeout handler
+		if (properties.onTimeout) {
+			serverRequest.ontimeout = properties.onTimeout;
+		}
 		// if the request is a POST
 		if (properties.post) {
 			// open the request
 			serverRequest.open('POST', properties.url, true);
 			// set its header
-			serverRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			serverRequest.setRequestHeader("Content-length", properties.post.length);
-			serverRequest.setRequestHeader("Connection", "close");
+			serverRequest.setRequestHeader("Content-type", properties.contentType || "application/x-www-form-urlencoded");
+			//serverRequest.setRequestHeader("Content-length", properties.post.length);
+			//serverRequest.setRequestHeader("Connection", "close");
 			// send the request, or fail gracefully
 			try { serverRequest.send(properties.post); }
 			catch (errorMessage) { properties.onFailure({readyState : -1, status : -1, statusText : errorMessage}); }
@@ -64,6 +72,15 @@
 				break;
 			case 304 :
 				properties.onSuccess(serverRequest, properties);
+				break;
+			case 0 :
+				// check if the data is okay before accepting it
+				try {
+					var test = JSON.parse(serverRequest.responseText);
+					properties.onSuccess(serverRequest, properties);
+				} catch (e) {
+					properties.onFailure(serverRequest, properties);
+				}
 				break;
 			default :
 				properties.onFailure(serverRequest, properties);
@@ -118,6 +135,7 @@
 	// public functions
 	useful.request = useful.request || {};
 	useful.request.send = request.send;
+	useful.request.deserialize = request.deserialize;
 	useful.request.decode = request.decode;
 
 }(window.useful = window.useful || {}));

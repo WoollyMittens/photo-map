@@ -1,27 +1,14 @@
-/*
-	Reference Styling for an Open Street Map Implementation
-*/
-
 @import "compass/css3";
 @import "compass/utilities";
-@import "definitions";
-@import "typography";
+@import "mixins";
 @import "leaflet";
-
-@media all {
-	/*
-		Photo Map
-	*/
-	.photomap {
-		display : block;
-		height : 400px;
-		margin : 0;
-		padding : 0;
-		width : 100%;
-	}
+/*
+	Photo Map
+*/
+.photomap {
+	display : block;
+	height : 400px;
+	margin : 0;
+	padding : 0;
+	width : 100%;
 }
-@media (max-width : 960px) {}
-@media (max-width : 480px) {}
-@media (orientation : landscape) {}
-@media (orientation : portrait) {}
-@media print {}

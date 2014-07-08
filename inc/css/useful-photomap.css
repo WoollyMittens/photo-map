@@ -1,10 +1,4 @@
 /*
-	Reference Styling for an Open Street Map Implementation
-*/
-/*
-	Definitions
-*/
-/*
 	Constants
 */
 /*
@@ -14,7 +8,7 @@
 	Turns a button into an icon
 */
 /*
-	Centres a graphic inside an icon
+	Centres a graphic or glyph inside an icon
 */
 /*
 	Offers both the pixel and rem value of a single property
@@ -31,490 +25,6 @@
 /*
 	Applies the "clearfix" hack to a container with floating content
 */
-/*
-	Typography
-*/
-@media all {
-  /*
-  	The root element
-  */
-  /* line 8, ../../src/scss/_typography.scss */
-  html {
-    font-family: Tahoma, Verdana, Arial, Sans-Serif;
-    font-size: 75%;
-    height: 100%;
-  }
-
-  /*
-  	Sections
-  */
-  /* line 16, ../../src/scss/_typography.scss */
-  body {
-    font-size: 12px;
-    font-size: 1rem;
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    padding-top: 0px;
-    padding-top: 0rem;
-    padding-right: 0px;
-    padding-right: 0rem;
-    padding-bottom: 0px;
-    padding-bottom: 0rem;
-    padding-left: 0px;
-    padding-left: 0rem;
-    line-height: 21.6px;
-    line-height: 1.8rem;
-    background: #eee;
-    color: #333;
-    _height: 100%;
-    min-height: 100%;
-  }
-
-  /* line 26, ../../src/scss/_typography.scss */
-  h1, h2, h3, h4, h5, h6 {
-    font-size: 12px;
-    font-size: 1rem;
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 6px;
-    margin-bottom: 0.5rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    display: block;
-    font-weight: normal;
-  }
-
-  /* line 32, ../../src/scss/_typography.scss */
-  h1 {
-    font-size: 22.5px;
-    font-size: 1.875rem;
-  }
-
-  /* line 35, ../../src/scss/_typography.scss */
-  h2 {
-    font-size: 19.5px;
-    font-size: 1.625rem;
-  }
-
-  /* line 38, ../../src/scss/_typography.scss */
-  h3 {
-    font-size: 15px;
-    font-size: 1.25rem;
-  }
-
-  /* line 41, ../../src/scss/_typography.scss */
-  address {
-    display: block;
-    font-style: normal;
-  }
-
-  /* line 45, ../../src/scss/_typography.scss */
-  section, nav, article, aside, hgroup, header, footer {
-    display: block;
-  }
-
-  /*
-  	Grouping content
-  */
-  /* line 51, ../../src/scss/_typography.scss */
-  p {
-    font-size: 12px;
-    font-size: 1rem;
-    display: block;
-  }
-
-  /* line 55, ../../src/scss/_typography.scss */
-  hr {
-    margin-top: 12px;
-    margin-top: 1rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 12px;
-    margin-bottom: 1rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    background-color: #333;
-    border: none;
-    clear: both;
-    color: #333;
-    display: block;
-    height: 1px;
-    width: 100%;
-  }
-
-  /* line 65, ../../src/scss/_typography.scss */
-  ul {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 12px;
-    margin-bottom: 1rem;
-    margin-left: 24px;
-    margin-left: 2rem;
-    padding-top: 0px;
-    padding-top: 0rem;
-    padding-right: 0px;
-    padding-right: 0rem;
-    padding-bottom: 0px;
-    padding-bottom: 0rem;
-    padding-left: 0px;
-    padding-left: 0rem;
-    display: block;
-  }
-
-  /* line 71, ../../src/scss/_typography.scss */
-  dl {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 12px;
-    margin-bottom: 1rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    display: block;
-  }
-
-  /* line 75, ../../src/scss/_typography.scss */
-  dt {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    display: block;
-    font-weight: bold;
-  }
-
-  /* line 80, ../../src/scss/_typography.scss */
-  dd {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    display: block;
-  }
-
-  /* line 84, ../../src/scss/_typography.scss */
-  pre, dialog, blockquote, ol {
-    display: block;
-  }
-
-  /*
-  	Text-level semantics
-  */
-  /* line 90, ../../src/scss/_typography.scss */
-  a {
-    color: #ff6a00;
-    text-decoration: underline;
-  }
-
-  /* line 94, ../../src/scss/_typography.scss */
-  a:hover {
-    color: #ff9800;
-    text-decoration: underline;
-  }
-
-  /* line 98, ../../src/scss/_typography.scss */
-  sub {
-    line-height: 0;
-  }
-
-  /* line 101, ../../src/scss/_typography.scss */
-  sup {
-    line-height: 0;
-  }
-
-  /* line 104, ../../src/scss/_typography.scss */
-  time, progress, meter {
-    display: block;
-  }
-
-  /*
-  	Embedded content
-  */
-  /* line 110, ../../src/scss/_typography.scss */
-  img {
-    border: none;
-    vertical-align: middle;
-  }
-
-  /* line 114, ../../src/scss/_typography.scss */
-  figure, figcaption, video, audio, canvas {
-    display: block;
-  }
-
-  /* Tabular data */
-  /* line 118, ../../src/scss/_typography.scss */
-  table {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 12px;
-    margin-bottom: 1rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    border-collapse: collapse;
-  }
-
-  /* line 122, ../../src/scss/_typography.scss */
-  caption {
-    font-size: 15px;
-    font-size: 1.25rem;
-    font-weight: bold;
-    text-align: left;
-  }
-
-  /* line 128, ../../src/scss/_typography.scss */
-  tr {
-    vertical-align: top;
-  }
-  /* line 130, ../../src/scss/_typography.scss */
-  tr:nth-child(2n) {
-    background-color: #eeeeee;
-  }
-
-  /* line 132, ../../src/scss/_typography.scss */
-  th, td {
-    padding-top: 6px;
-    padding-top: 0.5rem;
-    padding-right: 12px;
-    padding-right: 1rem;
-    padding-bottom: 6px;
-    padding-bottom: 0.5rem;
-    padding-left: 12px;
-    padding-left: 1rem;
-  }
-
-  /* line 135, ../../src/scss/_typography.scss */
-  th, th a, th a:hover {
-    background-color: #ff9800;
-    color: #fff;
-    font-weight: normal;
-    white-space: nowrap;
-    text-align: left;
-    text-decoration: none;
-  }
-
-  /*
-  	Forms
-  */
-  /* line 146, ../../src/scss/_typography.scss */
-  form {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-  }
-
-  /* line 149, ../../src/scss/_typography.scss */
-  fieldset {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 12px;
-    margin-bottom: 1rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    padding-top: 0px;
-    padding-top: 0rem;
-    padding-right: 0px;
-    padding-right: 0rem;
-    padding-bottom: 0px;
-    padding-bottom: 0rem;
-    padding-left: 0px;
-    padding-left: 0rem;
-    display: block;
-    border: none;
-  }
-
-  /* line 155, ../../src/scss/_typography.scss */
-  legend {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 6px;
-    margin-bottom: 0.5rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    display: block;
-    font-weight: bold;
-  }
-
-  /* line 161, ../../src/scss/_typography.scss */
-  input, button, select, textarea {
-    font-size: 12px;
-    font-size: 1rem;
-    font-family: Tahoma, Verdana, Arial, Sans-Serif;
-    vertical-align: baseline;
-  }
-
-  /* line 166, ../../src/scss/_typography.scss */
-  input[type=color], input[type=range], input[type=number], input[type=date], input[type=text], input[type=password], input[type=email], select, textarea {
-    -webkit-box-shadow: inset 0 0 5px #cccccc;
-    -moz-box-shadow: inset 0 0 5px #cccccc;
-    box-shadow: inset 0 0 5px #cccccc;
-    height: 36px;
-    height: 3rem;
-    font-size: 12px;
-    font-size: 1rem;
-    padding: 8.4px;
-    padding: 0.7rem;
-    margin-top: 8.4px;
-    margin-top: 0.7rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 8.4px;
-    margin-bottom: 0.7rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    background: #fff;
-    border: solid 1px #333;
-    font-family: Arial, Sans-Serif;
-  }
-
-  /* line 176, ../../src/scss/_typography.scss */
-  input[type=checkbox], input[type=radio] {
-    margin-top: 8.4px;
-    margin-top: 0.7rem;
-    margin-right: 3.6px;
-    margin-right: 0.3rem;
-    margin-bottom: 8.4px;
-    margin-bottom: 0.7rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-  }
-
-  /* line 179, ../../src/scss/_typography.scss */
-  select {
-    height: 36px;
-    height: 3rem;
-    padding: 8.4px;
-    padding: 0.7rem;
-  }
-
-  /* line 183, ../../src/scss/_typography.scss */
-  textarea {
-    height: 120px;
-    height: 10rem;
-    padding: 8.4px;
-    padding: 0.7rem;
-  }
-
-  /* line 187, ../../src/scss/_typography.scss */
-  button, .button {
-    -webkit-transition-property: background-color;
-    -moz-transition-property: background-color;
-    -o-transition-property: background-color;
-    transition-property: background-color;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    -o-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-    -webkit-transition-timing-function: ease;
-    -moz-transition-timing-function: ease;
-    -o-transition-timing-function: ease;
-    transition-timing-function: ease;
-    height: 36px;
-    height: 3rem;
-    line-height: 36px;
-    line-height: 3rem;
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    padding-top: 0px;
-    padding-top: 0rem;
-    padding-right: 12px;
-    padding-right: 1rem;
-    padding-bottom: 0px;
-    padding-bottom: 0rem;
-    padding-left: 12px;
-    padding-left: 1rem;
-    background-color: #ff6a00;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: inline-block;
-    overflow: visible;
-    text-decoration: none;
-  }
-  /* line 202, ../../src/scss/_typography.scss */
-  button:hover, .button:hover {
-    background-color: #ff9800;
-    color: #fff;
-    text-decoration: none;
-  }
-  /* line 207, ../../src/scss/_typography.scss */
-  button.disabled, button.disabled:hover, .button.disabled, .button.disabled:hover {
-    background-color: #7f7f7f;
-  }
-
-  /*
-  	Interactive elements
-  */
-  /* line 214, ../../src/scss/_typography.scss */
-  menu {
-    margin-top: 0px;
-    margin-top: 0rem;
-    margin-right: 0px;
-    margin-right: 0rem;
-    margin-bottom: 0px;
-    margin-bottom: 0rem;
-    margin-left: 0px;
-    margin-left: 0rem;
-    padding-top: 0px;
-    padding-top: 0rem;
-    padding-right: 0px;
-    padding-right: 0rem;
-    padding-bottom: 0px;
-    padding-bottom: 0rem;
-    padding-left: 0px;
-    padding-left: 0rem;
-    display: block;
-  }
-
-  /*
-  	Miscellaneous elements
-  */
-  /* line 222, ../../src/scss/_typography.scss */
-  div {
-    display: block;
-  }
-}
-@media (max-width: 480px) {
-  /* line 231, ../../src/scss/_typography.scss */
-  html {
-    font-size: 62.5%;
-  }
-}
 /* required styles */
 /* line 12, ../../src/scss/_leaflet.scss */
 .leaflet-pane,
@@ -544,7 +54,8 @@
 .leaflet-marker-shadow {
   -webkit-user-select: none;
   -moz-user-select: none;
-  user-select: none;
+  -ms-user-select: none;
+      user-select: none;
   -webkit-user-drag: none;
 }
 
@@ -582,7 +93,8 @@
 
 /* line 51, ../../src/scss/_leaflet.scss */
 .leaflet-tile {
-  filter: inherit;
+  -webkit-filter: inherit;
+          filter: inherit;
   visibility: hidden;
 }
 
@@ -595,7 +107,6 @@
 .leaflet-zoom-box {
   width: 0;
   height: 0;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   z-index: 8;
 }
@@ -732,8 +243,6 @@
 .leaflet-fade-anim .leaflet-popup {
   opacity: 0;
   -webkit-transition: opacity 0.2s linear;
-  -moz-transition: opacity 0.2s linear;
-  -o-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
 
@@ -746,8 +255,6 @@
 /* line 153, ../../src/scss/_leaflet.scss */
 .leaflet-zoom-anim .leaflet-zoom-animated {
   -webkit-transition: -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
-  -moz-transition: -moz-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
-  -o-transition: -o-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
   transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
 }
 
@@ -755,8 +262,6 @@
 .leaflet-zoom-anim .leaflet-tile,
 .leaflet-pan-anim .leaflet-tile {
   -webkit-transition: none;
-  -moz-transition: none;
-  -o-transition: none;
   transition: none;
 }
 
@@ -774,7 +279,6 @@
 /* line 177, ../../src/scss/_leaflet.scss */
 .leaflet-container {
   cursor: -webkit-grab;
-  cursor: -moz-grab;
 }
 
 /* line 182, ../../src/scss/_leaflet.scss */
@@ -794,7 +298,6 @@
 .leaflet-dragging .leaflet-clickable {
   cursor: move;
   cursor: -webkit-grabbing;
-  cursor: -moz-grabbing;
 }
 
 /* visual tweaks */
@@ -1025,7 +528,6 @@
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
   background: #fff;
   background: rgba(255, 255, 255, 0.5);
@@ -1098,9 +600,7 @@
   padding: 1px;
   margin: -10px auto 0;
   -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
   transform: rotate(45deg);
 }
 
@@ -1172,16 +672,14 @@
   border: 1px solid #666;
 }
 
-@media all {
-  /*
-  	Photo Map
-  */
-  /* line 15, ../../src/scss/useful-photomap.scss */
-  .photomap {
-    display: block;
-    height: 400px;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-  }
+/*
+	Photo Map
+*/
+/* line 8, ../../src/scss/useful-photomap.scss */
+.photomap {
+  display: block;
+  height: 400px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
