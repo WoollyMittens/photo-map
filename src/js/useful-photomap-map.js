@@ -14,10 +14,11 @@
 			L.tileLayer(cfg.tiles, {
 				attribution: cfg.credit,
 				errorTileUrl: cfg.missing,
+				minZoom: 10,
 				maxZoom: 15
 			}).addTo(cfg.map.object);
 			// get the centre of the map
-			this.beginning();
+			this.bounds();
 			// refresh the map after scrolling
 			var context = this;
 			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
@@ -29,6 +30,32 @@
 			if (cfg.map && cfg.map.object) {
 				cfg.map.object.remove();
 			}
+		};
+		this.bounds = function () {
+			var a, b, points, cfg = this.parent.cfg,
+				minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
+			// for all navigation points
+			points = this.parent.gpx.coordinates();
+			for (a = 0 , b = points.length; a < b; a += 1) {
+				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
+			}
+			// extend the bounds a little
+			minLat -= 0.01;
+			minLon -= 0.01;
+			maxLat += 0.01;
+			maxLon += 0.01;
+			// limit the bounds
+			cfg.map.object.fitBounds([
+			    [minLat, minLon],
+			    [maxLat, maxLon]
+			]);
+			cfg.map.object.setMaxBounds([
+			    [minLat, minLon],
+			    [maxLat, maxLon]
+			]);
 		};
 		this.beginning = function () {
 			var a, b, cfg = this.parent.cfg,
@@ -51,12 +78,17 @@
 			this.parent.redraw();
 		};
 		this.centre = function () {
-			var a, b, points, cfg = this.parent.cfg, totLat = 0, totLon = 0;
+			var a, b, points, cfg = this.parent.cfg, 
+				minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
 			// for all navigation points
 			points = this.parent.gpx.coordinates();
 			for (a = 0 , b = points.length; a < b; a += 1) {
 				totLon += points[a][0];
 				totLat += points[a][1];
+				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
 			}
 			// average the centre
 			cfg.map.centre = {

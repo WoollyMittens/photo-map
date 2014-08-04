@@ -37,8 +37,10 @@
 		this.onIndicatorClicked = function (indicator) {
 			var context = this;
 			return function (evt) {
-				// show the indicator message in a balloon
-				if (indicator.object) { indicator.object.openPopup(); }
+				// trigger the click event
+				if (indicator.clicked) { indicator.clicked(evt, indicator); }
+				// or show the indicator message in a balloon
+				else if (indicator.object) { indicator.object.openPopup(); }
 			};
 		};
 		this.remove = function () {
