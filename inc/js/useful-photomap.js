@@ -9575,8 +9575,10 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 		this.onIndicatorClicked = function (indicator) {
 			var context = this;
 			return function (evt) {
-				// show the indicator message in a balloon
-				if (indicator.object) { indicator.object.openPopup(); }
+				// trigger the click event
+				if (indicator.clicked) { indicator.clicked(evt, indicator); }
+				// or show the indicator message in a balloon
+				else if (indicator.object) { indicator.object.openPopup(); }
 			};
 		};
 		this.remove = function () {
@@ -9619,39 +9621,57 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 		this.interval = null;
 		// add the Layer with the GPX Track
 		this.point = function () {
-			var cfg = this.parent.cfg, context = this;
 			// if geolocation is available
 			if (navigator.geolocation) {
 				// request the position
-				navigator.geolocation.getCurrentPosition(function (geo) {
-					// create the icon
-					var icon = L.icon({
-						iconUrl: cfg.pointer,
-						iconSize: [32, 32],
-						iconAnchor: [16, 32]
-					});
-					// add the marker with the icon
-					context.object = L.marker(
-						[geo.coords.latitude, geo.coords.longitude],
-						{'icon': icon}
-					);
-					context.object.addTo(cfg.map.object);
-					// update the pointer's location periodically
-					context.interval = setInterval(function () { context.redraw(); }, 5000);
-				});
+				navigator.geolocation.watchPosition(
+					this.onGeoSuccess(), 
+					this.onGeoFailure(),
+					{ maximumAge : 10000,  timeout : 5000,  enableHighAccuracy : true }
+				);
 			}
 		};
 		// redraw the pointer layer
 		this.redraw = function () {
-			var cfg = this.parent.cfg, context = this;
 			// if geolocation is available
 			if (navigator.geolocation) {
 				// request the position
-				navigator.geolocation.getCurrentPosition(function (geo) {
-					// move the location pointer to the system's position
-					context.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
-				});
+				navigator.geolocation.getCurrentPosition(
+					this.onGeoSuccess(), 
+					this.onGeoFailure(),
+					{ enableHighAccuracy : true }
+				);
 			}
+		};
+		// geo location events
+		this.onGeoSuccess = function () {
+			var _this = this, _cfg = this.parent.cfg;
+			return function (geo) {
+				console.log('geolocation succeeded', geo);
+				// if the marker doesn't exist yet
+				if (_this.object === null) {
+					// create the icon
+					var icon = L.icon({
+						iconUrl: _cfg.pointer,
+						iconSize: [32, 32],
+						iconAnchor: [16, 32]
+					});
+					// add the marker with the icon
+					_this.object = L.marker(
+						[geo.coords.latitude, geo.coords.longitude],
+						{'icon': icon}
+					);
+					_this.object.addTo(_cfg.map.object);
+				} else {
+					_this.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
+				}
+			};
+		};
+		this.onGeoFailure = function () {
+			var _this = this;
+			return function () {
+				console.log('geolocation failed');
+			};
 		};
 	};
 
@@ -9673,10 +9693,11 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			L.tileLayer(cfg.tiles, {
 				attribution: cfg.credit,
 				errorTileUrl: cfg.missing,
+				minZoom: 10,
 				maxZoom: 15
 			}).addTo(cfg.map.object);
 			// get the centre of the map
-			this.beginning();
+			this.bounds();
 			// refresh the map after scrolling
 			var context = this;
 			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
@@ -9688,6 +9709,32 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			if (cfg.map && cfg.map.object) {
 				cfg.map.object.remove();
 			}
+		};
+		this.bounds = function () {
+			var a, b, points, cfg = this.parent.cfg,
+				minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
+			// for all navigation points
+			points = this.parent.gpx.coordinates();
+			for (a = 0 , b = points.length; a < b; a += 1) {
+				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
+			}
+			// extend the bounds a little
+			minLat -= 0.01;
+			minLon -= 0.01;
+			maxLat += 0.01;
+			maxLon += 0.01;
+			// limit the bounds
+			cfg.map.object.fitBounds([
+				[minLat, minLon],
+				[maxLat, maxLon]
+			]);
+			cfg.map.object.setMaxBounds([
+				[minLat, minLon],
+				[maxLat, maxLon]
+			]);
 		};
 		this.beginning = function () {
 			var a, b, cfg = this.parent.cfg,
@@ -9710,12 +9757,17 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 			this.parent.redraw();
 		};
 		this.centre = function () {
-			var a, b, points, cfg = this.parent.cfg, totLat = 0, totLon = 0;
+			var a, b, points, cfg = this.parent.cfg, 
+				minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
 			// for all navigation points
 			points = this.parent.gpx.coordinates();
 			for (a = 0 , b = points.length; a < b; a += 1) {
 				totLon += points[a][0];
 				totLat += points[a][1];
+				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
 			}
 			// average the centre
 			cfg.map.centre = {

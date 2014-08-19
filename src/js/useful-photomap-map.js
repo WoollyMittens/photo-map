@@ -49,12 +49,12 @@
 			maxLon += 0.01;
 			// limit the bounds
 			cfg.map.object.fitBounds([
-			    [minLat, minLon],
-			    [maxLat, maxLon]
+				[minLat, minLon],
+				[maxLat, maxLon]
 			]);
 			cfg.map.object.setMaxBounds([
-			    [minLat, minLon],
-			    [maxLat, maxLon]
+				[minLat, minLon],
+				[maxLat, maxLon]
 			]);
 		};
 		this.beginning = function () {
