@@ -11,12 +11,16 @@
 			cfg.map = {};
 			cfg.map.object = L.map(id);
 			// add the tiles
-			L.tileLayer(cfg.tiles, {
+			var tileLayer = L.tileLayer(cfg.tiles, {
 				attribution: cfg.credit,
 				errorTileUrl: cfg.missing,
-				minZoom: 10,
-				maxZoom: 15
+				minZoom: cfg.minZoom,
+				maxZoom: cfg.maxZoom
 			}).addTo(cfg.map.object);
+			// if there is a local tile store, try and handle failing tiles
+			if (this.parent.cfg.local) {
+				tileLayer.on('tileloadstart', this.onFallback(this.parent.cfg.local));
+			}
 			// get the centre of the map
 			this.bounds();
 			// refresh the map after scrolling
@@ -78,7 +82,7 @@
 			this.parent.redraw();
 		};
 		this.centre = function () {
-			var a, b, points, cfg = this.parent.cfg, 
+			var a, b, points, cfg = this.parent.cfg,
 				minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
 			// for all navigation points
 			points = this.parent.gpx.coordinates();
@@ -99,6 +103,28 @@
 			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
 			// call for a redraw
 			this.parent.redraw();
+		};
+		this.onFallback = function (local) {
+			return function (element) {
+				var src = element.tile.getAttribute('src');
+				element.tile.setAttribute('data-failed', 'false')
+				element.tile.addEventListener('error', function () {
+					// if this tile has not failed before
+					if (element.tile.getAttribute('data-failed') === 'false') {
+						// mark the element as a failure
+						element.tile.setAttribute('data-failed', 'true');
+						// recover the coordinates
+						var parts = src.split('/'),
+							length = parts.length,
+							z = parseInt(parts[length - 3]),
+							x =	parseInt(parts[length - 2]),
+							y = parseInt(parts[length - 1]);
+						// try the local source instead
+						element.tile.src = local.replace('{z}', z).replace('{x}', x).replace('{y}', y);
+						console.log('fallback to:', element.tile.src);
+					}
+				});
+			};
 		};
 	};
 
