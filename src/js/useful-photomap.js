@@ -10,7 +10,10 @@
 	https://github.com/mapbox/togeojson
 */
 
-(function (useful) {
+// public object
+var useful = useful || {};
+
+(function(){
 
 	"use strict";
 
@@ -81,4 +84,9 @@
 		this.start();
 	};
 
-}(window.useful = window.useful || {}));
+	// return as a require.js module
+	if (typeof module !== 'undefined') {
+		exports = module.exports = useful.Photomap;
+	}
+
+})();
