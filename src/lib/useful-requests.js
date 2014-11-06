@@ -40,8 +40,8 @@ var useful = useful || {};
 			else if (window.XMLHttpRequest) {
 				// create the request object
 				serverRequest = new XMLHttpRequest();
-				// set the optional timeout
-				serverRequest.timeout = properties.timeout || 0;
+				// set the optional timeout if available
+				if (serverRequest.timeout) { serverRequest.timeout = properties.timeout || 0; }
 				// add the event handler(s)
 				serverRequest.ontimeout = function () { properties.onTimeout(serverRequest, properties); };
 				serverRequest.onreadystatechange = function () { _this.update(serverRequest, properties); };

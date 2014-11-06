@@ -85,14 +85,26 @@
 					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
 				</style>
 				<ul id="testImages">
-					<li><a href="./inc/small/P6098685P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098685P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098815P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098815P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098876P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098876P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098922P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098922P.jpg"/></a></li>
-					<li><a href="./inc/small/P6098939P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6098939P.jpg"/></a></li>
-					<li><a href="./inc/small/P6099010P.jpg" title="Dolor Sit Amet" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6099010P.jpg"/></a></li>
-					<li><a href="./inc/small/P6099096P.jpg" title="Lorem Ipsum" onclick="combiPhotomap.indicate(this); return false;"><img alt="" src="./inc/small/P6099096P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098685P.jpg" title="Lorem Ipsum"><img alt="" src="./inc/small/P6098685P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098815P.jpg" title="Dolor Sit Amet"><img alt="" src="./inc/small/P6098815P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098876P.jpg" title="Lorem Ipsum"><img alt="" src="./inc/small/P6098876P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098922P.jpg" title="Dolor Sit Amet"><img alt="" src="./inc/small/P6098922P.jpg"/></a></li>
+					<li><a href="./inc/small/P6098939P.jpg" title="Lorem Ipsum"><img alt="" src="./inc/small/P6098939P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099010P.jpg" title="Dolor Sit Amet"><img alt="" src="./inc/small/P6099010P.jpg"/></a></li>
+					<li><a href="./inc/small/P6099096P.jpg" title="Lorem Ipsum"><img alt="" src="./inc/small/P6099096P.jpg"/></a></li>
 				</ul>
+				<script>
+					var a, b, links = document.querySelectorAll('#testImages a'),
+						indicate = function (element) {
+							return function (evt) {
+								evt.preventDefault();
+								combiPhotomap.indicate(element);
+							}
+						};
+					for (a = 0, b = links.length; a < b; a += 1) {
+						links[a].addEventListener('click', indicate(links[a]));
+					}
+				</script>
 			</article>
 		</section>
 	</body>
