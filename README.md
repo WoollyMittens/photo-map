@@ -29,7 +29,7 @@ To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5
 ## How to start the script
 
 ```javascript
-var photomap = new useful.Photomap( document.getElementById('id'), {
+var photomap = new useful.Photomap().init( document.getElementById('id'), {
 	'duration' : document.getElementById('duration'),
 	//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 	//'tiles' : 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
@@ -63,8 +63,6 @@ var photomap = new useful.Photomap( document.getElementById('id'), {
 	}
 });
 ```
-
-This is the safest way of starting the script, but allows for only one target element at a time.
 
 **id : {string}** - The ID attribute of an element somewhere in the document.
 

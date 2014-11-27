@@ -3,1460 +3,2889 @@
  (c) 2010-2014 Vladimir Agafonkin, (c) 2010-2011 CloudMade
 */
 (function (window, document, undefined) {
+
 var L = {
+
 	version: '0.8-dev'
+
 };
 
+
+
 function expose() {
+
 	var oldL = window.L;
 
+
+
 	L.noConflict = function () {
+
 		window.L = oldL;
+
 		return this;
+
 	};
 
+
+
 	window.L = L;
+
 }
+
+
 
 // define Leaflet for Node module pattern loaders, including Browserify
+
 if (typeof module === 'object' && typeof module.exports === 'object') {
+
 	module.exports = L;
 
+
+
 // define Leaflet as an AMD module
+
 } else if (typeof define === 'function' && define.amd) {
+
 	define(L);
 
+
+
 // define Leaflet as a global L variable, saving the original L to restore later if needed
+
 } else {
+
 	expose();
+
 }
+
 
 
 /*
+
  * L.Util contains various utility functions used throughout Leaflet code.
+
  */
 
+
+
 L.Util = {
+
 	// extend an object with properties of one or more other objects
+
 	extend: function (dest) {
+
 		var sources = Array.prototype.slice.call(arguments, 1),
+
 		    i, j, len, src;
 
+
+
 		for (j = 0, len = sources.length; j < len; j++) {
+
 			src = sources[j];
+
 			for (i in src) {
+
 				dest[i] = src[i];
+
 			}
+
 		}
+
 		return dest;
+
 	},
 
+
+
 	// create an object from a given prototype
+
 	create: Object.create || (function () {
+
 		function F() {}
+
 		return function (proto) {
+
 			F.prototype = proto;
+
 			return new F();
+
 		};
+
 	})(),
 
+
+
 	// bind a function to be called with a given context
+
 	bind: function (fn, obj) {
+
 		var slice = Array.prototype.slice;
 
+
+
 		if (fn.bind) {
+
 			return fn.bind.apply(fn, slice.call(arguments, 1));
+
 		}
+
+
 
 		var args = slice.call(arguments, 2);
 
+
+
 		return function () {
+
 			return fn.apply(obj, args.length ? args.concat(slice.call(arguments)) : arguments);
+
 		};
+
 	},
 
+
+
 	// return unique ID of an object
+
 	stamp: function (obj) {
+
 		// jshint camelcase: false
+
 		obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
+
 		return obj._leaflet_id;
+
 	},
+
+
 
 	lastId: 0,
 
+
+
 	// return a function that won't be called more often than the given interval
+
 	throttle: function (fn, time, context) {
+
 		var lock, args, wrapperFn, later;
 
+
+
 		later = function () {
+
 			// reset lock and call if queued
+
 			lock = false;
+
 			if (args) {
+
 				wrapperFn.apply(context, args);
+
 				args = false;
+
 			}
+
 		};
+
+
 
 		wrapperFn = function () {
+
 			if (lock) {
+
 				// called too soon, queue to call later
+
 				args = arguments;
 
+
+
 			} else {
+
 				// call and lock until later
+
 				fn.apply(context, arguments);
+
 				setTimeout(later, time);
+
 				lock = true;
+
 			}
+
 		};
 
+
+
 		return wrapperFn;
+
 	},
+
+
 
 	// wrap the given number to lie within a certain range (used for wrapping longitude)
+
 	wrapNum: function (x, range, includeMax) {
+
 		var max = range[1],
+
 		    min = range[0],
+
 		    d = max - min;
+
 		return x === max && includeMax ? x : ((x - min) % d + d) % d + min;
+
 	},
+
+
 
 	// do nothing (used as a noop throughout the code)
+
 	falseFn: function () { return false; },
 
+
+
 	// round a given number to a given precision
+
 	formatNum: function (num, digits) {
+
 		var pow = Math.pow(10, digits || 5);
+
 		return Math.round(num * pow) / pow;
+
 	},
+
+
 
 	// trim whitespace from both sides of a string
+
 	trim: function (str) {
+
 		return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+
 	},
+
+
 
 	// split a string into words
+
 	splitWords: function (str) {
+
 		return L.Util.trim(str).split(/\s+/);
+
 	},
+
+
 
 	// set options to an object, inheriting parent's options as well
+
 	setOptions: function (obj, options) {
+
 		if (!obj.hasOwnProperty('options')) {
+
 			obj.options = obj.options ? L.Util.create(obj.options) : {};
+
 		}
+
 		for (var i in options) {
+
 			obj.options[i] = options[i];
+
 		}
+
 		return obj.options;
+
 	},
+
+
 
 	// make an URL with GET parameters out of a set of properties/values
+
 	getParamString: function (obj, existingUrl, uppercase) {
+
 		var params = [];
+
 		for (var i in obj) {
+
 			params.push(encodeURIComponent(uppercase ? i.toUpperCase() : i) + '=' + encodeURIComponent(obj[i]));
+
 		}
+
 		return ((!existingUrl || existingUrl.indexOf('?') === -1) ? '?' : '&') + params.join('&');
+
 	},
+
+
 
 	// super-simple templating facility, used for TileLayer URLs
+
 	template: function (str, data) {
+
 		return str.replace(L.Util.templateRe, function (str, key) {
+
 			var value = data[key];
 
+
+
 			if (value === undefined) {
+
 				throw new Error('No value provided for variable ' + str);
 
+
+
 			} else if (typeof value === 'function') {
+
 				value = value(data);
+
 			}
+
 			return value;
+
 		});
+
 	},
+
+
 
 	templateRe: /\{ *([\w_]+) *\}/g,
 
+
+
 	isArray: Array.isArray || function (obj) {
+
 		return (Object.prototype.toString.call(obj) === '[object Array]');
+
 	},
 
+
+
 	// minimal image URI, set to an image when disposing to flush memory
+
 	emptyImageUrl: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+
 };
 
+
+
 (function () {
+
 	// inspired by http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 
+
+
 	function getPrefixed(name) {
+
 		return window['webkit' + name] || window['moz' + name] || window['ms' + name];
+
 	}
+
+
 
 	var lastTime = 0;
 
+
+
 	// fallback for IE 7-8
+
 	function timeoutDefer(fn) {
+
 		var time = +new Date(),
+
 		    timeToCall = Math.max(0, 16 - (time - lastTime));
 
+
+
 		lastTime = time + timeToCall;
+
 		return window.setTimeout(fn, timeToCall);
+
 	}
 
+
+
 	var requestFn = window.requestAnimationFrame || getPrefixed('RequestAnimationFrame') || timeoutDefer,
+
 	    cancelFn = window.cancelAnimationFrame || getPrefixed('CancelAnimationFrame') ||
+
 	               getPrefixed('CancelRequestAnimationFrame') || function (id) { window.clearTimeout(id); };
 
 
+
+
+
 	L.Util.requestAnimFrame = function (fn, context, immediate, element) {
+
 		if (immediate && requestFn === timeoutDefer) {
+
 			fn.call(context);
+
 		} else {
+
 			return requestFn.call(window, L.bind(fn, context), element);
+
 		}
+
 	};
+
+
 
 	L.Util.cancelAnimFrame = function (id) {
+
 		if (id) {
+
 			cancelFn.call(window, id);
+
 		}
+
 	};
+
 })();
 
+
+
 // shortcuts for most used utility functions
+
 L.extend = L.Util.extend;
+
 L.bind = L.Util.bind;
+
 L.stamp = L.Util.stamp;
+
 L.setOptions = L.Util.setOptions;
 
 
+
 /*
+
  * L.Class powers the OOP facilities of the library.
+
  * Thanks to John Resig and Dean Edwards for inspiration!
+
  */
+
+
 
 L.Class = function () {};
 
+
+
 L.Class.extend = function (props) {
 
+
+
 	// extended class with the new prototype
+
 	var NewClass = function () {
 
+
+
 		// call the constructor
+
 		if (this.initialize) {
+
 			this.initialize.apply(this, arguments);
+
 		}
+
+
 
 		// call all constructor hooks
+
 		if (this._initHooks.length) {
+
 			this.callInitHooks();
+
 		}
+
 	};
 
+
+
 	// jshint camelcase: false
+
 	var parentProto = NewClass.__super__ = this.prototype;
 
+
+
 	var proto = L.Util.create(parentProto);
+
 	proto.constructor = NewClass;
+
+
 
 	NewClass.prototype = proto;
 
+
+
 	//inherit parent's statics
+
 	for (var i in this) {
+
 		if (this.hasOwnProperty(i) && i !== 'prototype') {
+
 			NewClass[i] = this[i];
+
 		}
+
 	}
+
+
 
 	// mix static properties into the class
+
 	if (props.statics) {
+
 		L.extend(NewClass, props.statics);
+
 		delete props.statics;
+
 	}
+
+
 
 	// mix includes into the prototype
+
 	if (props.includes) {
+
 		L.Util.extend.apply(null, [proto].concat(props.includes));
+
 		delete props.includes;
+
 	}
+
+
 
 	// merge options
+
 	if (proto.options) {
+
 		props.options = L.Util.extend(L.Util.create(proto.options), props.options);
+
 	}
 
+
+
 	// mix given properties into the prototype
+
 	L.extend(proto, props);
+
+
 
 	proto._initHooks = [];
 
+
+
 	// add method for calling all hooks
+
 	proto.callInitHooks = function () {
+
+
 
 		if (this._initHooksCalled) { return; }
 
+
+
 		if (parentProto.callInitHooks) {
+
 			parentProto.callInitHooks.call(this);
+
 		}
+
+
 
 		this._initHooksCalled = true;
 
+
+
 		for (var i = 0, len = proto._initHooks.length; i < len; i++) {
+
 			proto._initHooks[i].call(this);
+
 		}
+
 	};
 
+
+
 	return NewClass;
+
 };
+
+
+
 
 
 // method for adding properties to prototype
+
 L.Class.include = function (props) {
+
 	L.extend(this.prototype, props);
+
 };
+
+
 
 // merge new default options to the Class
+
 L.Class.mergeOptions = function (options) {
+
 	L.extend(this.prototype.options, options);
+
 };
+
+
 
 // add a constructor hook
+
 L.Class.addInitHook = function (fn) { // (Function) || (String, args...)
+
 	var args = Array.prototype.slice.call(arguments, 1);
 
+
+
 	var init = typeof fn === 'function' ? fn : function () {
+
 		this[fn].apply(this, args);
+
 	};
 
+
+
 	this.prototype._initHooks = this.prototype._initHooks || [];
+
 	this.prototype._initHooks.push(init);
+
 };
+
 
 
 /*
+
  * L.Evented is a base class that Leaflet classes inherit from to handle custom events.
+
  */
+
+
 
 L.Evented = L.Class.extend({
 
+
+
 	on: function (types, fn, context) {
 
+
+
 		// types can be a map of types/handlers
+
 		if (typeof types === 'object') {
+
 			for (var type in types) {
+
 				// we don't process space-separated events here for performance;
+
 				// it's a hot path since Layer uses the on(obj) syntax
+
 				this._on(type, types[type], fn);
+
 			}
+
+
 
 		} else {
+
 			// types can be a string of space-separated words
+
 			types = L.Util.splitWords(types);
 
+
+
 			for (var i = 0, len = types.length; i < len; i++) {
+
 				this._on(types[i], fn, context);
+
 			}
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	off: function (types, fn, context) {
 
+
+
 		if (!types) {
+
 			// clear all listeners if called without arguments
+
 			delete this._events;
 
+
+
 		} else if (typeof types === 'object') {
+
 			for (var type in types) {
+
 				this._off(type, types[type], fn);
+
 			}
 
+
+
 		} else {
+
 			types = L.Util.splitWords(types);
 
+
+
 			for (var i = 0, len = types.length; i < len; i++) {
+
 				this._off(types[i], fn, context);
+
 			}
+
 		}
+
+
 
 		return this;
+
 	},
+
+
 
 	// attach listener (without syntactic sugar now)
+
 	_on: function (type, fn, context) {
 
+
+
 		var events = this._events = this._events || {},
+
 		    contextId = context && context !== this && L.stamp(context);
 
+
+
 		if (contextId) {
+
 			// store listeners with custom context in a separate hash (if it has an id);
+
 			// gives a major performance boost when firing and removing events (e.g. on map object)
 
+
+
 			var indexKey = type + '_idx',
+
 			    indexLenKey = type + '_len',
+
 			    typeIndex = events[indexKey] = events[indexKey] || {},
+
 			    id = L.stamp(fn) + '_' + contextId;
 
+
+
 			if (!typeIndex[id]) {
+
 				typeIndex[id] = {fn: fn, ctx: context};
 
+
+
 				// keep track of the number of keys in the index to quickly check if it's empty
+
 				events[indexLenKey] = (events[indexLenKey] || 0) + 1;
+
 			}
 
+
+
 		} else {
+
 			// individual layers mostly use "this" for context and don't fire listeners too often
+
 			// so simple array makes the memory footprint better while not degrading performance
 
+
+
 			events[type] = events[type] || [];
+
 			events[type].push({fn: fn});
+
 		}
+
 	},
 
+
+
 	_off: function (type, fn, context) {
+
 		var events = this._events,
+
 		    indexKey = type + '_idx',
+
 		    indexLenKey = type + '_len';
+
+
 
 		if (!events) { return; }
 
+
+
 		if (!fn) {
+
 			// clear all listeners for a type if function isn't specified
+
 			delete events[type];
+
 			delete events[indexKey];
+
 			delete events[indexLenKey];
+
 			return;
+
 		}
+
+
 
 		var contextId = context && context !== this && L.stamp(context),
+
 		    listeners, i, len, listener, id;
 
+
+
 		if (contextId) {
+
 			id = L.stamp(fn) + '_' + contextId;
+
 			listeners = events[indexKey];
 
+
+
 			if (listeners && listeners[id]) {
+
 				listener = listeners[id];
+
 				delete listeners[id];
+
 				events[indexLenKey]--;
+
 			}
+
+
 
 		} else {
+
 			listeners = events[type];
 
+
+
 			if (listeners) {
+
 				for (i = 0, len = listeners.length; i < len; i++) {
+
 					if (listeners[i].fn === fn) {
+
 						listener = listeners[i];
+
 						listeners.splice(i, 1);
+
 						break;
+
 					}
+
 				}
+
 			}
+
 		}
+
+
 
 		// set the removed listener to noop so that's not called if remove happens in fire
+
 		if (listener) {
+
 			listener.fn = L.Util.falseFn;
+
 		}
+
 	},
+
+
 
 	fire: function (type, data, propagate) {
+
 		if (!this.listens(type, propagate)) { return this; }
 
+
+
 		var event = L.Util.extend({}, data, {type: type, target: this}),
+
 		    events = this._events;
 
+
+
 		if (events) {
+
 		    var typeIndex = events[type + '_idx'],
+
 		        i, len, listeners, id;
 
+
+
 			if (events[type]) {
+
 				// make sure adding/removing listeners inside other listeners won't cause infinite loop
+
 				listeners = events[type].slice();
 
+
+
 				for (i = 0, len = listeners.length; i < len; i++) {
+
 					listeners[i].fn.call(this, event);
+
 				}
+
 			}
+
+
 
 			// fire event for the context-indexed listeners as well
+
 			for (id in typeIndex) {
+
 				typeIndex[id].fn.call(typeIndex[id].ctx, event);
+
 			}
+
 		}
+
+
 
 		if (propagate) {
+
 			// propagate the event to parents (set with addEventParent)
+
 			this._propagateEvent(event);
+
 		}
 
+
+
 		return this;
+
 	},
 
+
+
 	listens: function (type, propagate) {
+
 		var events = this._events;
+
+
 
 		if (events && (events[type] || events[type + '_len'])) { return true; }
 
+
+
 		if (propagate) {
+
 			// also check parents for listeners if event propagates
+
 			for (var id in this._eventParents) {
+
 				if (this._eventParents[id].listens(type, propagate)) { return true; }
+
 			}
+
 		}
+
 		return false;
+
 	},
+
+
 
 	once: function (types, fn, context) {
 
+
+
 		if (typeof types === 'object') {
+
 			for (var type in types) {
+
 				this.once(type, types[type], fn);
+
 			}
+
 			return this;
+
 		}
+
+
 
 		var handler = L.bind(function () {
+
 			this
+
 			    .off(types, fn, context)
+
 			    .off(types, handler, context);
+
 		}, this);
 
+
+
 		// add a listener that's executed once and removed after that
+
 		return this
+
 		    .on(types, fn, context)
+
 		    .on(types, handler, context);
+
 	},
+
+
 
 	// adds a parent to propagate events to (when you fire with true as a 3rd argument)
+
 	addEventParent: function (obj) {
+
 		this._eventParents = this._eventParents || {};
+
 		this._eventParents[L.stamp(obj)] = obj;
+
 		return this;
+
 	},
+
+
 
 	removeEventParent: function (obj) {
+
 		if (this._eventParents) {
+
 			delete this._eventParents[L.stamp(obj)];
+
 		}
+
 		return this;
+
 	},
 
+
+
 	_propagateEvent: function (e) {
+
 		for (var id in this._eventParents) {
+
 			this._eventParents[id].fire(e.type, L.extend({layer: e.target}, e), true);
+
 		}
+
 	}
+
 });
+
+
 
 var proto = L.Evented.prototype;
 
+
+
 // aliases; we should ditch those eventually
+
 proto.addEventListener = proto.on;
+
 proto.removeEventListener = proto.clearAllEventListeners = proto.off;
+
 proto.addOneTimeEventListener = proto.once;
+
 proto.fireEvent = proto.fire;
+
 proto.hasEventListeners = proto.listens;
+
+
 
 L.Mixin = {Events: proto};
 
 
+
 /*
+
  * L.Browser handles different browser and feature detections for internal Leaflet use.
+
  */
+
+
 
 (function () {
 
+
+
 	var ua = navigator.userAgent.toLowerCase(),
+
 	    doc = document.documentElement,
+
+
 
 	    ie = 'ActiveXObject' in window,
 
+
+
 	    webkit    = ua.indexOf('webkit') !== -1,
+
 	    phantomjs = ua.indexOf('phantom') !== -1,
+
 	    android23 = ua.search('android [23]') !== -1,
+
 	    chrome    = ua.indexOf('chrome') !== -1,
 
+
+
 	    mobile = typeof orientation !== 'undefined',
+
 	    msPointer = navigator.msPointerEnabled && navigator.msMaxTouchPoints && !window.PointerEvent,
+
 	    pointer = (window.PointerEvent && navigator.pointerEnabled && navigator.maxTouchPoints) || msPointer,
 
+
+
 	    ie3d = ie && ('transition' in doc.style),
+
 	    webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !android23,
+
 	    gecko3d = 'MozPerspective' in doc.style,
+
 	    opera3d = 'OTransition' in doc.style;
+
+
+
 
 
 	var retina = 'devicePixelRatio' in window && window.devicePixelRatio > 1;
 
+
+
 	if (!retina && 'matchMedia' in window) {
+
 		var matches = window.matchMedia('(min-resolution:144dpi)');
+
 		retina = matches && matches.matches;
+
 	}
 
+
+
 	var touch = !window.L_NO_TOUCH && !phantomjs && (pointer || 'ontouchstart' in window ||
+
 			(window.DocumentTouch && document instanceof window.DocumentTouch));
 
+
+
 	L.Browser = {
+
 		ie: ie,
+
 		ielt9: ie && !document.addEventListener,
+
 		webkit: webkit,
+
 		gecko: (ua.indexOf('gecko') !== -1) && !webkit && !window.opera && !ie,
+
 		android: ua.indexOf('android') !== -1,
+
 		android23: android23,
+
 		chrome: chrome,
+
 		safari: !chrome && ua.indexOf('safari') !== -1,
 
+
+
 		ie3d: ie3d,
+
 		webkit3d: webkit3d,
+
 		gecko3d: gecko3d,
+
 		opera3d: opera3d,
+
 		any3d: !window.L_DISABLE_3D && (ie3d || webkit3d || gecko3d || opera3d) && !phantomjs,
 
+
+
 		mobile: mobile,
+
 		mobileWebkit: mobile && webkit,
+
 		mobileWebkit3d: mobile && webkit3d,
+
 		mobileOpera: mobile && window.opera,
 
+
+
 		touch: !!touch,
+
 		msPointer: !!msPointer,
+
 		pointer: !!pointer,
 
+
+
 		retina: !!retina
+
 	};
+
+
 
 }());
 
 
+
 /*
+
  * L.Point represents a point with x and y coordinates.
+
  */
 
+
+
 L.Point = function (/*Number*/ x, /*Number*/ y, /*Boolean*/ round) {
+
 	this.x = (round ? Math.round(x) : x);
+
 	this.y = (round ? Math.round(y) : y);
+
 };
+
+
 
 L.Point.prototype = {
 
+
+
 	clone: function () {
+
 		return new L.Point(this.x, this.y);
+
 	},
+
+
 
 	// non-destructive, returns a new point
+
 	add: function (point) {
+
 		return this.clone()._add(L.point(point));
+
 	},
+
+
 
 	// destructive, used directly for performance in situations where it's safe to modify existing point
+
 	_add: function (point) {
+
 		this.x += point.x;
+
 		this.y += point.y;
+
 		return this;
+
 	},
+
+
 
 	subtract: function (point) {
+
 		return this.clone()._subtract(L.point(point));
+
 	},
+
+
 
 	_subtract: function (point) {
+
 		this.x -= point.x;
+
 		this.y -= point.y;
+
 		return this;
+
 	},
+
+
 
 	divideBy: function (num) {
+
 		return this.clone()._divideBy(num);
+
 	},
+
+
 
 	_divideBy: function (num) {
+
 		this.x /= num;
+
 		this.y /= num;
+
 		return this;
+
 	},
+
+
 
 	multiplyBy: function (num) {
+
 		return this.clone()._multiplyBy(num);
+
 	},
+
+
 
 	_multiplyBy: function (num) {
+
 		this.x *= num;
+
 		this.y *= num;
+
 		return this;
+
 	},
+
+
 
 	round: function () {
+
 		return this.clone()._round();
+
 	},
+
+
 
 	_round: function () {
+
 		this.x = Math.round(this.x);
+
 		this.y = Math.round(this.y);
+
 		return this;
+
 	},
+
+
 
 	floor: function () {
+
 		return this.clone()._floor();
+
 	},
+
+
 
 	_floor: function () {
+
 		this.x = Math.floor(this.x);
+
 		this.y = Math.floor(this.y);
+
 		return this;
+
 	},
+
+
 
 	ceil: function () {
+
 		return this.clone()._ceil();
+
 	},
+
+
 
 	_ceil: function () {
+
 		this.x = Math.ceil(this.x);
+
 		this.y = Math.ceil(this.y);
+
 		return this;
+
 	},
+
+
 
 	distanceTo: function (point) {
+
 		point = L.point(point);
+
+
 
 		var x = point.x - this.x,
+
 		    y = point.y - this.y;
 
+
+
 		return Math.sqrt(x * x + y * y);
+
 	},
+
+
 
 	equals: function (point) {
+
 		point = L.point(point);
+
+
 
 		return point.x === this.x &&
+
 		       point.y === this.y;
+
 	},
+
+
 
 	contains: function (point) {
+
 		point = L.point(point);
 
+
+
 		return Math.abs(point.x) <= Math.abs(this.x) &&
+
 		       Math.abs(point.y) <= Math.abs(this.y);
+
 	},
 
+
+
 	toString: function () {
+
 		return 'Point(' +
+
 		        L.Util.formatNum(this.x) + ', ' +
+
 		        L.Util.formatNum(this.y) + ')';
+
 	}
+
 };
 
+
+
 L.point = function (x, y, round) {
+
 	if (x instanceof L.Point) {
+
 		return x;
+
 	}
+
 	if (L.Util.isArray(x)) {
+
 		return new L.Point(x[0], x[1]);
+
 	}
+
 	if (x === undefined || x === null) {
+
 		return x;
+
 	}
+
 	return new L.Point(x, y, round);
+
 };
+
 
 
 /*
+
  * L.Bounds represents a rectangular area on the screen in pixel coordinates.
+
  */
 
+
+
 L.Bounds = function (a, b) { //(Point, Point) or Point[]
+
 	if (!a) { return; }
+
+
 
 	var points = b ? [a, b] : a;
 
+
+
 	for (var i = 0, len = points.length; i < len; i++) {
+
 		this.extend(points[i]);
+
 	}
+
 };
+
+
 
 L.Bounds.prototype = {
+
 	// extend the bounds to contain the given point
+
 	extend: function (point) { // (Point)
+
 		point = L.point(point);
 
+
+
 		if (!this.min && !this.max) {
+
 			this.min = point.clone();
+
 			this.max = point.clone();
+
 		} else {
+
 			this.min.x = Math.min(point.x, this.min.x);
+
 			this.max.x = Math.max(point.x, this.max.x);
+
 			this.min.y = Math.min(point.y, this.min.y);
+
 			this.max.y = Math.max(point.y, this.max.y);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	getCenter: function (round) { // (Boolean) -> Point
+
 		return new L.Point(
+
 		        (this.min.x + this.max.x) / 2,
+
 		        (this.min.y + this.max.y) / 2, round);
+
 	},
+
+
 
 	getBottomLeft: function () { // -> Point
+
 		return new L.Point(this.min.x, this.max.y);
+
 	},
+
+
 
 	getTopRight: function () { // -> Point
+
 		return new L.Point(this.max.x, this.min.y);
+
 	},
+
+
 
 	getSize: function () {
+
 		return this.max.subtract(this.min);
+
 	},
+
+
 
 	contains: function (obj) { // (Bounds) or (Point) -> Boolean
+
 		var min, max;
 
+
+
 		if (typeof obj[0] === 'number' || obj instanceof L.Point) {
+
 			obj = L.point(obj);
+
 		} else {
+
 			obj = L.bounds(obj);
+
 		}
+
+
 
 		if (obj instanceof L.Bounds) {
+
 			min = obj.min;
+
 			max = obj.max;
+
 		} else {
+
 			min = max = obj;
+
 		}
 
+
+
 		return (min.x >= this.min.x) &&
+
 		       (max.x <= this.max.x) &&
+
 		       (min.y >= this.min.y) &&
+
 		       (max.y <= this.max.y);
+
 	},
+
+
 
 	intersects: function (bounds) { // (Bounds) -> Boolean
+
 		bounds = L.bounds(bounds);
 
+
+
 		var min = this.min,
+
 		    max = this.max,
+
 		    min2 = bounds.min,
+
 		    max2 = bounds.max,
+
 		    xIntersects = (max2.x >= min.x) && (min2.x <= max.x),
+
 		    yIntersects = (max2.y >= min.y) && (min2.y <= max.y);
 
+
+
 		return xIntersects && yIntersects;
+
 	},
+
+
 
 	isValid: function () {
+
 		return !!(this.min && this.max);
+
 	}
+
 };
+
+
 
 L.bounds = function (a, b) { // (Bounds) or (Point, Point) or (Point[])
+
 	if (!a || a instanceof L.Bounds) {
+
 		return a;
+
 	}
+
 	return new L.Bounds(a, b);
+
 };
 
 
+
 /*
+
  * L.Transformation is an utility class to perform simple point transformations through a 2d-matrix.
+
  */
+
+
 
 L.Transformation = function (a, b, c, d) {
+
 	this._a = a;
+
 	this._b = b;
+
 	this._c = c;
+
 	this._d = d;
+
 };
+
+
 
 L.Transformation.prototype = {
+
 	transform: function (point, scale) { // (Point, Number) -> Point
+
 		return this._transform(point.clone(), scale);
+
 	},
+
+
 
 	// destructive transform (faster)
+
 	_transform: function (point, scale) {
+
 		scale = scale || 1;
+
 		point.x = scale * (this._a * point.x + this._b);
+
 		point.y = scale * (this._c * point.y + this._d);
+
 		return point;
+
 	},
 
+
+
 	untransform: function (point, scale) {
+
 		scale = scale || 1;
+
 		return new L.Point(
+
 		        (point.x / scale - this._b) / this._a,
+
 		        (point.y / scale - this._d) / this._c);
+
 	}
+
 };
+
 
 
 /*
+
  * L.DomUtil contains various utility functions for working with DOM.
+
  */
 
+
+
 L.DomUtil = {
+
 	get: function (id) {
+
 		return typeof id === 'string' ? document.getElementById(id) : id;
+
 	},
+
+
 
 	getStyle: function (el, style) {
 
+
+
 		var value = el.style[style] || (el.currentStyle && el.currentStyle[style]);
 
+
+
 		if ((!value || value === 'auto') && document.defaultView) {
+
 			var css = document.defaultView.getComputedStyle(el, null);
+
 			value = css ? css[style] : null;
+
 		}
 
+
+
 		return value === 'auto' ? null : value;
+
 	},
+
+
 
 	create: function (tagName, className, container) {
 
+
+
 		var el = document.createElement(tagName);
+
 		el.className = className;
 
+
+
 		if (container) {
+
 			container.appendChild(el);
+
 		}
+
+
 
 		return el;
+
 	},
+
+
 
 	remove: function (el) {
+
 		var parent = el.parentNode;
+
 		if (parent) {
+
 			parent.removeChild(el);
+
 		}
+
 	},
+
+
 
 	toFront: function (el) {
+
 		el.parentNode.appendChild(el);
+
 	},
+
+
 
 	toBack: function (el) {
+
 		var parent = el.parentNode;
+
 		parent.insertBefore(el, parent.firstChild);
+
 	},
+
+
 
 	hasClass: function (el, name) {
+
 		if (el.classList !== undefined) {
+
 			return el.classList.contains(name);
+
 		}
+
 		var className = L.DomUtil.getClass(el);
+
 		return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
+
 	},
+
+
 
 	addClass: function (el, name) {
+
 		if (el.classList !== undefined) {
+
 			var classes = L.Util.splitWords(name);
+
 			for (var i = 0, len = classes.length; i < len; i++) {
+
 				el.classList.add(classes[i]);
+
 			}
+
 		} else if (!L.DomUtil.hasClass(el, name)) {
+
 			var className = L.DomUtil.getClass(el);
+
 			L.DomUtil.setClass(el, (className ? className + ' ' : '') + name);
+
 		}
+
 	},
+
+
 
 	removeClass: function (el, name) {
+
 		if (el.classList !== undefined) {
+
 			el.classList.remove(name);
+
 		} else {
+
 			L.DomUtil.setClass(el, L.Util.trim((' ' + L.DomUtil.getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
+
 		}
+
 	},
+
+
 
 	setClass: function (el, name) {
+
 		if (el.className.baseVal === undefined) {
+
 			el.className = name;
+
 		} else {
+
 			// in case of SVG element
+
 			el.className.baseVal = name;
+
 		}
+
 	},
 
+
+
 	getClass: function (el) {
+
 		return el.className.baseVal === undefined ? el.className : el.className.baseVal;
+
 	},
+
+
 
 	setOpacity: function (el, value) {
 
+
+
 		if ('opacity' in el.style) {
+
 			el.style.opacity = value;
+
+
 
 		} else if ('filter' in el.style) {
 
+
+
 			var filter = false,
+
 			    filterName = 'DXImageTransform.Microsoft.Alpha';
 
+
+
 			// filters collection throws an error if we try to retrieve a filter that doesn't exist
+
 			try {
+
 				filter = el.filters.item(filterName);
+
 			} catch (e) {
+
 				// don't set opacity to 1 if we haven't already set an opacity,
+
 				// it isn't needed and breaks transparent pngs.
+
 				if (value === 1) { return; }
+
 			}
+
+
 
 			value = Math.round(value * 100);
 
+
+
 			if (filter) {
+
 				filter.Enabled = (value !== 100);
+
 				filter.Opacity = value;
+
 			} else {
+
 				el.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
+
 			}
+
 		}
+
 	},
+
+
 
 	testProp: function (props) {
 
+
+
 		var style = document.documentElement.style;
 
+
+
 		for (var i = 0; i < props.length; i++) {
+
 			if (props[i] in style) {
+
 				return props[i];
+
 			}
+
 		}
+
 		return false;
+
 	},
+
+
 
 	setTransform: function (el, offset, scale) {
+
 		var pos = offset || new L.Point(0, 0);
 
+
+
 		el.style[L.DomUtil.TRANSFORM] =
+
 			'translate3d(' + pos.x + 'px,' + pos.y + 'px' + ',0)' + (scale ? ' scale(' + scale + ')' : '');
+
 	},
+
+
 
 	setPosition: function (el, point, no3d) { // (HTMLElement, Point[, Boolean])
 
+
+
 		// jshint camelcase: false
+
 		el._leaflet_pos = point;
 
+
+
 		if (L.Browser.any3d && !no3d) {
+
 			L.DomUtil.setTransform(el, point);
+
 		} else {
+
 			el.style.left = point.x + 'px';
+
 			el.style.top = point.y + 'px';
+
 		}
+
 	},
 
+
+
 	getPosition: function (el) {
+
 		// this method is only used for elements previously positioned using setPosition,
+
 		// so it's safe to cache the position for performance
 
+
+
 		// jshint camelcase: false
+
 		return el._leaflet_pos;
+
 	}
+
 };
+
+
+
 
 
 (function () {
+
 	// prefix style property names
 
+
+
 	L.DomUtil.TRANSFORM = L.DomUtil.testProp(
+
 			['transform', 'WebkitTransform', 'OTransform', 'MozTransform', 'msTransform']);
 
 
+
+
+
 	// webkitTransition comes first because some browser versions that drop vendor prefix don't do
+
 	// the same for the transitionend event, in particular the Android 4.1 stock browser
 
+
+
 	var transition = L.DomUtil.TRANSITION = L.DomUtil.testProp(
+
 			['webkitTransition', 'transition', 'OTransition', 'MozTransition', 'msTransition']);
 
+
+
 	L.DomUtil.TRANSITION_END =
+
 			transition === 'webkitTransition' || transition === 'OTransition' ? transition + 'End' : 'transitionend';
 
 
+
+
+
 	if ('onselectstart' in document) {
+
 		L.DomUtil.disableTextSelection = function () {
+
 			L.DomEvent.on(window, 'selectstart', L.DomEvent.preventDefault);
+
 		};
+
 		L.DomUtil.enableTextSelection = function () {
+
 			L.DomEvent.off(window, 'selectstart', L.DomEvent.preventDefault);
+
 		};
+
+
 
 	} else {
+
 		var userSelectProperty = L.DomUtil.testProp(
+
 			['userSelect', 'WebkitUserSelect', 'OUserSelect', 'MozUserSelect', 'msUserSelect']);
 
+
+
 		L.DomUtil.disableTextSelection = function () {
+
 			if (userSelectProperty) {
+
 				var style = document.documentElement.style;
+
 				this._userSelect = style[userSelectProperty];
+
 				style[userSelectProperty] = 'none';
+
 			}
+
 		};
+
 		L.DomUtil.enableTextSelection = function () {
+
 			if (userSelectProperty) {
+
 				document.documentElement.style[userSelectProperty] = this._userSelect;
+
 				delete this._userSelect;
+
 			}
+
 		};
+
 	}
 
+
+
 	L.DomUtil.disableImageDrag = function () {
+
 		L.DomEvent.on(window, 'dragstart', L.DomEvent.preventDefault);
+
 	};
+
 	L.DomUtil.enableImageDrag = function () {
+
 		L.DomEvent.off(window, 'dragstart', L.DomEvent.preventDefault);
+
 	};
+
 })();
 
 
+
 /*
+
  * L.LatLng represents a geographical point with latitude and longitude coordinates.
+
  */
 
+
+
 L.LatLng = function (lat, lng, alt) {
+
 	if (isNaN(lat) || isNaN(lng)) {
+
 		throw new Error('Invalid LatLng object: (' + lat + ', ' + lng + ')');
+
 	}
+
+
 
 	this.lat = +lat;
+
 	this.lng = +lng;
 
+
+
 	if (alt !== undefined) {
+
 		this.alt = +alt;
+
 	}
+
 };
 
+
+
 L.LatLng.prototype = {
+
 	equals: function (obj, maxMargin) {
+
 		if (!obj) { return false; }
+
+
 
 		obj = L.latLng(obj);
 
+
+
 		var margin = Math.max(
+
 		        Math.abs(this.lat - obj.lat),
+
 		        Math.abs(this.lng - obj.lng));
 
+
+
 		return margin <= (maxMargin === undefined ? 1.0E-9 : maxMargin);
+
 	},
+
+
 
 	toString: function (precision) {
+
 		return 'LatLng(' +
+
 		        L.Util.formatNum(this.lat, precision) + ', ' +
+
 		        L.Util.formatNum(this.lng, precision) + ')';
+
 	},
+
+
 
 	distanceTo: function (other) {
+
 		return L.CRS.Earth.distance(this, L.latLng(other));
+
 	},
 
+
+
 	wrap: function () {
+
 		return L.CRS.Earth.wrapLatLng(this);
+
 	}
+
 };
+
+
+
 
 
 // constructs LatLng with different signatures
+
 // (LatLng) or ([Number, Number]) or (Number, Number) or (Object)
 
+
+
 L.latLng = function (a, b) {
+
 	if (a instanceof L.LatLng) {
+
 		return a;
+
 	}
+
 	if (L.Util.isArray(a) && typeof a[0] !== 'object') {
+
 		if (a.length === 3) {
+
 			return new L.LatLng(a[0], a[1], a[2]);
+
 		}
+
 		return new L.LatLng(a[0], a[1]);
+
 	}
+
 	if (a === undefined || a === null) {
+
 		return a;
+
 	}
+
 	if (typeof a === 'object' && 'lat' in a) {
+
 		return new L.LatLng(a.lat, 'lng' in a ? a.lng : a.lon);
+
 	}
+
 	if (b === undefined) {
+
 		return null;
+
 	}
+
 	return new L.LatLng(a, b);
+
 };
 
 
 
+
+
 /*
+
  * L.LatLngBounds represents a rectangular area on the map in geographical coordinates.
+
  */
 
+
+
 L.LatLngBounds = function (southWest, northEast) { // (LatLng, LatLng) or (LatLng[])
+
 	if (!southWest) { return; }
+
+
 
 	var latlngs = northEast ? [southWest, northEast] : southWest;
 
+
+
 	for (var i = 0, len = latlngs.length; i < len; i++) {
+
 		this.extend(latlngs[i]);
+
 	}
+
 };
+
+
 
 L.LatLngBounds.prototype = {
 
+
+
 	// extend the bounds to contain the given point or bounds
+
 	extend: function (obj) { // (LatLng) or (LatLngBounds)
+
 		var sw = this._southWest,
+
 			ne = this._northEast,
+
 			sw2, ne2;
 
+
+
 		if (obj instanceof L.LatLng) {
+
 			sw2 = obj;
+
 			ne2 = obj;
 
+
+
 		} else if (obj instanceof L.LatLngBounds) {
+
 			sw2 = obj._southWest;
+
 			ne2 = obj._northEast;
+
+
 
 			if (!sw2 || !ne2) { return this; }
 
+
+
 		} else {
+
 			return obj ? this.extend(L.latLng(obj) || L.latLngBounds(obj)) : this;
+
 		}
+
+
 
 		if (!sw && !ne) {
+
 			this._southWest = new L.LatLng(sw2.lat, sw2.lng);
+
 			this._northEast = new L.LatLng(ne2.lat, ne2.lng);
+
 		} else {
+
 			sw.lat = Math.min(sw2.lat, sw.lat);
+
 			sw.lng = Math.min(sw2.lng, sw.lng);
+
 			ne.lat = Math.max(ne2.lat, ne.lat);
+
 			ne.lng = Math.max(ne2.lng, ne.lng);
+
 		}
+
+
 
 		return this;
+
 	},
+
+
 
 	// extend the bounds by a percentage
+
 	pad: function (bufferRatio) { // (Number) -> LatLngBounds
+
 		var sw = this._southWest,
+
 		    ne = this._northEast,
+
 		    heightBuffer = Math.abs(sw.lat - ne.lat) * bufferRatio,
+
 		    widthBuffer = Math.abs(sw.lng - ne.lng) * bufferRatio;
 
+
+
 		return new L.LatLngBounds(
+
 		        new L.LatLng(sw.lat - heightBuffer, sw.lng - widthBuffer),
+
 		        new L.LatLng(ne.lat + heightBuffer, ne.lng + widthBuffer));
+
 	},
+
+
 
 	getCenter: function () { // -> LatLng
+
 		return new L.LatLng(
+
 		        (this._southWest.lat + this._northEast.lat) / 2,
+
 		        (this._southWest.lng + this._northEast.lng) / 2);
+
 	},
+
+
 
 	getSouthWest: function () {
+
 		return this._southWest;
+
 	},
+
+
 
 	getNorthEast: function () {
+
 		return this._northEast;
+
 	},
+
+
 
 	getNorthWest: function () {
+
 		return new L.LatLng(this.getNorth(), this.getWest());
+
 	},
+
+
 
 	getSouthEast: function () {
+
 		return new L.LatLng(this.getSouth(), this.getEast());
+
 	},
+
+
 
 	getWest: function () {
+
 		return this._southWest.lng;
+
 	},
+
+
 
 	getSouth: function () {
+
 		return this._southWest.lat;
+
 	},
+
+
 
 	getEast: function () {
+
 		return this._northEast.lng;
+
 	},
+
+
 
 	getNorth: function () {
+
 		return this._northEast.lat;
+
 	},
+
+
 
 	contains: function (obj) { // (LatLngBounds) or (LatLng) -> Boolean
+
 		if (typeof obj[0] === 'number' || obj instanceof L.LatLng) {
+
 			obj = L.latLng(obj);
+
 		} else {
+
 			obj = L.latLngBounds(obj);
+
 		}
 
+
+
 		var sw = this._southWest,
+
 		    ne = this._northEast,
+
 		    sw2, ne2;
 
+
+
 		if (obj instanceof L.LatLngBounds) {
+
 			sw2 = obj.getSouthWest();
+
 			ne2 = obj.getNorthEast();
+
 		} else {
+
 			sw2 = ne2 = obj;
+
 		}
 
+
+
 		return (sw2.lat >= sw.lat) && (ne2.lat <= ne.lat) &&
+
 		       (sw2.lng >= sw.lng) && (ne2.lng <= ne.lng);
+
 	},
+
+
 
 	intersects: function (bounds) { // (LatLngBounds)
+
 		bounds = L.latLngBounds(bounds);
+
+
 
 		var sw = this._southWest,
+
 		    ne = this._northEast,
+
 		    sw2 = bounds.getSouthWest(),
+
 		    ne2 = bounds.getNorthEast(),
 
+
+
 		    latIntersects = (ne2.lat >= sw.lat) && (sw2.lat <= ne.lat),
+
 		    lngIntersects = (ne2.lng >= sw.lng) && (sw2.lng <= ne.lng);
 
+
+
 		return latIntersects && lngIntersects;
+
 	},
+
+
 
 	toBBoxString: function () {
+
 		return [this.getWest(), this.getSouth(), this.getEast(), this.getNorth()].join(',');
+
 	},
 
+
+
 	equals: function (bounds) { // (LatLngBounds)
+
 		if (!bounds) { return false; }
+
+
 
 		bounds = L.latLngBounds(bounds);
 
+
+
 		return this._southWest.equals(bounds.getSouthWest()) &&
+
 		       this._northEast.equals(bounds.getNorthEast());
+
 	},
 
+
+
 	isValid: function () {
+
 		return !!(this._southWest && this._northEast);
+
 	}
+
 };
+
+
 
 //TODO International date line?
 
+
+
 L.latLngBounds = function (a, b) { // (LatLngBounds) or (LatLng, LatLng)
+
 	if (!a || a instanceof L.LatLngBounds) {
+
 		return a;
+
 	}
+
 	return new L.LatLngBounds(a, b);
+
 };
 
 
+
 /*
+
  * Simple equirectangular (Plate Carree) projection, used by CRS like EPSG:4326 and Simple.
+
  */
+
+
 
 L.Projection = {};
 
+
+
 L.Projection.LonLat = {
+
 	project: function (latlng) {
+
 		return new L.Point(latlng.lng, latlng.lat);
+
 	},
+
+
 
 	unproject: function (point) {
+
 		return new L.LatLng(point.y, point.x);
+
 	},
 
+
+
 	bounds: L.bounds([-180, -90], [180, 90])
+
 };
 
 
+
 /*
+
  * Spherical Mercator is the most popular map projection, used by EPSG:3857 CRS used by default.
+
  */
+
+
 
 L.Projection.SphericalMercator = {
 
+
+
 	R: 6378137,
 
+
+
 	project: function (latlng) {
+
 		var d = Math.PI / 180,
+
 		    max = 1 - 1E-15,
+
 		    sin = Math.max(Math.min(Math.sin(latlng.lat * d), max), -max);
 
+
+
 		return new L.Point(
+
 				this.R * latlng.lng * d,
+
 				this.R * Math.log((1 + sin) / (1 - sin)) / 2);
+
 	},
+
+
 
 	unproject: function (point) {
+
 		var d = 180 / Math.PI;
 
+
+
 		return new L.LatLng(
+
 			(2 * Math.atan(Math.exp(point.y / this.R)) - (Math.PI / 2)) * d,
+
 			point.x * d / this.R);
+
 	},
 
+
+
 	bounds: (function () {
+
 		var d = 6378137 * Math.PI;
+
 		return L.bounds([-d, -d], [d, d]);
+
 	})()
+
 };
+
 
 
 /*
+
  * L.CRS is the base object for all defined CRS (Coordinate Reference Systems) in Leaflet.
+
  */
 
+
+
 L.CRS = {
+
 	// converts geo coords to pixel ones
+
 	latLngToPoint: function (latlng, zoom) {
+
 		var projectedPoint = this.projection.project(latlng),
+
 		    scale = this.scale(zoom);
 
+
+
 		return this.transformation._transform(projectedPoint, scale);
+
 	},
+
+
 
 	// converts pixel coords to geo coords
+
 	pointToLatLng: function (point, zoom) {
+
 		var scale = this.scale(zoom),
+
 		    untransformedPoint = this.transformation.untransform(point, scale);
 
+
+
 		return this.projection.unproject(untransformedPoint);
+
 	},
+
+
 
 	// converts geo coords to projection-specific coords (e.g. in meters)
+
 	project: function (latlng) {
+
 		return this.projection.project(latlng);
+
 	},
+
+
 
 	// converts projected coords to geo coords
+
 	unproject: function (point) {
+
 		return this.projection.unproject(point);
+
 	},
+
+
 
 	// defines how the world scales with zoom
+
 	scale: function (zoom) {
+
 		return 256 * Math.pow(2, zoom);
+
 	},
+
+
 
 	// returns the bounds of the world in projected coords if applicable
+
 	getProjectedBounds: function (zoom) {
+
 		if (this.infinite) { return null; }
 
+
+
 		var b = this.projection.bounds,
+
 		    s = this.scale(zoom),
+
 		    min = this.transformation.transform(b.min, s),
+
 		    max = this.transformation.transform(b.max, s);
 
+
+
 		return L.bounds(min, max);
+
 	},
 
+
+
 	// whether a coordinate axis wraps in a given range (e.g. longitude from -180 to 180); depends on CRS
+
 	// wrapLng: [min, max],
+
 	// wrapLat: [min, max],
 
+
+
 	// if true, the coordinate space will be unbounded (infinite in all directions)
+
 	// infinite: false,
 
+
+
 	// wraps geo coords in certain ranges if applicable
+
 	wrapLatLng: function (latlng) {
+
 		var lng = this.wrapLng ? L.Util.wrapNum(latlng.lng, this.wrapLng, true) : latlng.lng,
+
 		    lat = this.wrapLat ? L.Util.wrapNum(latlng.lat, this.wrapLat, true) : latlng.lat;
 
+
+
 		return L.latLng(lat, lng);
+
 	}
+
 };
+
 
 
 /*
@@ -1504,733 +2933,1457 @@ L.CRS.Earth = L.extend({}, L.CRS, {
 
 
 /*
+
  * L.CRS.EPSG3857 (Spherical Mercator) is the most common CRS for web mapping and is used by Leaflet by default.
+
  */
+
+
 
 L.CRS.EPSG3857 = L.extend({}, L.CRS.Earth, {
+
 	code: 'EPSG:3857',
+
 	projection: L.Projection.SphericalMercator,
 
+
+
 	transformation: (function () {
+
 		var scale = 0.5 / (Math.PI * L.Projection.SphericalMercator.R);
+
 		return new L.Transformation(scale, 0.5, -scale, 0.5);
+
 	}())
+
 });
+
+
 
 L.CRS.EPSG900913 = L.extend({}, L.CRS.EPSG3857, {
+
 	code: 'EPSG:900913'
+
 });
 
 
+
 /*
+
  * L.CRS.EPSG4326 is a CRS popular among advanced GIS specialists.
+
  */
+
+
 
 L.CRS.EPSG4326 = L.extend({}, L.CRS.Earth, {
+
 	code: 'EPSG:4326',
+
 	projection: L.Projection.LonLat,
+
 	transformation: new L.Transformation(1 / 180, 1, -1 / 180, 0.5)
+
 });
 
 
+
 /*
+
  * L.Map is the central class of the API - it is used to create a map.
+
  */
+
+
 
 L.Map = L.Evented.extend({
 
+
+
 	options: {
+
 		crs: L.CRS.EPSG3857,
 
+
+
 		/*
+
 		center: LatLng,
+
 		zoom: Number,
+
 		layers: Array,
+
 		*/
 
+
+
 		fadeAnimation: true,
+
 		trackResize: true,
+
 		markerZoomAnimation: true
+
 	},
 
+
+
 	initialize: function (id, options) { // (HTMLElement or String, Object)
+
 		options = L.setOptions(this, options);
 
+
+
 		this._initContainer(id);
+
 		this._initLayout();
 
+
+
 		// hack for https://github.com/Leaflet/Leaflet/issues/1980
+
 		this._onResize = L.bind(this._onResize, this);
+
+
 
 		this._initEvents();
 
+
+
 		if (options.maxBounds) {
+
 			this.setMaxBounds(options.maxBounds);
+
 		}
+
+
 
 		if (options.center && options.zoom !== undefined) {
+
 			this.setView(L.latLng(options.center), options.zoom, {reset: true});
+
 		}
 
+
+
 		this._handlers = [];
+
 		this._layers = {};
+
 		this._zoomBoundLayers = {};
+
+
 
 		this.callInitHooks();
 
+
+
 		this._addLayers(this.options.layers);
+
 	},
+
+
+
 
 
 	// public methods that modify map state
 
+
+
 	// replaced by animation-powered implementation in Map.PanAnimation.js
+
 	setView: function (center, zoom) {
+
 		zoom = zoom === undefined ? this.getZoom() : zoom;
+
 		this._resetView(L.latLng(center), this._limitZoom(zoom));
+
 		return this;
+
 	},
+
+
 
 	setZoom: function (zoom, options) {
+
 		if (!this._loaded) {
+
 			this._zoom = this._limitZoom(zoom);
+
 			return this;
+
 		}
+
 		return this.setView(this.getCenter(), zoom, {zoom: options});
+
 	},
+
+
 
 	zoomIn: function (delta, options) {
+
 		return this.setZoom(this._zoom + (delta || 1), options);
+
 	},
+
+
 
 	zoomOut: function (delta, options) {
+
 		return this.setZoom(this._zoom - (delta || 1), options);
+
 	},
+
+
 
 	setZoomAround: function (latlng, zoom, options) {
+
 		var scale = this.getZoomScale(zoom),
+
 		    viewHalf = this.getSize().divideBy(2),
+
 		    containerPoint = latlng instanceof L.Point ? latlng : this.latLngToContainerPoint(latlng),
 
+
+
 		    centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale),
+
 		    newCenter = this.containerPointToLatLng(viewHalf.add(centerOffset));
 
+
+
 		return this.setView(newCenter, zoom, {zoom: options});
+
 	},
+
+
 
 	fitBounds: function (bounds, options) {
 
+
+
 		options = options || {};
+
 		bounds = bounds.getBounds ? bounds.getBounds() : L.latLngBounds(bounds);
 
+
+
 		var paddingTL = L.point(options.paddingTopLeft || options.padding || [0, 0]),
+
 		    paddingBR = L.point(options.paddingBottomRight || options.padding || [0, 0]),
+
+
 
 		    zoom = this.getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
 
+
+
 		zoom = options.maxZoom ? Math.min(options.maxZoom, zoom) : zoom;
+
+
 
 		var paddingOffset = paddingBR.subtract(paddingTL).divideBy(2),
 
+
+
 		    swPoint = this.project(bounds.getSouthWest(), zoom),
+
 		    nePoint = this.project(bounds.getNorthEast(), zoom),
+
 		    center = this.unproject(swPoint.add(nePoint).divideBy(2).add(paddingOffset), zoom);
 
+
+
 		return this.setView(center, zoom, options);
+
 	},
+
+
 
 	fitWorld: function (options) {
+
 		return this.fitBounds([[-90, -180], [90, 180]], options);
+
 	},
+
+
 
 	panTo: function (center, options) { // (LatLng)
+
 		return this.setView(center, this._zoom, {pan: options});
+
 	},
 
+
+
 	panBy: function (offset) { // (Point)
+
 		// replaced with animated panBy in Map.PanAnimation.js
+
 		this.fire('movestart');
+
+
 
 		this._rawPanBy(L.point(offset));
 
+
+
 		this.fire('move');
+
 		return this.fire('moveend');
+
 	},
 
+
+
 	setMaxBounds: function (bounds) {
+
 		bounds = L.latLngBounds(bounds);
+
+
 
 		this.options.maxBounds = bounds;
 
+
+
 		if (!bounds) {
+
 			return this.off('moveend', this._panInsideMaxBounds);
+
 		}
+
+
 
 		if (this._loaded) {
+
 			this._panInsideMaxBounds();
+
 		}
 
+
+
 		return this.on('moveend', this._panInsideMaxBounds);
+
 	},
 
+
+
 	panInsideBounds: function (bounds, options) {
+
 		var center = this.getCenter(),
+
 			newCenter = this._limitCenter(center, this._zoom, bounds);
+
+
 
 		if (center.equals(newCenter)) { return this; }
 
+
+
 		return this.panTo(newCenter, options);
+
 	},
 
+
+
 	invalidateSize: function (options) {
+
 		if (!this._loaded) { return this; }
 
+
+
 		options = L.extend({
+
 			animate: false,
+
 			pan: true
+
 		}, options === true ? {animate: true} : options);
 
+
+
 		var oldSize = this.getSize();
+
 		this._sizeChanged = true;
+
 		this._initialCenter = null;
 
+
+
 		var newSize = this.getSize(),
+
 		    oldCenter = oldSize.divideBy(2).round(),
+
 		    newCenter = newSize.divideBy(2).round(),
+
 		    offset = oldCenter.subtract(newCenter);
+
+
 
 		if (!offset.x && !offset.y) { return this; }
 
+
+
 		if (options.animate && options.pan) {
+
 			this.panBy(offset);
 
+
+
 		} else {
+
 			if (options.pan) {
+
 				this._rawPanBy(offset);
+
 			}
+
+
 
 			this.fire('move');
 
+
+
 			if (options.debounceMoveend) {
+
 				clearTimeout(this._sizeTimer);
+
 				this._sizeTimer = setTimeout(L.bind(this.fire, this, 'moveend'), 200);
+
 			} else {
+
 				this.fire('moveend');
+
 			}
+
 		}
 
+
+
 		return this.fire('resize', {
+
 			oldSize: oldSize,
+
 			newSize: newSize
+
 		});
+
 	},
 
+
+
 	// TODO handler.addTo
+
 	addHandler: function (name, HandlerClass) {
+
 		if (!HandlerClass) { return this; }
+
+
 
 		var handler = this[name] = new HandlerClass(this);
 
+
+
 		this._handlers.push(handler);
 
+
+
 		if (this.options[name]) {
+
 			handler.enable();
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	remove: function () {
 
+
+
 		this._initEvents('off');
 
+
+
 		try {
+
 			// throws error in IE6-8
+
 			delete this._container._leaflet;
+
 		} catch (e) {
+
 			this._container._leaflet = undefined;
+
 		}
+
+
 
 		L.DomUtil.remove(this._mapPane);
 
+
+
 		if (this._clearControlPos) {
+
 			this._clearControlPos();
+
 		}
+
+
 
 		this._clearHandlers();
 
+
+
 		if (this._loaded) {
+
 			this.fire('unload');
+
 		}
+
+
 
 		return this;
+
 	},
+
+
 
 	createPane: function (name, container) {
+
 		var className = 'leaflet-pane' + (name ? ' leaflet-' + name.replace('Pane', '') + '-pane' : ''),
+
 		    pane = L.DomUtil.create('div', className, container || this._mapPane);
 
+
+
 		if (name) {
+
 			this._panes[name] = pane;
+
 		}
+
 		return pane;
+
 	},
+
+
+
 
 
 	// public methods for getting map state
 
+
+
 	getCenter: function () { // (Boolean) -> LatLng
+
 		this._checkIfLoaded();
 
+
+
 		if (this._initialCenter && !this._moved()) {
+
 			return this._initialCenter;
+
 		}
+
 		return this.layerPointToLatLng(this._getCenterLayerPoint());
+
 	},
+
+
 
 	getZoom: function () {
+
 		return this._zoom;
+
 	},
+
+
 
 	getBounds: function () {
+
 		var bounds = this.getPixelBounds(),
+
 		    sw = this.unproject(bounds.getBottomLeft()),
+
 		    ne = this.unproject(bounds.getTopRight());
 
+
+
 		return new L.LatLngBounds(sw, ne);
+
 	},
+
+
 
 	getMinZoom: function () {
+
 		return this.options.minZoom === undefined ? this._layersMinZoom || 0 : this.options.minZoom;
+
 	},
+
+
 
 	getMaxZoom: function () {
+
 		return this.options.maxZoom === undefined ?
+
 			(this._layersMaxZoom === undefined ? Infinity : this._layersMaxZoom) :
+
 			this.options.maxZoom;
+
 	},
 
+
+
 	getBoundsZoom: function (bounds, inside, padding) { // (LatLngBounds[, Boolean, Point]) -> Number
+
 		bounds = L.latLngBounds(bounds);
 
+
+
 		var zoom = this.getMinZoom() - (inside ? 1 : 0),
+
 		    maxZoom = this.getMaxZoom(),
+
 		    size = this.getSize(),
 
+
+
 		    nw = bounds.getNorthWest(),
+
 		    se = bounds.getSouthEast(),
 
+
+
 		    zoomNotFound = true,
+
 		    boundsSize;
+
+
 
 		padding = L.point(padding || [0, 0]);
 
+
+
 		do {
+
 			zoom++;
+
 			boundsSize = this.project(se, zoom).subtract(this.project(nw, zoom)).add(padding);
+
 			zoomNotFound = !inside ? size.contains(boundsSize) : boundsSize.x < size.x || boundsSize.y < size.y;
+
+
 
 		} while (zoomNotFound && zoom <= maxZoom);
 
+
+
 		if (zoomNotFound && inside) {
+
 			return null;
+
 		}
+
+
 
 		return inside ? zoom : zoom - 1;
+
 	},
+
+
 
 	getSize: function () {
+
 		if (!this._size || this._sizeChanged) {
+
 			this._size = new L.Point(
+
 				this._container.clientWidth,
+
 				this._container.clientHeight);
 
+
+
 			this._sizeChanged = false;
+
 		}
+
 		return this._size.clone();
+
 	},
+
+
 
 	getPixelBounds: function () {
+
 		var topLeftPoint = this._getTopLeftPoint();
+
 		return new L.Bounds(topLeftPoint, topLeftPoint.add(this.getSize()));
+
 	},
+
+
 
 	getPixelOrigin: function () {
+
 		this._checkIfLoaded();
+
 		return this._initialTopLeftPoint;
+
 	},
+
+
 
 	getPixelWorldBounds: function () {
+
 		return this.options.crs.getProjectedBounds(this.getZoom());
+
 	},
+
+
 
 	getPane: function (pane) {
+
 		return typeof pane === 'string' ? this._panes[pane] : pane;
+
 	},
+
+
 
 	getPanes: function () {
+
 		return this._panes;
+
 	},
 
+
+
 	getContainer: function () {
+
 		return this._container;
+
 	},
+
+
+
 
 
 	// TODO replace with universal implementation after refactoring projections
 
+
+
 	getZoomScale: function (toZoom) {
+
 		var crs = this.options.crs;
+
 		return crs.scale(toZoom) / crs.scale(this._zoom);
+
 	},
 
+
+
 	getScaleZoom: function (scale) {
+
 		return this._zoom + (Math.log(scale) / Math.LN2);
+
 	},
+
+
+
 
 
 	// conversion methods
 
+
+
 	project: function (latlng, zoom) { // (LatLng[, Number]) -> Point
+
 		zoom = zoom === undefined ? this._zoom : zoom;
+
 		return this.options.crs.latLngToPoint(L.latLng(latlng), zoom);
+
 	},
+
+
 
 	unproject: function (point, zoom) { // (Point[, Number]) -> LatLng
+
 		zoom = zoom === undefined ? this._zoom : zoom;
+
 		return this.options.crs.pointToLatLng(L.point(point), zoom);
+
 	},
+
+
 
 	layerPointToLatLng: function (point) { // (Point)
+
 		var projectedPoint = L.point(point).add(this.getPixelOrigin());
+
 		return this.unproject(projectedPoint);
+
 	},
+
+
 
 	latLngToLayerPoint: function (latlng) { // (LatLng)
+
 		var projectedPoint = this.project(L.latLng(latlng))._round();
+
 		return projectedPoint._subtract(this.getPixelOrigin());
+
 	},
+
+
 
 	wrapLatLng: function (latlng) {
+
 		return this.options.crs.wrapLatLng(L.latLng(latlng));
+
 	},
+
+
 
 	distance: function (latlng1, latlng2) {
+
 		return this.options.crs.distance(L.latLng(latlng1), L.latLng(latlng2));
+
 	},
+
+
 
 	containerPointToLayerPoint: function (point) { // (Point)
+
 		return L.point(point).subtract(this._getMapPanePos());
+
 	},
+
+
 
 	layerPointToContainerPoint: function (point) { // (Point)
+
 		return L.point(point).add(this._getMapPanePos());
+
 	},
+
+
 
 	containerPointToLatLng: function (point) {
+
 		var layerPoint = this.containerPointToLayerPoint(L.point(point));
+
 		return this.layerPointToLatLng(layerPoint);
+
 	},
+
+
 
 	latLngToContainerPoint: function (latlng) {
+
 		return this.layerPointToContainerPoint(this.latLngToLayerPoint(L.latLng(latlng)));
+
 	},
+
+
 
 	mouseEventToContainerPoint: function (e) { // (MouseEvent)
+
 		return L.DomEvent.getMousePosition(e, this._container);
+
 	},
+
+
 
 	mouseEventToLayerPoint: function (e) { // (MouseEvent)
+
 		return this.containerPointToLayerPoint(this.mouseEventToContainerPoint(e));
+
 	},
 
+
+
 	mouseEventToLatLng: function (e) { // (MouseEvent)
+
 		return this.layerPointToLatLng(this.mouseEventToLayerPoint(e));
+
 	},
+
+
+
 
 
 	// map initialization methods
 
+
+
 	_initContainer: function (id) {
+
 		var container = this._container = L.DomUtil.get(id);
 
+
+
 		if (!container) {
+
 			throw new Error('Map container not found.');
+
 		} else if (container._leaflet) {
+
 			throw new Error('Map container is already initialized.');
+
 		}
 
+
+
 		container._leaflet = true;
+
 	},
 
+
+
 	_initLayout: function () {
+
 		var container = this._container;
+
+
 
 		this._fadeAnimated = this.options.fadeAnimation && L.Browser.any3d;
 
+
+
 		L.DomUtil.addClass(container, 'leaflet-container' +
+
 			(L.Browser.touch ? ' leaflet-touch' : '') +
+
 			(L.Browser.retina ? ' leaflet-retina' : '') +
+
 			(L.Browser.ielt9 ? ' leaflet-oldie' : '') +
+
 			(L.Browser.safari ? ' leaflet-safari' : '') +
+
 			(this._fadeAnimated ? ' leaflet-fade-anim' : ''));
+
+
 
 		var position = L.DomUtil.getStyle(container, 'position');
 
+
+
 		if (position !== 'absolute' && position !== 'relative' && position !== 'fixed') {
+
 			container.style.position = 'relative';
+
 		}
+
+
 
 		this._initPanes();
 
+
+
 		if (this._initControlPos) {
+
 			this._initControlPos();
+
 		}
+
 	},
 
+
+
 	_initPanes: function () {
+
 		var panes = this._panes = {};
+
+
 
 		this._mapPane = this.createPane('mapPane', this._container);
 
+
+
 		this.createPane('tilePane');
+
 		this.createPane('shadowPane');
+
 		this.createPane('overlayPane');
+
 		this.createPane('markerPane');
+
 		this.createPane('popupPane');
 
+
+
 		if (!this.options.markerZoomAnimation) {
+
 			L.DomUtil.addClass(panes.markerPane, 'leaflet-zoom-hide');
+
 			L.DomUtil.addClass(panes.shadowPane, 'leaflet-zoom-hide');
+
 		}
+
 	},
+
+
+
 
 
 	// private methods that modify map state
 
+
+
 	_resetView: function (center, zoom, preserveMapOffset, afterZoomAnim) {
+
+
 
 		var zoomChanged = (this._zoom !== zoom);
 
+
+
 		if (!afterZoomAnim) {
+
 			this.fire('movestart');
 
+
+
 			if (zoomChanged) {
+
 				this.fire('zoomstart');
+
 			}
+
 		}
 
+
+
 		this._zoom = zoom;
+
 		this._initialCenter = center;
+
+
 
 		this._initialTopLeftPoint = this._getNewTopLeftPoint(center);
 
+
+
 		if (!preserveMapOffset) {
+
 			L.DomUtil.setPosition(this._mapPane, new L.Point(0, 0));
+
 		} else {
+
 			this._initialTopLeftPoint._add(this._getMapPanePos());
+
 		}
 
+
+
 		var loading = !this._loaded;
+
 		this._loaded = true;
+
+
 
 		this.fire('viewreset', {hard: !preserveMapOffset});
 
+
+
 		if (loading) {
+
 			this.fire('load');
+
 		}
+
+
 
 		this.fire('move');
 
+
+
 		if (zoomChanged || afterZoomAnim) {
+
 			this.fire('zoomend');
+
 		}
+
+
 
 		this.fire('moveend', {hard: !preserveMapOffset});
+
 	},
+
+
 
 	_rawPanBy: function (offset) {
+
 		L.DomUtil.setPosition(this._mapPane, this._getMapPanePos().subtract(offset));
+
 	},
+
+
 
 	_getZoomSpan: function () {
+
 		return this.getMaxZoom() - this.getMinZoom();
+
 	},
+
+
 
 	_panInsideMaxBounds: function () {
+
 		this.panInsideBounds(this.options.maxBounds);
+
 	},
 
+
+
 	_checkIfLoaded: function () {
+
 		if (!this._loaded) {
+
 			throw new Error('Set map center and zoom first.');
+
 		}
+
 	},
+
+
 
 	// map events
 
+
+
 	_initEvents: function (onOff) {
+
 		if (!L.DomEvent) { return; }
+
+
 
 		onOff = onOff || 'on';
 
+
+
 		L.DomEvent[onOff](this._container,
+
 			'click dblclick mousedown mouseup mouseenter mouseleave mousemove contextmenu',
+
 			this._handleMouseEvent, this);
 
+
+
 		if (this.options.trackResize) {
+
 			L.DomEvent[onOff](window, 'resize', this._onResize, this);
+
 		}
+
 	},
+
+
 
 	_onResize: function () {
+
 		L.Util.cancelAnimFrame(this._resizeRequest);
+
 		this._resizeRequest = L.Util.requestAnimFrame(
+
 		        function () { this.invalidateSize({debounceMoveend: true}); }, this, false, this._container);
+
 	},
+
+
 
 	_handleMouseEvent: function (e) {
+
 		if (!this._loaded) { return; }
 
+
+
 		this._fireMouseEvent(this, e,
+
 				e.type === 'mouseenter' ? 'mouseover' :
+
 				e.type === 'mouseleave' ? 'mouseout' : e.type);
+
 	},
 
+
+
 	_fireMouseEvent: function (obj, e, type, propagate, latlng) {
+
 		type = type || e.type;
+
+
 
 		if (L.DomEvent._skipped(e)) { return; }
 
+
+
 		if (type === 'click') {
+
 			if (!e._simulated && ((this.dragging && this.dragging.moved()) ||
+
 			                      (this.boxZoom && this.boxZoom.moved()))) { return; }
+
 			obj.fire('preclick');
+
 		}
+
+
 
 		if (!obj.listens(type, propagate)) { return; }
 
+
+
 		if (type === 'contextmenu') {
+
 			L.DomEvent.preventDefault(e);
+
 		}
+
 		if (type === 'click' || type === 'dblclick' || type === 'contextmenu') {
+
 			L.DomEvent.stopPropagation(e);
+
 		}
+
+
 
 		var data = {
+
 			originalEvent: e,
+
 			containerPoint: this.mouseEventToContainerPoint(e)
+
 		};
 
+
+
 		data.layerPoint = this.containerPointToLayerPoint(data.containerPoint);
+
 		data.latlng = latlng || this.layerPointToLatLng(data.layerPoint);
 
+
+
 		obj.fire(type, data, propagate);
+
 	},
+
+
 
 	_clearHandlers: function () {
+
 		for (var i = 0, len = this._handlers.length; i < len; i++) {
+
 			this._handlers[i].disable();
+
 		}
+
 	},
 
+
+
 	whenReady: function (callback, context) {
+
 		if (this._loaded) {
+
 			callback.call(context || this, {target: this});
+
 		} else {
+
 			this.on('load', callback, context);
+
 		}
+
 		return this;
+
 	},
+
+
+
 
 
 	// private methods for getting map state
 
+
+
 	_getMapPanePos: function () {
+
 		return L.DomUtil.getPosition(this._mapPane);
+
 	},
+
+
 
 	_moved: function () {
+
 		var pos = this._getMapPanePos();
+
 		return pos && !pos.equals([0, 0]);
+
 	},
+
+
 
 	_getTopLeftPoint: function () {
+
 		return this.getPixelOrigin().subtract(this._getMapPanePos());
+
 	},
+
+
 
 	_getNewTopLeftPoint: function (center, zoom) {
+
 		var viewHalf = this.getSize()._divideBy(2);
+
 		// TODO round on display, not calculation to increase precision?
+
 		return this.project(center, zoom)._subtract(viewHalf)._round();
+
 	},
+
+
 
 	_latLngToNewLayerPoint: function (latlng, newZoom, newCenter) {
+
 		var topLeft = this._getNewTopLeftPoint(newCenter, newZoom).add(this._getMapPanePos());
+
 		return this.project(latlng, newZoom)._subtract(topLeft);
+
 	},
+
+
 
 	// layer point of the current center
+
 	_getCenterLayerPoint: function () {
+
 		return this.containerPointToLayerPoint(this.getSize()._divideBy(2));
+
 	},
+
+
 
 	// offset of the specified place to the current center in pixels
+
 	_getCenterOffset: function (latlng) {
+
 		return this.latLngToLayerPoint(latlng).subtract(this._getCenterLayerPoint());
+
 	},
 
+
+
 	// adjust center for view to get inside bounds
+
 	_limitCenter: function (center, zoom, bounds) {
+
+
 
 		if (!bounds) { return center; }
 
+
+
 		var centerPoint = this.project(center, zoom),
+
 		    viewHalf = this.getSize().divideBy(2),
+
 		    viewBounds = new L.Bounds(centerPoint.subtract(viewHalf), centerPoint.add(viewHalf)),
+
 		    offset = this._getBoundsOffset(viewBounds, bounds, zoom);
 
+
+
 		return this.unproject(centerPoint.add(offset), zoom);
+
 	},
+
+
 
 	// adjust offset for view to get inside bounds
+
 	_limitOffset: function (offset, bounds) {
+
 		if (!bounds) { return offset; }
 
+
+
 		var viewBounds = this.getPixelBounds(),
+
 		    newBounds = new L.Bounds(viewBounds.min.add(offset), viewBounds.max.add(offset));
 
+
+
 		return offset.add(this._getBoundsOffset(newBounds, bounds));
+
 	},
+
+
 
 	// returns offset needed for pxBounds to get inside maxBounds at a specified zoom
+
 	_getBoundsOffset: function (pxBounds, maxBounds, zoom) {
+
 		var nwOffset = this.project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
+
 		    seOffset = this.project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
 
+
+
 		    dx = this._rebound(nwOffset.x, -seOffset.x),
+
 		    dy = this._rebound(nwOffset.y, -seOffset.y);
 
+
+
 		return new L.Point(dx, dy);
+
 	},
+
+
 
 	_rebound: function (left, right) {
+
 		return left + right > 0 ?
+
 			Math.round(left - right) / 2 :
+
 			Math.max(0, Math.ceil(left)) - Math.max(0, Math.floor(right));
+
 	},
 
+
+
 	_limitZoom: function (zoom) {
+
 		var min = this.getMinZoom(),
+
 		    max = this.getMaxZoom();
 
+
+
 		return Math.max(min, Math.min(max, zoom));
+
 	}
+
 });
 
+
+
 L.map = function (id, options) {
+
 	return new L.Map(id, options);
+
 };
+
 
 
 
@@ -2389,63 +4542,119 @@ L.Map.include({
 
 
 /*
+
  * Mercator projection that takes into account that the Earth is not a perfect sphere.
+
  * Less popular than spherical mercator; used by projections like EPSG:3395.
+
  */
 
+
+
 L.Projection.Mercator = {
+
 	R: 6378137,
+
 	R_MINOR: 6356752.314245179,
+
+
 
 	bounds: L.bounds([-20037508.34279, -15496570.73972], [20037508.34279, 18764656.23138]),
 
+
+
 	project: function (latlng) {
+
 		var d = Math.PI / 180,
+
 		    r = this.R,
+
 		    y = latlng.lat * d,
+
 		    tmp = this.R_MINOR / r,
+
 		    e = Math.sqrt(1 - tmp * tmp),
+
 		    con = e * Math.sin(y);
 
+
+
 		var ts = Math.tan(Math.PI / 4 - y / 2) / Math.pow((1 - con) / (1 + con), e / 2);
+
 		y = -r * Math.log(Math.max(ts, 1E-10));
 
+
+
 		return new L.Point(latlng.lng * d * r, y);
+
 	},
 
+
+
 	unproject: function (point) {
+
 		var d = 180 / Math.PI,
+
 		    r = this.R,
+
 		    tmp = this.R_MINOR / r,
+
 		    e = Math.sqrt(1 - tmp * tmp),
+
 		    ts = Math.exp(-point.y / r),
+
 		    phi = Math.PI / 2 - 2 * Math.atan(ts);
 
+
+
 		for (var i = 0, dphi = 0.1, con; i < 15 && Math.abs(dphi) > 1e-7; i++) {
+
 			con = e * Math.sin(phi);
+
 			con = Math.pow((1 - con) / (1 + con), e / 2);
+
 			dphi = Math.PI / 2 - 2 * Math.atan(ts * con) - phi;
+
 			phi += dphi;
+
 		}
 
+
+
 		return new L.LatLng(phi * d, point.x * d / r);
+
 	}
+
 };
 
 
+
 /*
+
  * L.CRS.EPSG3857 (World Mercator) CRS implementation.
+
  */
 
+
+
 L.CRS.EPSG3395 = L.extend({}, L.CRS.Earth, {
+
 	code: 'EPSG:3395',
+
 	projection: L.Projection.Mercator,
 
+
+
 	transformation: (function () {
+
 		var scale = 0.5 / (Math.PI * L.Projection.Mercator.R);
+
 		return new L.Transformation(scale, 0.5, -scale, 0.5);
+
 	}())
+
 });
+
 
 
 /*
@@ -2988,448 +5197,885 @@ L.gridLayer = function (options) {
 
 
 /*
+
  * L.TileLayer is used for standard xyz-numbered tile layers.
+
  */
+
+
 
 L.TileLayer = L.GridLayer.extend({
 
+
+
 	options: {
+
 		minZoom: 0,
+
 		maxZoom: 18,
 
+
+
 		subdomains: 'abc',
+
 		// errorTileUrl: '',
+
 		zoomOffset: 0
 
+
+
 		/*
+
 		maxNativeZoom: <Number>,
+
 		tms: <Boolean>,
+
 		zoomReverse: <Number>,
+
 		detectRetina: <Number>,
+
 		*/
+
 	},
+
+
 
 	initialize: function (url, options) {
 
+
+
 		this._url = url;
+
+
 
 		options = L.setOptions(this, options);
 
+
+
 		// detecting retina displays, adjusting tileSize and zoom levels
+
 		if (options.detectRetina && L.Browser.retina && options.maxZoom > 0) {
 
+
+
 			options.tileSize = Math.floor(options.tileSize / 2);
+
 			options.zoomOffset++;
 
+
+
 			options.minZoom = Math.max(0, options.minZoom);
+
 			options.maxZoom--;
+
 		}
+
+
 
 		if (typeof options.subdomains === 'string') {
+
 			options.subdomains = options.subdomains.split('');
+
 		}
+
 	},
+
+
 
 	setUrl: function (url, noRedraw) {
+
 		this._url = url;
 
+
+
 		if (!noRedraw) {
+
 			this.redraw();
+
 		}
+
 		return this;
+
 	},
 
+
+
 	createTile: function (coords, done) {
+
 		var tile = document.createElement('img');
 
+
+
 		tile.onload = L.bind(this._tileOnLoad, this, done, tile);
+
 		tile.onerror = L.bind(this._tileOnError, this, done, tile);
 
+
+
 		/*
+
 		 Alt tag is set to empty string to keep screen readers from reading URL and for compliance reasons
+
 		 http://www.w3.org/TR/WCAG20-TECHS/H67
+
 		*/
+
 		tile.alt = '';
+
+
 
 		tile.src = this.getTileUrl(coords);
 
+
+
 		return tile;
+
 	},
+
+
 
 	getTileUrl: function (coords) {
+
 		return L.Util.template(this._url, L.extend({
+
 			r: this.options.detectRetina && L.Browser.retina && this.options.maxZoom > 0 ? '@2x' : '',
+
 			s: this._getSubdomain(coords),
+
 			x: coords.x,
+
 			y: this.options.tms ? this._tileNumBounds.max.y - coords.y : coords.y,
+
 			z: this._getZoomForUrl()
+
 		}, this.options));
+
 	},
+
+
 
 	_tileOnLoad: function (done, tile) {
+
 		done(null, tile);
+
 	},
+
+
 
 	_tileOnError: function (done, tile, e) {
+
 		var errorUrl = this.options.errorTileUrl;
+
 		if (errorUrl) {
+
 			tile.src = errorUrl;
+
 		}
+
 		done(e, tile);
+
 	},
+
+
 
 	_getTileSize: function () {
+
 		var map = this._map,
+
 		    options = this.options,
+
 		    zoom = map.getZoom() + options.zoomOffset,
+
 		    zoomN = options.maxNativeZoom;
 
+
+
 		// increase tile size when overscaling
+
 		return zoomN && zoom > zoomN ?
+
 				Math.round(map.getZoomScale(zoom) / map.getZoomScale(zoomN) * options.tileSize) :
+
 				options.tileSize;
+
 	},
 
+
+
 	_removeTile: function (key) {
+
 		var tile = this._tiles[key];
+
+
 
 		L.GridLayer.prototype._removeTile.call(this, key);
 
+
+
 		// for https://github.com/Leaflet/Leaflet/issues/137
+
 		if (!L.Browser.android) {
+
 			tile.onload = null;
+
 			tile.src = L.Util.emptyImageUrl;
+
 		}
+
 	},
+
+
 
 	_getZoomForUrl: function () {
 
+
+
 		var options = this.options,
+
 		    zoom = this._map.getZoom();
 
+
+
 		if (options.zoomReverse) {
+
 			zoom = options.maxZoom - zoom;
+
 		}
+
+
 
 		zoom += options.zoomOffset;
 
+
+
 		return options.maxNativeZoom ? Math.min(zoom, options.maxNativeZoom) : zoom;
+
 	},
+
+
 
 	_getSubdomain: function (tilePoint) {
+
 		var index = Math.abs(tilePoint.x + tilePoint.y) % this.options.subdomains.length;
+
 		return this.options.subdomains[index];
+
 	},
 
+
+
 	// stops loading all tiles in the background layer
+
 	_abortLoading: function () {
+
 		var i, tile;
+
 		for (i in this._tiles) {
+
 			tile = this._tiles[i];
 
+
+
 			if (!tile.complete) {
+
 				tile.onload = L.Util.falseFn;
+
 				tile.onerror = L.Util.falseFn;
+
 				tile.src = L.Util.emptyImageUrl;
 
+
+
 				L.DomUtil.remove(tile);
+
 			}
+
 		}
+
 	}
+
 });
 
+
+
 L.tileLayer = function (url, options) {
+
 	return new L.TileLayer(url, options);
+
 };
 
 
+
 /*
+
  * L.TileLayer.WMS is used for WMS tile layers.
+
  */
+
+
 
 L.TileLayer.WMS = L.TileLayer.extend({
 
+
+
 	defaultWmsParams: {
+
 		service: 'WMS',
+
 		request: 'GetMap',
+
 		version: '1.1.1',
+
 		layers: '',
+
 		styles: '',
+
 		format: 'image/jpeg',
+
 		transparent: false
+
 	},
+
+
 
 	initialize: function (url, options) {
 
+
+
 		this._url = url;
+
+
 
 		var wmsParams = L.extend({}, this.defaultWmsParams);
 
+
+
 		// all keys that are not TileLayer options go to WMS params
+
 		for (var i in options) {
+
 			if (!this.options.hasOwnProperty(i) && i !== 'crs') {
+
 				wmsParams[i] = options[i];
+
 			}
+
 		}
+
+
 
 		options = L.setOptions(this, options);
 
+
+
 		wmsParams.width = wmsParams.height =
+
 				options.tileSize * (options.detectRetina && L.Browser.retina ? 2 : 1);
 
+
+
 		this.wmsParams = wmsParams;
+
 	},
+
+
 
 	onAdd: function (map) {
 
+
+
 		this._crs = this.options.crs || map.options.crs;
+
+
 
 		this._wmsVersion = parseFloat(this.wmsParams.version);
 
+
+
 		var projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs';
+
 		this.wmsParams[projectionKey] = this._crs.code;
 
+
+
 		L.TileLayer.prototype.onAdd.call(this, map);
+
 	},
+
+
 
 	getTileUrl: function (coords) {
 
+
+
 		var tileBounds = this._tileCoordsToBounds(coords),
+
 		    nw = this._crs.project(tileBounds.getNorthWest()),
+
 		    se = this._crs.project(tileBounds.getSouthEast()),
 
+
+
 		    bbox = (this._wmsVersion >= 1.3 && this._crs === L.CRS.EPSG4326 ?
+
 			    [se.y, nw.x, nw.y, se.x] :
+
 			    [nw.x, se.y, se.x, nw.y]).join(','),
+
+
 
 		    url = L.Util.template(this._url, {s: this._getSubdomain(coords)});
 
+
+
 		return url + L.Util.getParamString(this.wmsParams, url, true) + '&BBOX=' + bbox;
+
 	},
+
+
 
 	setParams: function (params, noRedraw) {
 
+
+
 		L.extend(this.wmsParams, params);
 
+
+
 		if (!noRedraw) {
+
 			this.redraw();
+
 		}
 
+
+
 		return this;
+
 	}
+
 });
 
+
+
 L.tileLayer.wms = function (url, options) {
+
 	return new L.TileLayer.WMS(url, options);
+
 };
 
 
+
 /*
+
  * L.ImageOverlay is used to overlay images over the map (to specific geographical bounds).
+
  */
+
+
 
 L.ImageOverlay = L.Layer.extend({
 
+
+
 	options: {
+
 		opacity: 1
+
 	},
+
+
 
 	initialize: function (url, bounds, options) { // (String, LatLngBounds, Object)
+
 		this._url = url;
+
 		this._bounds = L.latLngBounds(bounds);
 
+
+
 		L.setOptions(this, options);
+
 	},
 
+
+
 	onAdd: function () {
+
 		if (!this._image) {
+
 			this._initImage();
 
+
+
 			if (this.options.opacity < 1) {
+
 				this._updateOpacity();
+
 			}
+
 		}
+
+
 
 		this.getPane().appendChild(this._image);
 
+
+
 		this._reset();
+
 	},
+
+
 
 	onRemove: function () {
+
 		L.DomUtil.remove(this._image);
+
 	},
+
+
 
 	setOpacity: function (opacity) {
+
 		this.options.opacity = opacity;
 
+
+
 		if (this._image) {
+
 			this._updateOpacity();
+
 		}
+
 		return this;
+
 	},
+
+
 
 	bringToFront: function () {
+
 		if (this._map) {
+
 			L.DomUtil.toFront(this._image);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	bringToBack: function () {
+
 		if (this._map) {
+
 			L.DomUtil.toBack(this._image);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	setUrl: function (url) {
+
 		this._url = url;
 
+
+
 		if (this._image) {
+
 			this._image.src = url;
+
 		}
+
 		return this;
+
 	},
+
+
 
 	getAttribution: function () {
+
 		return this.options.attribution;
+
 	},
+
+
 
 	getEvents: function () {
+
 		var events = {
+
 			viewreset: this._reset
+
 		};
 
+
+
 		if (this._zoomAnimated) {
+
 			events.zoomanim = this._animateZoom;
+
 		}
 
+
+
 		return events;
+
 	},
+
+
 
 	_initImage: function () {
+
 		var img = this._image = L.DomUtil.create('img',
+
 				'leaflet-image-layer ' + (this._zoomAnimated ? 'leaflet-zoom-animated' : ''));
 
+
+
 		img.onselectstart = L.Util.falseFn;
+
 		img.onmousemove = L.Util.falseFn;
 
+
+
 		img.onload = L.bind(this.fire, this, 'load');
+
 		img.src = this._url;
+
 	},
+
+
 
 	_animateZoom: function (e) {
+
 		var topLeft = this._map._latLngToNewLayerPoint(this._bounds.getNorthWest(), e.zoom, e.center),
+
 		    size = this._map._latLngToNewLayerPoint(this._bounds.getSouthEast(), e.zoom, e.center).subtract(topLeft),
+
 		    offset = topLeft.add(size._multiplyBy((1 - 1 / e.scale) / 2));
 
+
+
 		L.DomUtil.setTransform(this._image, offset, e.scale);
+
 	},
 
+
+
 	_reset: function () {
+
 		var image = this._image,
+
 		    bounds = new L.Bounds(
+
 		        this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
+
 		        this._map.latLngToLayerPoint(this._bounds.getSouthEast())),
+
 		    size = bounds.getSize();
+
+
 
 		L.DomUtil.setPosition(image, bounds.min);
 
+
+
 		image.style.width  = size.x + 'px';
+
 		image.style.height = size.y + 'px';
+
 	},
 
+
+
 	_updateOpacity: function () {
+
 		L.DomUtil.setOpacity(this._image, this.options.opacity);
+
 	}
+
 });
 
+
+
 L.imageOverlay = function (url, bounds, options) {
+
 	return new L.ImageOverlay(url, bounds, options);
+
 };
+
 
 
 /*
+
  * L.Icon is an image-based icon class that you can use with L.Marker for custom markers.
+
  */
 
+
+
 L.Icon = L.Class.extend({
+
 	/*
+
 	options: {
+
 		iconUrl: (String) (required)
+
 		iconRetinaUrl: (String) (optional, used for retina devices if detected)
+
 		iconSize: (Point) (can be set through CSS)
+
 		iconAnchor: (Point) (centered by default, can be set in CSS with negative margins)
+
 		popupAnchor: (Point) (if not specified, popup opens in the anchor point)
+
 		shadowUrl: (String) (no shadow by default)
+
 		shadowRetinaUrl: (String) (optional, used for retina devices if detected)
+
 		shadowSize: (Point)
+
 		shadowAnchor: (Point)
+
 		className: (String)
+
 	},
+
 	*/
 
+
+
 	initialize: function (options) {
+
 		L.setOptions(this, options);
+
 	},
+
+
 
 	createIcon: function (oldIcon) {
+
 		return this._createIcon('icon', oldIcon);
+
 	},
+
+
 
 	createShadow: function (oldIcon) {
+
 		return this._createIcon('shadow', oldIcon);
+
 	},
+
+
 
 	_createIcon: function (name, oldIcon) {
+
 		var src = this._getIconUrl(name);
 
+
+
 		if (!src) {
+
 			if (name === 'icon') {
+
 				throw new Error('iconUrl not set in Icon options (see the docs).');
+
 			}
+
 			return null;
+
 		}
 
+
+
 		var img = this._createImg(src, oldIcon && oldIcon.tagName === 'IMG' ? oldIcon : null);
+
 		this._setIconStyles(img, name);
 
+
+
 		return img;
+
 	},
 
+
+
 	_setIconStyles: function (img, name) {
+
 		var options = this.options,
+
 		    size = L.point(options[name + 'Size']),
+
 		    anchor = L.point(name === 'shadow' && options.shadowAnchor || options.iconAnchor ||
+
 		            size && size.divideBy(2, true));
+
+
 
 		img.className = 'leaflet-marker-' + name + ' ' + (options.className || '');
 
+
+
 		if (anchor) {
+
 			img.style.marginLeft = (-anchor.x) + 'px';
+
 			img.style.marginTop  = (-anchor.y) + 'px';
+
 		}
+
+
 
 		if (size) {
+
 			img.style.width  = size.x + 'px';
+
 			img.style.height = size.y + 'px';
+
 		}
+
 	},
+
+
 
 	_createImg: function (src, el) {
+
 		el = el || document.createElement('img');
+
 		el.src = src;
+
 		return el;
+
 	},
 
+
+
 	_getIconUrl: function (name) {
+
 		return L.Browser.retina && this.options[name + 'RetinaUrl'] || this.options[name + 'Url'];
+
 	}
+
 });
 
+
+
 L.icon = function (options) {
+
 	return new L.Icon(options);
+
 };
+
 
 
 /*
@@ -3480,272 +6126,539 @@ L.Icon.Default.imagePath = (function () {
 
 
 /*
+
  * L.Marker is used to display clickable/draggable icons on the map.
+
  */
+
+
 
 L.Marker = L.Layer.extend({
 
+
+
 	options: {
+
 		pane: 'markerPane',
 
+
+
 		icon: new L.Icon.Default(),
+
 		// title: '',
+
 		// alt: '',
+
 		clickable: true,
+
 		// draggable: false,
+
 		keyboard: true,
+
 		zIndexOffset: 0,
+
 		opacity: 1,
+
 		// riseOnHover: false,
+
 		riseOffset: 250
+
 	},
+
+
 
 	initialize: function (latlng, options) {
+
 		L.setOptions(this, options);
+
 		this._latlng = L.latLng(latlng);
+
 	},
+
+
 
 	onAdd: function (map) {
+
 		this._zoomAnimated = this._zoomAnimated && map.options.markerZoomAnimation;
 
+
+
 		this._initIcon();
+
 		this.update();
+
 	},
+
+
 
 	onRemove: function () {
+
 		if (this.dragging) {
+
 			this.dragging.disable();
+
 		}
+
+
 
 		this._removeIcon();
+
 		this._removeShadow();
+
 	},
+
+
 
 	getEvents: function () {
+
 		var events = {viewreset: this.update};
 
+
+
 		if (this._zoomAnimated) {
+
 			events.zoomanim = this._animateZoom;
+
 		}
 
+
+
 		return events;
+
 	},
+
+
 
 	getLatLng: function () {
+
 		return this._latlng;
+
 	},
+
+
 
 	setLatLng: function (latlng) {
+
 		var oldLatLng = this._latlng;
+
 		this._latlng = L.latLng(latlng);
+
 		this.update();
+
 		return this.fire('move', { oldLatLng: oldLatLng, latlng: this._latlng });
+
 	},
 
+
+
 	setZIndexOffset: function (offset) {
+
 		this.options.zIndexOffset = offset;
+
 		return this.update();
+
 	},
+
+
 
 	setIcon: function (icon) {
 
+
+
 		this.options.icon = icon;
 
+
+
 		if (this._map) {
+
 			this._initIcon();
+
 			this.update();
+
 		}
+
+
 
 		if (this._popup) {
+
 			this.bindPopup(this._popup);
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	update: function () {
 
+
+
 		if (this._icon) {
+
 			var pos = this._map.latLngToLayerPoint(this._latlng).round();
+
 			this._setPos(pos);
+
 		}
+
+
 
 		return this;
+
 	},
 
+
+
 	_initIcon: function () {
+
 		var options = this.options,
+
 		    classToAdd = 'leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 
+
+
 		var icon = options.icon.createIcon(this._icon),
+
 			addIcon = false;
 
+
+
 		// if we're not reusing the icon, remove the old one and init new one
+
 		if (icon !== this._icon) {
+
 			if (this._icon) {
+
 				this._removeIcon();
+
 			}
+
 			addIcon = true;
 
+
+
 			if (options.title) {
+
 				icon.title = options.title;
+
 			}
+
 			if (options.alt) {
+
 				icon.alt = options.alt;
+
 			}
+
 		}
+
+
 
 		L.DomUtil.addClass(icon, classToAdd);
 
+
+
 		if (options.keyboard) {
+
 			icon.tabIndex = '0';
+
 		}
+
+
 
 		this._icon = icon;
+
 		this._initInteraction();
 
+
+
 		if (options.riseOnHover) {
+
 			L.DomEvent.on(icon, {
+
 				mouseover: this._bringToFront,
+
 				mouseout: this._resetZIndex
+
 			}, this);
+
 		}
+
+
 
 		var newShadow = options.icon.createShadow(this._shadow),
+
 			addShadow = false;
 
+
+
 		if (newShadow !== this._shadow) {
+
 			this._removeShadow();
+
 			addShadow = true;
+
 		}
 
+
+
 		if (newShadow) {
+
 			L.DomUtil.addClass(newShadow, classToAdd);
+
 		}
+
 		this._shadow = newShadow;
 
 
+
+
+
 		if (options.opacity < 1) {
+
 			this._updateOpacity();
+
 		}
+
+
+
 
 
 		if (addIcon) {
+
 			this.getPane().appendChild(this._icon);
+
 		}
+
 		if (newShadow && addShadow) {
+
 			this.getPane('shadowPane').appendChild(this._shadow);
+
 		}
+
 	},
 
+
+
 	_removeIcon: function () {
+
 		if (this.options.riseOnHover) {
+
 			L.DomEvent.off(this._icon, {
+
 				mouseover: this._bringToFront,
+
 			    mouseout: this._resetZIndex
+
 			}, this);
+
 		}
+
+
 
 		L.DomUtil.remove(this._icon);
 
+
+
 		this._icon = null;
+
 	},
+
+
 
 	_removeShadow: function () {
+
 		if (this._shadow) {
+
 			L.DomUtil.remove(this._shadow);
+
 		}
+
 		this._shadow = null;
+
 	},
 
+
+
 	_setPos: function (pos) {
+
 		L.DomUtil.setPosition(this._icon, pos);
 
+
+
 		if (this._shadow) {
+
 			L.DomUtil.setPosition(this._shadow, pos);
+
 		}
+
+
 
 		this._zIndex = pos.y + this.options.zIndexOffset;
 
+
+
 		this._resetZIndex();
+
 	},
+
+
 
 	_updateZIndex: function (offset) {
+
 		this._icon.style.zIndex = this._zIndex + offset;
+
 	},
+
+
 
 	_animateZoom: function (opt) {
+
 		var pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
 
+
+
 		this._setPos(pos);
+
 	},
+
+
 
 	_initInteraction: function () {
 
+
+
 		if (!this.options.clickable) { return; }
+
+
 
 		L.DomUtil.addClass(this._icon, 'leaflet-clickable');
 
+
+
 		L.DomEvent.on(this._icon, 'click dblclick mousedown mouseup mouseover mouseout contextmenu keypress',
+
 				this._fireMouseEvent, this);
 
+
+
 		if (L.Handler.MarkerDrag) {
+
 			this.dragging = new L.Handler.MarkerDrag(this);
 
+
+
 			if (this.options.draggable) {
+
 				this.dragging.enable();
+
 			}
+
 		}
+
 	},
 
+
+
 	_fireMouseEvent: function (e, type) {
+
 		// to prevent outline when clicking on keyboard-focusable marker
+
 		if (e.type === 'mousedown') {
+
 			L.DomEvent.preventDefault(e);
+
 		}
+
+
 
 		if (e.type === 'click' && this.dragging && this.dragging.moved()) { return; }
 
+
+
 		if (e.type === 'keypress' && e.keyCode === 13) {
+
 			type = 'click';
+
 		}
 
+
+
 		if (this._map) {
+
 			this._map._fireMouseEvent(this, e, type, true, this._latlng);
+
 		}
+
 	},
+
+
 
 	setOpacity: function (opacity) {
+
 		this.options.opacity = opacity;
+
 		if (this._map) {
+
 			this._updateOpacity();
+
 		}
 
+
+
 		return this;
+
 	},
 
+
+
 	_updateOpacity: function () {
+
 		var opacity = this.options.opacity;
+
+
 
 		L.DomUtil.setOpacity(this._icon, opacity);
 
+
+
 		if (this._shadow) {
+
 			L.DomUtil.setOpacity(this._shadow, opacity);
+
 		}
+
 	},
+
+
 
 	_bringToFront: function () {
+
 		this._updateZIndex(this.options.riseOffset);
+
 	},
 
+
+
 	_resetZIndex: function () {
+
 		this._updateZIndex(0);
+
 	}
+
 });
 
+
+
 L.marker = function (latlng, options) {
+
 	return new L.Marker(latlng, options);
+
 };
+
 
 
 /*
@@ -3791,329 +6704,653 @@ L.divIcon = function (options) {
 
 
 /*
+
  * L.Popup is used for displaying popups on the map.
+
  */
 
+
+
 L.Map.mergeOptions({
+
 	closePopupOnClick: true
+
 });
+
+
 
 L.Popup = L.Layer.extend({
 
+
+
 	options: {
+
 		pane: 'popupPane',
 
+
+
 		minWidth: 50,
+
 		maxWidth: 300,
+
 		// maxHeight: <Number>,
+
 		offset: [0, 7],
 
+
+
 		autoPan: true,
+
 		autoPanPadding: [5, 5],
+
 		// autoPanPaddingTopLeft: <Point>,
+
 		// autoPanPaddingBottomRight: <Point>,
 
+
+
 		closeButton: true,
+
 		// keepInView: false,
+
 		// className: '',
+
 		zoomAnimation: true
+
 	},
+
+
 
 	initialize: function (options, source) {
+
 		L.setOptions(this, options);
 
+
+
 		this._source = source;
+
 	},
 
+
+
 	onAdd: function (map) {
+
 		this._zoomAnimated = this._zoomAnimated && this.options.zoomAnimation;
 
+
+
 		if (!this._container) {
+
 			this._initLayout();
+
 		}
 
+
+
 		if (map._fadeAnimated) {
+
 			L.DomUtil.setOpacity(this._container, 0);
+
 		}
+
+
 
 		clearTimeout(this._removeTimeout);
+
 		this.getPane().appendChild(this._container);
+
 		this.update();
 
+
+
 		if (map._fadeAnimated) {
+
 			L.DomUtil.setOpacity(this._container, 1);
+
 		}
+
+
 
 		map.fire('popupopen', {popup: this});
 
+
+
 		if (this._source) {
+
 			this._source.fire('popupopen', {popup: this}, true);
+
 		}
+
 	},
+
+
 
 	openOn: function (map) {
+
 		map.openPopup(this);
+
 		return this;
+
 	},
 
+
+
 	onRemove: function (map) {
+
 		if (map._fadeAnimated) {
+
 			L.DomUtil.setOpacity(this._container, 0);
+
 			this._removeTimeout = setTimeout(L.bind(L.DomUtil.remove, L.DomUtil, this._container), 200);
+
 		} else {
+
 			L.DomUtil.remove(this._container);
+
 		}
+
+
 
 		map.fire('popupclose', {popup: this});
 
+
+
 		if (this._source) {
+
 			this._source.fire('popupclose', {popup: this}, true);
+
 		}
+
 	},
+
+
 
 	getLatLng: function () {
+
 		return this._latlng;
+
 	},
+
+
 
 	setLatLng: function (latlng) {
+
 		this._latlng = L.latLng(latlng);
+
 		if (this._map) {
+
 			this._updatePosition();
+
 			this._adjustPan();
+
 		}
+
 		return this;
+
 	},
+
+
 
 	getContent: function () {
+
 		return this._content;
+
 	},
+
+
 
 	setContent: function (content) {
+
 		this._content = content;
+
 		this.update();
+
 		return this;
+
 	},
 
+
+
 	update: function () {
+
 		if (!this._map) { return; }
+
+
 
 		this._container.style.visibility = 'hidden';
 
+
+
 		this._updateContent();
+
 		this._updateLayout();
+
 		this._updatePosition();
+
+
 
 		this._container.style.visibility = '';
 
+
+
 		this._adjustPan();
+
 	},
+
+
 
 	getEvents: function () {
+
 		var events = {viewreset: this._updatePosition},
+
 		    options = this.options;
 
+
+
 		if (this._zoomAnimated) {
+
 			events.zoomanim = this._animateZoom;
+
 		}
+
 		if ('closeOnClick' in options ? options.closeOnClick : this._map.options.closePopupOnClick) {
+
 			events.preclick = this._close;
+
 		}
+
 		if (options.keepInView) {
+
 			events.moveend = this._adjustPan;
+
 		}
+
 		return events;
+
 	},
+
 	
+
 	isOpen: function () {
+
 		return !!this._map && this._map.hasLayer(this);
+
 	},
+
+
 
 	_close: function () {
+
 		if (this._map) {
+
 			this._map.closePopup(this);
+
 		}
+
 	},
+
+
 
 	_initLayout: function () {
+
 		var prefix = 'leaflet-popup',
+
 		    container = this._container = L.DomUtil.create('div',
+
 			prefix + ' ' + (this.options.className || '') +
+
 			' leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide'));
 
+
+
 		if (this.options.closeButton) {
+
 			var closeButton = this._closeButton = L.DomUtil.create('a', prefix + '-close-button', container);
+
 			closeButton.href = '#close';
+
 			closeButton.innerHTML = '&#215;';
 
+
+
 			L.DomEvent.on(closeButton, 'click', this._onCloseButtonClick, this);
+
 		}
 
+
+
 		var wrapper = this._wrapper = L.DomUtil.create('div', prefix + '-content-wrapper', container);
+
 		this._contentNode = L.DomUtil.create('div', prefix + '-content', wrapper);
 
+
+
 		L.DomEvent
+
 			.disableClickPropagation(wrapper)
+
 			.disableScrollPropagation(this._contentNode)
+
 			.on(wrapper, 'contextmenu', L.DomEvent.stopPropagation);
 
+
+
 		this._tipContainer = L.DomUtil.create('div', prefix + '-tip-container', container);
+
 		this._tip = L.DomUtil.create('div', prefix + '-tip', this._tipContainer);
+
 	},
 
+
+
 	_updateContent: function () {
+
 		if (!this._content) { return; }
+
+
 
 		var node = this._contentNode;
 
+
+
 		if (typeof this._content === 'string') {
+
 			node.innerHTML = this._content;
+
 		} else {
+
 			while (node.hasChildNodes()) {
+
 				node.removeChild(node.firstChild);
+
 			}
+
 			node.appendChild(this._content);
+
 		}
+
 		this.fire('contentupdate');
+
 	},
 
+
+
 	_updateLayout: function () {
+
 		var container = this._contentNode,
+
 		    style = container.style;
 
+
+
 		style.width = '';
+
 		style.whiteSpace = 'nowrap';
 
+
+
 		var width = container.offsetWidth;
+
 		width = Math.min(width, this.options.maxWidth);
+
 		width = Math.max(width, this.options.minWidth);
 
+
+
 		style.width = (width + 1) + 'px';
+
 		style.whiteSpace = '';
+
+
 
 		style.height = '';
 
+
+
 		var height = container.offsetHeight,
+
 		    maxHeight = this.options.maxHeight,
+
 		    scrolledClass = 'leaflet-popup-scrolled';
 
+
+
 		if (maxHeight && height > maxHeight) {
+
 			style.height = maxHeight + 'px';
+
 			L.DomUtil.addClass(container, scrolledClass);
+
 		} else {
+
 			L.DomUtil.removeClass(container, scrolledClass);
+
 		}
+
+
 
 		this._containerWidth = this._container.offsetWidth;
+
 	},
+
+
 
 	_updatePosition: function () {
+
 		if (!this._map) { return; }
 
+
+
 		var pos = this._map.latLngToLayerPoint(this._latlng),
+
 		    offset = L.point(this.options.offset);
 
+
+
 		if (this._zoomAnimated) {
+
 			L.DomUtil.setPosition(this._container, pos);
+
 		} else {
+
 			offset = offset.add(pos);
+
 		}
+
+
 
 		var bottom = this._containerBottom = -offset.y,
+
 		    left = this._containerLeft = -Math.round(this._containerWidth / 2) + offset.x;
 
+
+
 		// bottom position the popup in case the height of the popup changes (images loading etc)
+
 		this._container.style.bottom = bottom + 'px';
+
 		this._container.style.left = left + 'px';
+
 	},
+
+
 
 	_animateZoom: function (e) {
+
 		var pos = this._map._latLngToNewLayerPoint(this._latlng, e.zoom, e.center);
+
 		L.DomUtil.setPosition(this._container, pos);
+
 	},
+
+
 
 	_adjustPan: function () {
+
 		if (!this.options.autoPan) { return; }
 
+
+
 		var map = this._map,
+
 		    containerHeight = this._container.offsetHeight,
+
 		    containerWidth = this._containerWidth,
+
 		    layerPos = new L.Point(this._containerLeft, -containerHeight - this._containerBottom);
 
+
+
 		if (this._zoomAnimated) {
+
 			layerPos._add(L.DomUtil.getPosition(this._container));
+
 		}
+
+
 
 		var containerPos = map.layerPointToContainerPoint(layerPos),
+
 		    padding = L.point(this.options.autoPanPadding),
+
 		    paddingTL = L.point(this.options.autoPanPaddingTopLeft || padding),
+
 		    paddingBR = L.point(this.options.autoPanPaddingBottomRight || padding),
+
 		    size = map.getSize(),
+
 		    dx = 0,
+
 		    dy = 0;
 
+
+
 		if (containerPos.x + containerWidth + paddingBR.x > size.x) { // right
+
 			dx = containerPos.x + containerWidth - size.x + paddingBR.x;
+
 		}
+
 		if (containerPos.x - dx - paddingTL.x < 0) { // left
+
 			dx = containerPos.x - paddingTL.x;
+
 		}
+
 		if (containerPos.y + containerHeight + paddingBR.y > size.y) { // bottom
+
 			dy = containerPos.y + containerHeight - size.y + paddingBR.y;
+
 		}
+
 		if (containerPos.y - dy - paddingTL.y < 0) { // top
+
 			dy = containerPos.y - paddingTL.y;
+
 		}
+
+
 
 		if (dx || dy) {
+
 			map
+
 			    .fire('autopanstart')
+
 			    .panBy([dx, dy]);
+
 		}
+
 	},
 
+
+
 	_onCloseButtonClick: function (e) {
+
 		this._close();
+
 		L.DomEvent.stop(e);
+
 	}
+
 });
 
+
+
 L.popup = function (options, source) {
+
 	return new L.Popup(options, source);
+
 };
 
 
+
+
+
 L.Map.include({
+
 	openPopup: function (popup, latlng, options) { // (Popup) or (String || HTMLElement, LatLng[, Object])
+
 		if (!(popup instanceof L.Popup)) {
+
 			var content = popup;
 
+
+
 			popup = new L.Popup(options).setContent(content);
+
 		}
+
+
 
 		if (latlng) {
+
 			popup.setLatLng(latlng);
+
 		}
+
+
 
 		if (this.hasLayer(popup)) {
+
 			return this;
+
 		}
+
+
 
 		this.closePopup();
+
 		this._popup = popup;
+
 		return this.addLayer(popup);
+
 	},
 
+
+
 	closePopup: function (popup) {
+
 		if (!popup || popup === this._popup) {
+
 			popup = this._popup;
+
 			this._popup = null;
+
 		}
+
 		if (popup) {
+
 			this.removeLayer(popup);
+
 		}
+
 		return this;
+
 	}
+
 });
+
 
 
 /*
@@ -4206,221 +7443,433 @@ L.Layer.include({
 
 
 /*
+
  * Popup extension to L.Marker, adding popup-related methods.
+
  */
 
+
+
 L.Marker.include({
+
 	bindPopup: function (content, options) {
+
 		var anchor = L.point(this.options.icon.options.popupAnchor || [0, 0])
+
 			.add(L.Popup.prototype.options.offset);
+
+
 
 		options = L.extend({offset: anchor}, options);
 
+
+
 		return L.Layer.prototype.bindPopup.call(this, content, options);
+
 	},
 
+
+
 	_openPopup: L.Layer.prototype.togglePopup
+
 });
 
 
+
 /*
+
  * L.LayerGroup is a class to combine several layers into one so that
+
  * you can manipulate the group (e.g. add/remove it) as one layer.
+
  */
+
+
 
 L.LayerGroup = L.Layer.extend({
 
+
+
 	initialize: function (layers) {
+
 		this._layers = {};
+
+
 
 		var i, len;
 
+
+
 		if (layers) {
+
 			for (i = 0, len = layers.length; i < len; i++) {
+
 				this.addLayer(layers[i]);
+
 			}
+
 		}
+
 	},
 
+
+
 	addLayer: function (layer) {
+
 		var id = this.getLayerId(layer);
+
+
 
 		this._layers[id] = layer;
 
+
+
 		if (this._map) {
+
 			this._map.addLayer(layer);
+
 		}
+
+
 
 		return this;
+
 	},
 
+
+
 	removeLayer: function (layer) {
+
 		var id = layer in this._layers ? layer : this.getLayerId(layer);
 
+
+
 		if (this._map && this._layers[id]) {
+
 			this._map.removeLayer(this._layers[id]);
+
 		}
+
+
 
 		delete this._layers[id];
 
+
+
 		return this;
+
 	},
+
+
 
 	hasLayer: function (layer) {
+
 		return !!layer && (layer in this._layers || this.getLayerId(layer) in this._layers);
+
 	},
+
+
 
 	clearLayers: function () {
+
 		for (var i in this._layers) {
+
 			this.removeLayer(this._layers[i]);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	invoke: function (methodName) {
+
 		var args = Array.prototype.slice.call(arguments, 1),
+
 		    i, layer;
 
+
+
 		for (i in this._layers) {
+
 			layer = this._layers[i];
 
+
+
 			if (layer[methodName]) {
+
 				layer[methodName].apply(layer, args);
+
 			}
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	onAdd: function (map) {
+
 		for (var i in this._layers) {
+
 			map.addLayer(this._layers[i]);
+
 		}
+
 	},
+
+
 
 	onRemove: function (map) {
+
 		for (var i in this._layers) {
+
 			map.removeLayer(this._layers[i]);
+
 		}
+
 	},
+
+
 
 	eachLayer: function (method, context) {
+
 		for (var i in this._layers) {
+
 			method.call(context, this._layers[i]);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	getLayer: function (id) {
+
 		return this._layers[id];
+
 	},
+
+
 
 	getLayers: function () {
+
 		var layers = [];
 
+
+
 		for (var i in this._layers) {
+
 			layers.push(this._layers[i]);
+
 		}
+
 		return layers;
+
 	},
+
+
 
 	setZIndex: function (zIndex) {
+
 		return this.invoke('setZIndex', zIndex);
+
 	},
 
+
+
 	getLayerId: function (layer) {
+
 		return L.stamp(layer);
+
 	}
+
 });
 
+
+
 L.layerGroup = function (layers) {
+
 	return new L.LayerGroup(layers);
+
 };
+
 
 
 /*
+
  * L.FeatureGroup extends L.LayerGroup by introducing mouse events and additional methods
+
  * shared between a group of interactive layers (like vectors or markers).
+
  */
+
+
 
 L.FeatureGroup = L.LayerGroup.extend({
 
+
+
 	addLayer: function (layer) {
+
 		if (this.hasLayer(layer)) {
+
 			return this;
+
 		}
+
+
 
 		layer.addEventParent(this);
 
+
+
 		L.LayerGroup.prototype.addLayer.call(this, layer);
 
+
+
 		if (this._popupContent && layer.bindPopup) {
+
 			layer.bindPopup(this._popupContent, this._popupOptions);
+
 		}
+
+
 
 		return this.fire('layeradd', {layer: layer});
+
 	},
 
+
+
 	removeLayer: function (layer) {
+
 		if (!this.hasLayer(layer)) {
+
 			return this;
+
 		}
+
 		if (layer in this._layers) {
+
 			layer = this._layers[layer];
+
 		}
+
+
 
 		layer.removeEventParent(this);
 
+
+
 		L.LayerGroup.prototype.removeLayer.call(this, layer);
 
+
+
 		if (this._popupContent) {
+
 			this.invoke('unbindPopup');
+
 		}
+
+
 
 		return this.fire('layerremove', {layer: layer});
+
 	},
+
+
 
 	bindPopup: function (content, options) {
+
 		this._popupContent = content;
+
 		this._popupOptions = options;
+
 		return this.invoke('bindPopup', content, options);
+
 	},
+
+
 
 	openPopup: function (latlng) {
+
 		// open popup on the first layer
+
 		for (var id in this._layers) {
+
 			this._layers[id].openPopup(latlng);
+
 			break;
+
 		}
+
 		return this;
+
 	},
+
+
 
 	setStyle: function (style) {
+
 		return this.invoke('setStyle', style);
+
 	},
+
+
 
 	bringToFront: function () {
+
 		return this.invoke('bringToFront');
+
 	},
+
+
 
 	bringToBack: function () {
+
 		return this.invoke('bringToBack');
+
 	},
 
+
+
 	getBounds: function () {
+
 		var bounds = new L.LatLngBounds();
 
+
+
 		this.eachLayer(function (layer) {
+
 			bounds.extend(layer.getBounds ? layer.getBounds() : layer.getLatLng());
+
 		});
 
+
+
 		return bounds;
+
 	}
+
 });
 
+
+
 L.featureGroup = function (layers) {
+
 	return new L.FeatureGroup(layers);
+
 };
+
 
 
 /*
@@ -4586,218 +8035,431 @@ L.Path = L.Layer.extend({
 
 
 /*
+
  * L.LineUtil contains different utility functions for line segments
+
  * and polylines (clipping, simplification, distances, etc.)
+
  */
+
+
 
 /*jshint bitwise:false */ // allow bitwise operations for this file
 
+
+
 L.LineUtil = {
 
+
+
 	// Simplify polyline with vertex reduction and Douglas-Peucker simplification.
+
 	// Improves rendering performance dramatically by lessening the number of points to draw.
 
+
+
 	simplify: function (/*Point[]*/ points, /*Number*/ tolerance) {
+
 		if (!tolerance || !points.length) {
+
 			return points.slice();
+
 		}
+
+
 
 		var sqTolerance = tolerance * tolerance;
 
+
+
 		// stage 1: vertex reduction
+
 		points = this._reducePoints(points, sqTolerance);
 
+
+
 		// stage 2: Douglas-Peucker simplification
+
 		points = this._simplifyDP(points, sqTolerance);
 
+
+
 		return points;
+
 	},
+
+
 
 	// distance from a point to a segment between two points
+
 	pointToSegmentDistance:  function (/*Point*/ p, /*Point*/ p1, /*Point*/ p2) {
+
 		return Math.sqrt(this._sqClosestPointOnSegment(p, p1, p2, true));
+
 	},
+
+
 
 	closestPointOnSegment: function (/*Point*/ p, /*Point*/ p1, /*Point*/ p2) {
+
 		return this._sqClosestPointOnSegment(p, p1, p2);
+
 	},
 
+
+
 	// Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
+
 	_simplifyDP: function (points, sqTolerance) {
 
+
+
 		var len = points.length,
+
 		    ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
+
 		    markers = new ArrayConstructor(len);
+
+
 
 		markers[0] = markers[len - 1] = 1;
 
+
+
 		this._simplifyDPStep(points, markers, sqTolerance, 0, len - 1);
 
+
+
 		var i,
+
 		    newPoints = [];
 
+
+
 		for (i = 0; i < len; i++) {
+
 			if (markers[i]) {
+
 				newPoints.push(points[i]);
+
 			}
+
 		}
 
+
+
 		return newPoints;
+
 	},
+
+
 
 	_simplifyDPStep: function (points, markers, sqTolerance, first, last) {
 
+
+
 		var maxSqDist = 0,
+
 		    index, i, sqDist;
 
+
+
 		for (i = first + 1; i <= last - 1; i++) {
+
 			sqDist = this._sqClosestPointOnSegment(points[i], points[first], points[last], true);
 
+
+
 			if (sqDist > maxSqDist) {
+
 				index = i;
+
 				maxSqDist = sqDist;
+
 			}
+
 		}
+
+
 
 		if (maxSqDist > sqTolerance) {
+
 			markers[index] = 1;
 
+
+
 			this._simplifyDPStep(points, markers, sqTolerance, first, index);
+
 			this._simplifyDPStep(points, markers, sqTolerance, index, last);
+
 		}
+
 	},
+
+
 
 	// reduce points that are too close to each other to a single point
+
 	_reducePoints: function (points, sqTolerance) {
+
 		var reducedPoints = [points[0]];
 
+
+
 		for (var i = 1, prev = 0, len = points.length; i < len; i++) {
+
 			if (this._sqDist(points[i], points[prev]) > sqTolerance) {
+
 				reducedPoints.push(points[i]);
+
 				prev = i;
+
 			}
+
 		}
+
 		if (prev < len - 1) {
+
 			reducedPoints.push(points[len - 1]);
+
 		}
+
 		return reducedPoints;
+
 	},
 
+
+
 	// Cohen-Sutherland line clipping algorithm.
+
 	// Used to avoid rendering parts of a polyline that are not currently visible.
 
+
+
 	clipSegment: function (a, b, bounds, useLastCode) {
+
 		var codeA = useLastCode ? this._lastCode : this._getBitCode(a, bounds),
+
 		    codeB = this._getBitCode(b, bounds),
+
+
 
 		    codeOut, p, newCode;
 
+
+
 		// save 2nd code to avoid calculating it on the next segment
+
 		this._lastCode = codeB;
 
+
+
 		while (true) {
+
 			// if a,b is inside the clip window (trivial accept)
+
 			if (!(codeA | codeB)) {
+
 				return [a, b];
+
 			// if a,b is outside the clip window (trivial reject)
+
 			} else if (codeA & codeB) {
+
 				return false;
+
 			// other cases
+
 			} else {
+
 				codeOut = codeA || codeB;
+
 				p = this._getEdgeIntersection(a, b, codeOut, bounds);
+
 				newCode = this._getBitCode(p, bounds);
 
+
+
 				if (codeOut === codeA) {
+
 					a = p;
+
 					codeA = newCode;
+
 				} else {
+
 					b = p;
+
 					codeB = newCode;
+
 				}
+
 			}
+
 		}
+
 	},
+
+
 
 	_getEdgeIntersection: function (a, b, code, bounds) {
+
 		var dx = b.x - a.x,
+
 		    dy = b.y - a.y,
+
 		    min = bounds.min,
+
 		    max = bounds.max,
+
 		    x, y;
 
+
+
 		if (code & 8) { // top
+
 			x = a.x + dx * (max.y - a.y) / dy;
+
 			y = max.y;
 
+
+
 		} else if (code & 4) { // bottom
+
 			x = a.x + dx * (min.y - a.y) / dy;
+
 			y = min.y;
 
+
+
 		} else if (code & 2) { // right
+
 			x = max.x;
+
 			y = a.y + dy * (max.x - a.x) / dx;
 
+
+
 		} else if (code & 1) { // left
+
 			x = min.x;
+
 			y = a.y + dy * (min.x - a.x) / dx;
+
 		}
+
+
 
 		return new L.Point(x, y, true);
+
 	},
+
+
 
 	_getBitCode: function (/*Point*/ p, bounds) {
+
 		var code = 0;
 
+
+
 		if (p.x < bounds.min.x) { // left
+
 			code |= 1;
+
 		} else if (p.x > bounds.max.x) { // right
+
 			code |= 2;
+
 		}
+
+
 
 		if (p.y < bounds.min.y) { // bottom
+
 			code |= 4;
+
 		} else if (p.y > bounds.max.y) { // top
+
 			code |= 8;
+
 		}
+
+
 
 		return code;
+
 	},
+
+
 
 	// square distance (to avoid unnecessary Math.sqrt calls)
+
 	_sqDist: function (p1, p2) {
+
 		var dx = p2.x - p1.x,
+
 		    dy = p2.y - p1.y;
+
 		return dx * dx + dy * dy;
+
 	},
 
+
+
 	// return closest point on segment or distance to that point
+
 	_sqClosestPointOnSegment: function (p, p1, p2, sqDist) {
+
 		var x = p1.x,
+
 		    y = p1.y,
+
 		    dx = p2.x - x,
+
 		    dy = p2.y - y,
+
 		    dot = dx * dx + dy * dy,
+
 		    t;
 
+
+
 		if (dot > 0) {
+
 			t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
 
+
+
 			if (t > 1) {
+
 				x = p2.x;
+
 				y = p2.y;
+
 			} else if (t > 0) {
+
 				x += dx * t;
+
 				y += dy * t;
+
 			}
+
 		}
 
+
+
 		dx = p.x - x;
+
 		dy = p.y - y;
 
+
+
 		return sqDist ? dx * dx + dy * dy : new L.Point(x, y);
+
 	}
+
 };
+
 
 
 /*
@@ -5026,60 +8688,115 @@ L.polyline = function (latlngs, options) {
 
 
 /*
+
  * L.PolyUtil contains utility functions for polygons (clipping, etc.).
+
  */
+
+
 
 /*jshint bitwise:false */ // allow bitwise operations here
 
+
+
 L.PolyUtil = {};
 
+
+
 /*
+
  * Sutherland-Hodgeman polygon clipping algorithm.
+
  * Used to avoid rendering parts of a polygon that are not currently visible.
+
  */
+
 L.PolyUtil.clipPolygon = function (points, bounds) {
+
 	var clippedPoints,
+
 	    edges = [1, 4, 2, 8],
+
 	    i, j, k,
+
 	    a, b,
+
 	    len, edge, p,
+
 	    lu = L.LineUtil;
 
+
+
 	for (i = 0, len = points.length; i < len; i++) {
+
 		points[i]._code = lu._getBitCode(points[i], bounds);
+
 	}
+
+
 
 	// for each edge (left, bottom, right, top)
+
 	for (k = 0; k < 4; k++) {
+
 		edge = edges[k];
+
 		clippedPoints = [];
 
+
+
 		for (i = 0, len = points.length, j = len - 1; i < len; j = i++) {
+
 			a = points[i];
+
 			b = points[j];
 
+
+
 			// if a is inside the clip window
+
 			if (!(a._code & edge)) {
+
 				// if b is outside the clip window (a->b goes out of screen)
+
 				if (b._code & edge) {
+
 					p = lu._getEdgeIntersection(b, a, edge, bounds);
+
 					p._code = lu._getBitCode(p, bounds);
+
 					clippedPoints.push(p);
+
 				}
+
 				clippedPoints.push(a);
 
+
+
 			// else if b is inside the clip window (a->b enters the screen)
+
 			} else if (!(b._code & edge)) {
+
 				p = lu._getEdgeIntersection(b, a, edge, bounds);
+
 				p._code = lu._getBitCode(p, bounds);
+
 				clippedPoints.push(p);
+
 			}
+
 		}
+
 		points = clippedPoints;
+
 	}
 
+
+
 	return points;
+
 };
+
 
 
 /*
@@ -5957,663 +9674,1317 @@ L.CircleMarker.prototype._containsPoint = function (p) {
 
 
 /*
+
  * L.GeoJSON turns any GeoJSON data into a Leaflet layer.
+
  */
+
+
 
 L.GeoJSON = L.FeatureGroup.extend({
 
+
+
 	initialize: function (geojson, options) {
+
 		L.setOptions(this, options);
+
+
 
 		this._layers = {};
 
+
+
 		if (geojson) {
+
 			this.addData(geojson);
+
 		}
+
 	},
 
+
+
 	addData: function (geojson) {
+
 		var features = L.Util.isArray(geojson) ? geojson : geojson.features,
+
 		    i, len, feature;
 
+
+
 		if (features) {
+
 			for (i = 0, len = features.length; i < len; i++) {
+
 				// Only add this if geometry or geometries are set and not null
+
 				feature = features[i];
+
 				if (feature.geometries || feature.geometry || feature.features || feature.coordinates) {
+
 					this.addData(feature);
+
 				}
+
 			}
+
 			return this;
+
 		}
+
+
 
 		var options = this.options;
 
+
+
 		if (options.filter && !options.filter(geojson)) { return; }
 
+
+
 		var layer = L.GeoJSON.geometryToLayer(geojson, options);
+
 		layer.feature = L.GeoJSON.asFeature(geojson);
 
+
+
 		layer.defaultOptions = layer.options;
+
 		this.resetStyle(layer);
 
+
+
 		if (options.onEachFeature) {
+
 			options.onEachFeature(geojson, layer);
+
 		}
+
+
 
 		return this.addLayer(layer);
+
 	},
+
+
 
 	resetStyle: function (layer) {
+
 		// reset any custom styles
+
 		layer.options = layer.defaultOptions;
+
 		this._setLayerStyle(layer, this.options.style);
+
 		return this;
+
 	},
+
+
 
 	setStyle: function (style) {
+
 		return this.eachLayer(function (layer) {
+
 			this._setLayerStyle(layer, style);
+
 		}, this);
+
 	},
+
+
 
 	_setLayerStyle: function (layer, style) {
+
 		if (typeof style === 'function') {
+
 			style = style(layer.feature);
+
 		}
+
 		if (layer.setStyle) {
+
 			layer.setStyle(style);
+
 		}
+
 	}
+
 });
+
+
 
 L.extend(L.GeoJSON, {
+
 	geometryToLayer: function (geojson, options) {
 
+
+
 		var geometry = geojson.type === 'Feature' ? geojson.geometry : geojson,
+
 		    coords = geometry.coordinates,
+
 		    layers = [],
+
 		    pointToLayer = options && options.pointToLayer,
+
 		    coordsToLatLng = options && options.coordsToLatLng || this.coordsToLatLng,
+
 		    latlng, latlngs, i, len;
 
+
+
 		switch (geometry.type) {
+
 		case 'Point':
+
 			latlng = coordsToLatLng(coords);
+
 			return pointToLayer ? pointToLayer(geojson, latlng) : new L.Marker(latlng);
 
+
+
 		case 'MultiPoint':
+
 			for (i = 0, len = coords.length; i < len; i++) {
+
 				latlng = coordsToLatLng(coords[i]);
+
 				layers.push(pointToLayer ? pointToLayer(geojson, latlng) : new L.Marker(latlng));
+
 			}
+
 			return new L.FeatureGroup(layers);
+
+
 
 		case 'LineString':
+
 		case 'MultiLineString':
+
 			latlngs = this.coordsToLatLngs(coords, geometry.type === 'LineString' ? 0 : 1, coordsToLatLng);
+
 			return new L.Polyline(latlngs, options);
 
+
+
 		case 'Polygon':
+
 		case 'MultiPolygon':
+
 			latlngs = this.coordsToLatLngs(coords, geometry.type === 'Polygon' ? 1 : 2, coordsToLatLng);
+
 			return new L.Polygon(latlngs, options);
 
+
+
 		case 'GeometryCollection':
+
 			for (i = 0, len = geometry.geometries.length; i < len; i++) {
 
+
+
 				layers.push(this.geometryToLayer({
+
 					geometry: geometry.geometries[i],
+
 					type: 'Feature',
+
 					properties: geojson.properties
+
 				}, options));
+
 			}
+
 			return new L.FeatureGroup(layers);
 
+
+
 		default:
+
 			throw new Error('Invalid GeoJSON object.');
+
 		}
+
 	},
+
+
 
 	coordsToLatLng: function (coords) {
+
 		return new L.LatLng(coords[1], coords[0], coords[2]);
+
 	},
+
+
 
 	coordsToLatLngs: function (coords, levelsDeep, coordsToLatLng) {
+
 		var latlngs = [];
 
+
+
 		for (var i = 0, len = coords.length, latlng; i < len; i++) {
+
 			latlng = levelsDeep ?
+
 			        this.coordsToLatLngs(coords[i], levelsDeep - 1, coordsToLatLng) :
+
 			        (coordsToLatLng || this.coordsToLatLng)(coords[i]);
 
+
+
 			latlngs.push(latlng);
+
 		}
+
+
 
 		return latlngs;
+
 	},
+
+
 
 	latLngToCoords: function (latlng) {
+
 		return latlng.alt !== undefined ?
+
 				[latlng.lng, latlng.lat, latlng.alt] :
+
 				[latlng.lng, latlng.lat];
+
 	},
+
+
 
 	latLngsToCoords: function (latlngs, levelsDeep, closed) {
+
 		var coords = [];
 
+
+
 		for (var i = 0, len = latlngs.length; i < len; i++) {
+
 			coords.push(levelsDeep ?
+
 				L.GeoJSON.latLngsToCoords(latlngs[i], levelsDeep - 1, closed):
+
 				L.GeoJSON.latLngToCoords(latlngs[i]));
+
 		}
+
+
 
 		if (!levelsDeep && closed) {
+
 			coords.push(coords[0]);
+
 		}
+
+
 
 		return coords;
+
 	},
+
+
 
 	getFeature: function (layer, newGeometry) {
+
 		return layer.feature ?
+
 				L.extend({}, layer.feature, {geometry: newGeometry}) :
+
 				L.GeoJSON.asFeature(newGeometry);
+
 	},
 
+
+
 	asFeature: function (geoJSON) {
+
 		if (geoJSON.type === 'Feature') {
+
 			return geoJSON;
+
 		}
 
+
+
 		return {
+
 			type: 'Feature',
+
 			properties: {},
+
 			geometry: geoJSON
+
 		};
+
 	}
+
 });
 
+
+
 var PointToGeoJSON = {
+
 	toGeoJSON: function () {
+
 		return L.GeoJSON.getFeature(this, {
+
 			type: 'Point',
+
 			coordinates: L.GeoJSON.latLngToCoords(this.getLatLng())
+
 		});
+
 	}
+
 };
 
+
+
 L.Marker.include(PointToGeoJSON);
+
 L.Circle.include(PointToGeoJSON);
+
 L.CircleMarker.include(PointToGeoJSON);
 
+
+
 L.Polyline.prototype.toGeoJSON = function () {
+
 	var multi = !this._flat(this._latlngs);
+
+
 
 	var coords = L.GeoJSON.latLngsToCoords(this._latlngs, multi ? 1 : 0);
 
+
+
 	return L.GeoJSON.getFeature(this, {
+
 		type: (multi ? 'Multi' : '') + 'LineString',
+
 		coordinates: coords
+
 	});
+
 };
 
+
+
 L.Polygon.prototype.toGeoJSON = function () {
+
 	var holes = !this._flat(this._latlngs),
+
 	    multi = holes && !this._flat(this._latlngs[0]);
+
+
 
 	var coords = L.GeoJSON.latLngsToCoords(this._latlngs, multi ? 2 : holes ? 1 : 0, true);
 
+
+
 	if (holes && this._latlngs.length === 1) {
+
 		multi = true;
+
 		coords = [coords];
-	}
-	if (!holes) {
-		coords = [coords];
+
 	}
 
+	if (!holes) {
+
+		coords = [coords];
+
+	}
+
+
+
 	return L.GeoJSON.getFeature(this, {
+
 		type: (multi ? 'Multi' : '') + 'Polygon',
+
 		coordinates: coords
+
 	});
+
 };
+
+
+
 
 
 L.LayerGroup.include({
+
 	toMultiPoint: function () {
+
 		var coords = [];
 
+
+
 		this.eachLayer(function (layer) {
+
 			coords.push(layer.toGeoJSON().geometry.coordinates);
+
 		});
 
+
+
 		return L.GeoJSON.getFeature(this, {
+
 			type: 'MultiPoint',
+
 			coordinates: coords
+
 		});
+
 	},
+
+
 
 	toGeoJSON: function () {
 
+
+
 		var type = this.feature && this.feature.geometry && this.feature.geometry.type;
 
+
+
 		if (type === 'MultiPoint') {
+
 			return this.toMultiPoint();
+
 		}
+
+
 
 		var isGeometryCollection = type === 'GeometryCollection',
+
 			jsons = [];
 
+
+
 		this.eachLayer(function (layer) {
+
 			if (layer.toGeoJSON) {
+
 				var json = layer.toGeoJSON();
+
 				jsons.push(isGeometryCollection ? json.geometry : L.GeoJSON.asFeature(json));
+
 			}
+
 		});
 
+
+
 		if (isGeometryCollection) {
+
 			return L.GeoJSON.getFeature(this, {
+
 				geometries: jsons,
+
 				type: 'GeometryCollection'
+
 			});
+
 		}
 
+
+
 		return {
+
 			type: 'FeatureCollection',
+
 			features: jsons
+
 		};
+
 	}
+
 });
 
+
+
 L.geoJson = function (geojson, options) {
+
 	return new L.GeoJSON(geojson, options);
+
 };
 
 
+
 /*
+
  * L.DomEvent contains functions for working with DOM events.
+
  * Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
+
  */
+
+
 
 var eventsKey = '_leaflet_events';
 
+
+
 L.DomEvent = {
+
+
 
 	on: function (obj, types, fn, context) {
 
+
+
 		if (typeof types === 'object') {
+
 			for (var type in types) {
+
 				this._on(obj, type, types[type], fn);
+
 			}
+
 		} else {
+
 			types = L.Util.splitWords(types);
 
+
+
 			for (var i = 0, len = types.length; i < len; i++) {
+
 				this._on(obj, types[i], fn, context);
+
 			}
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	off: function (obj, types, fn, context) {
 
+
+
 		if (typeof types === 'object') {
+
 			for (var type in types) {
+
 				this._off(obj, type, types[type], fn);
+
 			}
+
 		} else {
+
 			types = L.Util.splitWords(types);
 
+
+
 			for (var i = 0, len = types.length; i < len; i++) {
+
 				this._off(obj, types[i], fn, context);
+
 			}
+
 		}
 
+
+
 		return this;
+
 	},
 
+
+
 	_on: function (obj, type, fn, context) {
+
 		var id = type + L.stamp(fn) + (context ? '_' + L.stamp(context) : '');
+
+
 
 		if (obj[eventsKey] && obj[eventsKey][id]) { return this; }
 
+
+
 		var handler = function (e) {
+
 			return fn.call(context || obj, e || window.event);
+
 		};
+
+
 
 		var originalHandler = handler;
 
+
+
 		if (L.Browser.pointer && type.indexOf('touch') === 0) {
+
 			return this.addPointerListener(obj, type, handler, id);
+
 		}
+
 		if (L.Browser.touch && (type === 'dblclick') && this.addDoubleTapListener) {
+
 			this.addDoubleTapListener(obj, handler, id);
+
 		}
+
+
 
 		if ('addEventListener' in obj) {
 
+
+
 			if (type === 'mousewheel') {
+
 				obj.addEventListener('DOMMouseScroll', handler, false);
+
 				obj.addEventListener(type, handler, false);
+
+
 
 			} else if ((type === 'mouseenter') || (type === 'mouseleave')) {
+
 				handler = function (e) {
+
 					e = e || window.event;
+
 					if (!L.DomEvent._checkMouse(obj, e)) { return; }
+
 					return originalHandler(e);
+
 				};
+
 				obj.addEventListener(type === 'mouseenter' ? 'mouseover' : 'mouseout', handler, false);
 
+
+
 			} else {
+
 				if (type === 'click' && L.Browser.android) {
+
 					handler = function (e) {
+
 						return L.DomEvent._filterClick(e, originalHandler);
+
 					};
+
 				}
+
 				obj.addEventListener(type, handler, false);
+
 			}
 
+
+
 		} else if ('attachEvent' in obj) {
+
 			obj.attachEvent('on' + type, handler);
+
 		}
 
+
+
 		obj[eventsKey] = obj[eventsKey] || {};
+
 		obj[eventsKey][id] = handler;
 
+
+
 		return this;
+
 	},
+
+
 
 	_off: function (obj, type, fn, context) {
 
+
+
 		var id = type + L.stamp(fn) + (context ? '_' + L.stamp(context) : ''),
+
 		    handler = obj[eventsKey] && obj[eventsKey][id];
+
+
 
 		if (!handler) { return this; }
 
+
+
 		if (L.Browser.pointer && type.indexOf('touch') === 0) {
+
 			this.removePointerListener(obj, type, id);
 
+
+
 		} else if (L.Browser.touch && (type === 'dblclick') && this.removeDoubleTapListener) {
+
 			this.removeDoubleTapListener(obj, id);
+
+
 
 		} else if ('removeEventListener' in obj) {
 
+
+
 			if (type === 'mousewheel') {
+
 				obj.removeEventListener('DOMMouseScroll', handler, false);
+
 				obj.removeEventListener(type, handler, false);
 
+
+
 			} else {
+
 				obj.removeEventListener(
+
 					type === 'mouseenter' ? 'mouseover' :
+
 					type === 'mouseleave' ? 'mouseout' : type, handler, false);
+
 			}
 
+
+
 		} else if ('detachEvent' in obj) {
+
 			obj.detachEvent('on' + type, handler);
+
 		}
+
+
 
 		obj[eventsKey][id] = null;
 
+
+
 		return this;
+
 	},
+
+
 
 	stopPropagation: function (e) {
 
+
+
 		if (e.stopPropagation) {
+
 			e.stopPropagation();
+
 		} else {
+
 			e.cancelBubble = true;
+
 		}
+
 		L.DomEvent._skipped(e);
 
+
+
 		return this;
+
 	},
+
+
 
 	disableScrollPropagation: function (el) {
+
 		return L.DomEvent.on(el, 'mousewheel MozMousePixelScroll', L.DomEvent.stopPropagation);
+
 	},
 
+
+
 	disableClickPropagation: function (el) {
+
 		var stop = L.DomEvent.stopPropagation;
+
+
 
 		L.DomEvent.on(el, L.Draggable.START.join(' '), stop);
 
+
+
 		return L.DomEvent.on(el, {
+
 			click: L.DomEvent._fakeStop,
+
 			dblclick: stop
+
 		});
+
 	},
+
+
 
 	preventDefault: function (e) {
 
+
+
 		if (e.preventDefault) {
+
 			e.preventDefault();
+
 		} else {
+
 			e.returnValue = false;
+
 		}
+
 		return this;
+
 	},
+
+
 
 	stop: function (e) {
+
 		return L.DomEvent
+
 			.preventDefault(e)
+
 			.stopPropagation(e);
+
 	},
 
+
+
 	getMousePosition: function (e, container) {
+
 		if (!container) {
+
 			return new L.Point(e.clientX, e.clientY);
+
 		}
+
+
 
 		var rect = container.getBoundingClientRect();
 
+
+
 		return new L.Point(
+
 			e.clientX - rect.left - container.clientLeft,
+
 			e.clientY - rect.top - container.clientTop);
+
 	},
+
+
 
 	getWheelDelta: function (e) {
 
+
+
 		var delta = 0;
 
+
+
 		if (e.wheelDelta) {
+
 			delta = e.wheelDelta / 120;
+
 		}
+
 		if (e.detail) {
+
 			delta = -e.detail / 3;
+
 		}
+
 		return delta;
+
 	},
+
+
 
 	_skipEvents: {},
 
+
+
 	_fakeStop: function (e) {
+
 		// fakes stopPropagation by setting a special event flag, checked/reset with L.DomEvent._skipped(e)
+
 		L.DomEvent._skipEvents[e.type] = true;
+
 	},
+
+
 
 	_skipped: function (e) {
+
 		var skipped = this._skipEvents[e.type];
+
 		// reset when checking, as it's only used in map container and propagates outside of the map
+
 		this._skipEvents[e.type] = false;
+
 		return skipped;
+
 	},
 
+
+
 	// check if element really left/entered the event target (for mouseenter/mouseleave)
+
 	_checkMouse: function (el, e) {
+
+
 
 		var related = e.relatedTarget;
 
+
+
 		if (!related) { return true; }
 
+
+
 		try {
+
 			while (related && (related !== el)) {
+
 				related = related.parentNode;
+
 			}
+
 		} catch (err) {
+
 			return false;
+
 		}
+
 		return (related !== el);
+
 	},
 
+
+
 	// this is a horrible workaround for a bug in Android where a single touch triggers two click events
+
 	_filterClick: function (e, handler) {
+
 		var timeStamp = (e.timeStamp || e.originalEvent.timeStamp),
+
 			elapsed = L.DomEvent._lastClick && (timeStamp - L.DomEvent._lastClick);
 
+
+
 		// are they closer together than 500ms yet more than 100ms?
+
 		// Android typically triggers them ~300ms apart while multiple listeners
+
 		// on the same event should be triggered far faster;
+
 		// or check if click is simulated on the element, and if it is, reject any non-simulated events
 
+
+
 		if ((elapsed && elapsed > 100 && elapsed < 500) || (e.target._simulatedClick && !e._simulated)) {
+
 			L.DomEvent.stop(e);
+
 			return;
+
 		}
+
 		L.DomEvent._lastClick = timeStamp;
 
+
+
 		return handler(e);
+
 	}
+
 };
 
+
+
 L.DomEvent.addListener = L.DomEvent.on;
+
 L.DomEvent.removeListener = L.DomEvent.off;
 
 
+
 /*
+
  * L.Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
+
  */
+
+
 
 L.Draggable = L.Evented.extend({
 
+
+
 	statics: {
+
 		START: L.Browser.touch ? ['touchstart', 'mousedown'] : ['mousedown'],
+
 		END: {
+
 			mousedown: 'mouseup',
+
 			touchstart: 'touchend',
+
 			pointerdown: 'touchend',
+
 			MSPointerDown: 'touchend'
+
 		},
+
 		MOVE: {
+
 			mousedown: 'mousemove',
+
 			touchstart: 'touchmove',
+
 			pointerdown: 'touchmove',
+
 			MSPointerDown: 'touchmove'
+
 		}
+
 	},
+
+
 
 	initialize: function (element, dragStartTarget) {
+
 		this._element = element;
+
 		this._dragStartTarget = dragStartTarget || element;
+
 	},
 
+
+
 	enable: function () {
+
 		if (this._enabled) { return; }
+
+
 
 		L.DomEvent.on(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
 
+
+
 		this._enabled = true;
+
 	},
 
+
+
 	disable: function () {
+
 		if (!this._enabled) { return; }
+
+
 
 		L.DomEvent.off(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
 
+
+
 		this._enabled = false;
+
 		this._moved = false;
+
 	},
 
+
+
 	_onDown: function (e) {
+
 		this._moved = false;
+
+
 
 		if (e.shiftKey || ((e.which !== 1) && (e.button !== 1) && !e.touches)) { return; }
 
+
+
 		L.DomEvent.stopPropagation(e);
+
+
 
 		if (L.Draggable._disabled) { return; }
 
+
+
 		L.DomUtil.disableImageDrag();
+
 		L.DomUtil.disableTextSelection();
+
+
 
 		if (this._moving) { return; }
 
+
+
 		this.fire('down');
+
+
 
 		var first = e.touches ? e.touches[0] : e;
 
+
+
 		this._startPoint = new L.Point(first.clientX, first.clientY);
+
 		this._startPos = this._newPos = L.DomUtil.getPosition(this._element);
 
+
+
 		L.DomEvent
+
 		    .on(document, L.Draggable.MOVE[e.type], this._onMove, this)
+
 		    .on(document, L.Draggable.END[e.type], this._onUp, this);
+
 	},
 
+
+
 	_onMove: function (e) {
+
 		if (e.touches && e.touches.length > 1) {
+
 			this._moved = true;
+
 			return;
+
 		}
 
+
+
 		var first = (e.touches && e.touches.length === 1 ? e.touches[0] : e),
+
 		    newPoint = new L.Point(first.clientX, first.clientY),
+
 		    offset = newPoint.subtract(this._startPoint);
 
+
+
 		if (!offset.x && !offset.y) { return; }
+
 		if (L.Browser.touch && Math.abs(offset.x) + Math.abs(offset.y) < 3) { return; }
+
+
 
 		L.DomEvent.preventDefault(e);
 
+
+
 		if (!this._moved) {
+
 			this.fire('dragstart');
 
+
+
 			this._moved = true;
+
 			this._startPos = L.DomUtil.getPosition(this._element).subtract(offset);
 
+
+
 			L.DomUtil.addClass(document.body, 'leaflet-dragging');
+
 			L.DomUtil.addClass(e.target || e.srcElement, 'leaflet-drag-target');
+
 		}
+
+
 
 		this._newPos = this._startPos.add(offset);
+
 		this._moving = true;
 
+
+
 		L.Util.cancelAnimFrame(this._animRequest);
+
 		this._animRequest = L.Util.requestAnimFrame(this._updatePosition, this, true, this._dragStartTarget);
+
 	},
+
+
 
 	_updatePosition: function () {
+
 		this.fire('predrag');
+
 		L.DomUtil.setPosition(this._element, this._newPos);
+
 		this.fire('drag');
+
 	},
 
+
+
 	_onUp: function (e) {
+
 		L.DomUtil.removeClass(document.body, 'leaflet-dragging');
+
 		L.DomUtil.removeClass(e.target || e.srcElement, 'leaflet-drag-target');
 
+
+
 		for (var i in L.Draggable.MOVE) {
+
 			L.DomEvent
+
 			    .off(document, L.Draggable.MOVE[i], this._onMove, this)
+
 			    .off(document, L.Draggable.END[i], this._onUp, this);
+
 		}
+
+
 
 		L.DomUtil.enableImageDrag();
+
 		L.DomUtil.enableTextSelection();
 
+
+
 		if (this._moved && this._moving) {
+
 			// ensure drag is not fired after dragend
+
 			L.Util.cancelAnimFrame(this._animRequest);
 
+
+
 			this.fire('dragend', {
+
 				distance: this._newPos.distanceTo(this._startPos)
+
 			});
+
 		}
 
+
+
 		this._moving = false;
+
 	}
+
 });
+
 
 
 /*
@@ -6903,102 +11274,199 @@ L.Map.addInitHook('addHandler', 'scrollWheelZoom', L.Map.ScrollWheelZoom);
 
 
 /*
+
  * Extends the event handling code with double tap support for mobile browsers.
+
  */
+
+
 
 L.extend(L.DomEvent, {
 
+
+
 	_touchstart: L.Browser.msPointer ? 'MSPointerDown' : L.Browser.pointer ? 'pointerdown' : 'touchstart',
+
 	_touchend: L.Browser.msPointer ? 'MSPointerUp' : L.Browser.pointer ? 'pointerup' : 'touchend',
 
+
+
 	// inspired by Zepto touch code by Thomas Fuchs
+
 	addDoubleTapListener: function (obj, handler, id) {
+
 		var last, touch,
+
 		    doubleTap = false,
+
 		    delay = 250,
+
 		    trackedTouches = [];
 
+
+
 		function onTouchStart(e) {
+
 			var count;
 
+
+
 			if (L.Browser.pointer) {
+
 				trackedTouches.push(e.pointerId);
+
 				count = trackedTouches.length;
+
 			} else {
+
 				count = e.touches.length;
+
 			}
+
+
 
 			if (count > 1) { return; }
 
+
+
 			var now = Date.now(),
+
 			    delta = now - (last || now);
 
+
+
 			touch = e.touches ? e.touches[0] : e;
+
 			doubleTap = (delta > 0 && delta <= delay);
+
 			last = now;
+
 		}
+
+
 
 		function onTouchEnd(e) {
+
 			if (L.Browser.pointer) {
+
 				var idx = trackedTouches.indexOf(e.pointerId);
+
 				if (idx === -1) { return; }
+
 				trackedTouches.splice(idx, 1);
+
 			}
+
+
 
 			if (doubleTap) {
+
 				if (L.Browser.pointer) {
+
 					// work around .type being readonly with MSPointer* events
+
 					var newTouch = {},
+
 						prop, i;
 
+
+
 					for (i in touch) {
+
 						prop = touch[i];
+
 						newTouch[i] = prop && prop.bind ? prop.bind(touch) : prop;
+
 					}
+
 					touch = newTouch;
+
 				}
+
 				touch.type = 'dblclick';
+
 				handler(touch);
+
 				last = null;
+
 			}
+
 		}
 
+
+
 		var pre = '_leaflet_',
+
 		    touchstart = this._touchstart,
+
 		    touchend = this._touchend;
 
+
+
 		obj[pre + touchstart + id] = onTouchStart;
+
 		obj[pre + touchend + id] = onTouchEnd;
 
+
+
 		// on pointer we need to listen on the document, otherwise a drag starting on the map and moving off screen
+
 		// will not come through to us, so we will lose track of how many touches are ongoing
+
 		var endElement = L.Browser.pointer ? document.documentElement : obj;
+
+
 
 		obj.addEventListener(touchstart, onTouchStart, false);
 
+
+
 		endElement.addEventListener(touchend, onTouchEnd, false);
+
 		if (L.Browser.pointer) {
+
 			endElement.addEventListener(L.DomEvent.POINTER_CANCEL, onTouchEnd, false);
+
 		}
 
+
+
 		return this;
+
 	},
 
+
+
 	removeDoubleTapListener: function (obj, id) {
+
 		var pre = '_leaflet_',
+
 		    endElement = L.Browser.pointer ? document.documentElement : obj,
+
 		    touchend = obj[pre + this._touchend + id];
+
+
 
 		obj.removeEventListener(this._touchstart, obj[pre + this._touchstart + id], false);
 
+
+
 		endElement.removeEventListener(this._touchend, touchend, false);
+
 		if (L.Browser.pointer) {
+
 			endElement.removeEventListener(L.DomEvent.POINTER_CANCEL, touchend, false);
+
 		}
 
+
+
 		return this;
+
 	}
+
 });
+
 
 
 /*
@@ -7678,310 +12146,611 @@ L.Handler.MarkerDrag = L.Handler.extend({
 
 
 /*
+
  * L.Control is a base class for implementing map controls. Handles positioning.
+
  * All other controls extend from this class.
+
  */
 
+
+
 L.Control = L.Class.extend({
+
 	options: {
+
 		position: 'topright'
+
 	},
+
+
 
 	initialize: function (options) {
+
 		L.setOptions(this, options);
+
 	},
+
+
 
 	getPosition: function () {
+
 		return this.options.position;
+
 	},
 
+
+
 	setPosition: function (position) {
+
 		var map = this._map;
 
+
+
 		if (map) {
+
 			map.removeControl(this);
+
 		}
+
+
 
 		this.options.position = position;
 
+
+
 		if (map) {
+
 			map.addControl(this);
+
 		}
 
+
+
 		return this;
+
 	},
+
+
 
 	getContainer: function () {
+
 		return this._container;
+
 	},
 
+
+
 	addTo: function (map) {
+
 		this._map = map;
 
+
+
 		var container = this._container = this.onAdd(map),
+
 		    pos = this.getPosition(),
+
 		    corner = map._controlCorners[pos];
+
+
 
 		L.DomUtil.addClass(container, 'leaflet-control');
 
+
+
 		if (pos.indexOf('bottom') !== -1) {
+
 			corner.insertBefore(container, corner.firstChild);
+
 		} else {
+
 			corner.appendChild(container);
+
 		}
+
+
 
 		return this;
+
 	},
 
+
+
 	remove: function () {
+
 		L.DomUtil.remove(this._container);
 
+
+
 		if (this.onRemove) {
+
 			this.onRemove(this._map);
+
 		}
+
+
 
 		this._map = null;
 
+
+
 		return this;
+
 	},
 
+
+
 	_refocusOnMap: function () {
+
 		if (this._map) {
+
 			this._map.getContainer().focus();
+
 		}
+
 	}
+
 });
 
+
+
 L.control = function (options) {
+
 	return new L.Control(options);
+
 };
+
+
+
 
 
 // adds control-related methods to L.Map
 
+
+
 L.Map.include({
+
 	addControl: function (control) {
+
 		control.addTo(this);
+
 		return this;
+
 	},
+
+
 
 	removeControl: function (control) {
+
 		control.remove();
+
 		return this;
+
 	},
+
+
 
 	_initControlPos: function () {
+
 		var corners = this._controlCorners = {},
+
 		    l = 'leaflet-',
+
 		    container = this._controlContainer =
+
 		            L.DomUtil.create('div', l + 'control-container', this._container);
 
+
+
 		function createCorner(vSide, hSide) {
+
 			var className = l + vSide + ' ' + l + hSide;
 
+
+
 			corners[vSide + hSide] = L.DomUtil.create('div', className, container);
+
 		}
 
+
+
 		createCorner('top', 'left');
+
 		createCorner('top', 'right');
+
 		createCorner('bottom', 'left');
+
 		createCorner('bottom', 'right');
+
 	},
 
+
+
 	_clearControlPos: function () {
+
 		L.DomUtil.remove(this._controlContainer);
+
 	}
+
 });
+
 
 
 /*
+
  * L.Control.Zoom is used for the default zoom buttons on the map.
+
  */
 
+
+
 L.Control.Zoom = L.Control.extend({
+
 	options: {
+
 		position: 'topleft',
+
 		zoomInText: '+',
+
 		zoomInTitle: 'Zoom in',
+
 		zoomOutText: '-',
+
 		zoomOutTitle: 'Zoom out'
+
 	},
+
+
 
 	onAdd: function (map) {
+
 		var zoomName = 'leaflet-control-zoom',
+
 		    container = L.DomUtil.create('div', zoomName + ' leaflet-bar'),
+
 		    options = this.options;
 
+
+
 		this._zoomInButton  = this._createButton(options.zoomInText, options.zoomInTitle,
+
 		        zoomName + '-in',  container, this._zoomIn);
+
 		this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
+
 		        zoomName + '-out', container, this._zoomOut);
 
+
+
 		this._updateDisabled();
+
 		map.on('zoomend zoomlevelschange', this._updateDisabled, this);
 
+
+
 		return container;
+
 	},
+
+
 
 	onRemove: function (map) {
+
 		map.off('zoomend zoomlevelschange', this._updateDisabled, this);
+
 	},
+
+
 
 	_zoomIn: function (e) {
+
 		this._map.zoomIn(e.shiftKey ? 3 : 1);
+
 	},
+
+
 
 	_zoomOut: function (e) {
+
 		this._map.zoomOut(e.shiftKey ? 3 : 1);
+
 	},
+
+
 
 	_createButton: function (html, title, className, container, fn) {
+
 		var link = L.DomUtil.create('a', className, container);
+
 		link.innerHTML = html;
+
 		link.href = '#';
+
 		link.title = title;
 
+
+
 		L.DomEvent
+
 		    .on(link, 'mousedown dblclick', L.DomEvent.stopPropagation)
+
 		    .on(link, 'click', L.DomEvent.stop)
+
 		    .on(link, 'click', fn, this)
+
 		    .on(link, 'click', this._refocusOnMap, this);
 
+
+
 		return link;
+
 	},
 
+
+
 	_updateDisabled: function () {
+
 		var map = this._map,
+
 			className = 'leaflet-disabled';
 
+
+
 		L.DomUtil.removeClass(this._zoomInButton, className);
+
 		L.DomUtil.removeClass(this._zoomOutButton, className);
 
+
+
 		if (map._zoom === map.getMinZoom()) {
+
 			L.DomUtil.addClass(this._zoomOutButton, className);
+
 		}
+
 		if (map._zoom === map.getMaxZoom()) {
+
 			L.DomUtil.addClass(this._zoomInButton, className);
+
 		}
+
 	}
+
 });
+
+
 
 L.Map.mergeOptions({
+
 	zoomControl: true
+
 });
+
+
 
 L.Map.addInitHook(function () {
+
 	if (this.options.zoomControl) {
+
 		this.zoomControl = new L.Control.Zoom();
+
 		this.addControl(this.zoomControl);
+
 	}
+
 });
 
+
+
 L.control.zoom = function (options) {
+
 	return new L.Control.Zoom(options);
+
 };
 
 
 
+
+
 /*
+
  * L.Control.Attribution is used for displaying attribution on the map (added by default).
+
  */
 
+
+
 L.Control.Attribution = L.Control.extend({
+
 	options: {
+
 		position: 'bottomright',
+
 		prefix: '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
+
 	},
+
+
 
 	initialize: function (options) {
+
 		L.setOptions(this, options);
 
+
+
 		this._attributions = {};
+
 	},
+
+
 
 	onAdd: function (map) {
+
 		this._container = L.DomUtil.create('div', 'leaflet-control-attribution');
+
 		L.DomEvent.disableClickPropagation(this._container);
 
+
+
 		// TODO ugly, refactor
+
 		for (var i in map._layers) {
+
 			if (map._layers[i].getAttribution) {
+
 				this.addAttribution(map._layers[i].getAttribution());
+
 			}
+
 		}
 
+
+
 		this._update();
+
+
 
 		return this._container;
+
 	},
+
+
 
 	setPrefix: function (prefix) {
+
 		this.options.prefix = prefix;
+
 		this._update();
+
 		return this;
+
 	},
+
+
 
 	addAttribution: function (text) {
+
 		if (!text) { return; }
 
+
+
 		if (!this._attributions[text]) {
+
 			this._attributions[text] = 0;
+
 		}
+
 		this._attributions[text]++;
+
+
 
 		this._update();
 
+
+
 		return this;
+
 	},
+
+
 
 	removeAttribution: function (text) {
+
 		if (!text) { return; }
 
+
+
 		if (this._attributions[text]) {
+
 			this._attributions[text]--;
+
 			this._update();
+
 		}
 
+
+
 		return this;
+
 	},
 
+
+
 	_update: function () {
+
 		if (!this._map) { return; }
+
+
 
 		var attribs = [];
 
+
+
 		for (var i in this._attributions) {
+
 			if (this._attributions[i]) {
+
 				attribs.push(i);
+
 			}
+
 		}
+
+
 
 		var prefixAndAttribs = [];
 
+
+
 		if (this.options.prefix) {
+
 			prefixAndAttribs.push(this.options.prefix);
+
 		}
+
 		if (attribs.length) {
+
 			prefixAndAttribs.push(attribs.join(', '));
+
 		}
+
+
 
 		this._container.innerHTML = prefixAndAttribs.join(' | ');
+
 	}
+
 });
+
+
 
 L.Map.mergeOptions({
+
 	attributionControl: true
+
 });
+
+
 
 L.Map.addInitHook(function () {
+
 	if (this.options.attributionControl) {
+
 		this.attributionControl = (new L.Control.Attribution()).addTo(this);
+
 	}
+
 });
 
+
+
 L.control.attribution = function (options) {
+
 	return new L.Control.Attribution(options);
+
 };
+
 
 
 /*
@@ -8089,242 +12858,479 @@ L.control.scale = function (options) {
 
 
 /*
+
  * L.Control.Layers is a control to allow users to switch between different layers on the map.
+
  */
 
+
+
 L.Control.Layers = L.Control.extend({
+
 	options: {
+
 		collapsed: true,
+
 		position: 'topright',
+
 		autoZIndex: true
+
 	},
+
+
 
 	initialize: function (baseLayers, overlays, options) {
+
 		L.setOptions(this, options);
 
+
+
 		this._layers = {};
+
 		this._lastZIndex = 0;
+
 		this._handlingClick = false;
 
+
+
 		for (var i in baseLayers) {
+
 			this._addLayer(baseLayers[i], i);
+
 		}
+
+
 
 		for (i in overlays) {
+
 			this._addLayer(overlays[i], i, true);
+
 		}
+
 	},
+
+
 
 	onAdd: function () {
+
 		this._initLayout();
+
 		this._update();
 
+
+
 		return this._container;
+
 	},
+
+
 
 	addBaseLayer: function (layer, name) {
+
 		this._addLayer(layer, name);
+
 		return this._update();
+
 	},
+
+
 
 	addOverlay: function (layer, name) {
+
 		this._addLayer(layer, name, true);
+
 		return this._update();
+
 	},
+
+
 
 	removeLayer: function (layer) {
+
 		layer.off('add remove', this._onLayerChange, this);
 
+
+
 		delete this._layers[L.stamp(layer)];
+
 		return this._update();
+
 	},
 
+
+
 	_initLayout: function () {
+
 		var className = 'leaflet-control-layers',
+
 		    container = this._container = L.DomUtil.create('div', className);
 
+
+
 		// makes this work on IE touch devices by stopping it from firing a mouseout event when the touch is released
+
 		container.setAttribute('aria-haspopup', true);
 
+
+
 		if (!L.Browser.touch) {
+
 			L.DomEvent
+
 				.disableClickPropagation(container)
+
 				.disableScrollPropagation(container);
+
 		} else {
+
 			L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
+
 		}
+
+
 
 		var form = this._form = L.DomUtil.create('form', className + '-list');
 
+
+
 		if (this.options.collapsed) {
+
 			if (!L.Browser.android) {
+
 				L.DomEvent.on(container, {
+
 					mouseenter: this._expand,
+
 					mouseleave: this._collapse
+
 				}, this);
+
 			}
+
+
 
 			var link = this._layersLink = L.DomUtil.create('a', className + '-toggle', container);
+
 			link.href = '#';
+
 			link.title = 'Layers';
 
+
+
 			if (L.Browser.touch) {
+
 				L.DomEvent
+
 				    .on(link, 'click', L.DomEvent.stop)
+
 				    .on(link, 'click', this._expand, this);
+
 			} else {
+
 				L.DomEvent.on(link, 'focus', this._expand, this);
+
 			}
 
+
+
 			// work around for Firefox Android issue https://github.com/Leaflet/Leaflet/issues/2033
+
 			L.DomEvent.on(form, 'click', function () {
+
 				setTimeout(L.bind(this._onInputClick, this), 0);
+
 			}, this);
 
+
+
 			this._map.on('click', this._collapse, this);
+
 			// TODO keyboard accessibility
+
 		} else {
+
 			this._expand();
+
 		}
 
+
+
 		this._baseLayersList = L.DomUtil.create('div', className + '-base', form);
+
 		this._separator = L.DomUtil.create('div', className + '-separator', form);
+
 		this._overlaysList = L.DomUtil.create('div', className + '-overlays', form);
 
+
+
 		container.appendChild(form);
+
 	},
 
+
+
 	_addLayer: function (layer, name, overlay) {
+
 		layer.on('add remove', this._onLayerChange, this);
+
+
 
 		var id = L.stamp(layer);
 
+
+
 		this._layers[id] = {
+
 			layer: layer,
+
 			name: name,
+
 			overlay: overlay
+
 		};
 
+
+
 		if (this.options.autoZIndex && layer.setZIndex) {
+
 			this._lastZIndex++;
+
 			layer.setZIndex(this._lastZIndex);
+
 		}
+
 	},
 
+
+
 	_update: function () {
+
 		if (!this._container) { return; }
 
+
+
 		this._baseLayersList.innerHTML = '';
+
 		this._overlaysList.innerHTML = '';
+
+
 
 		var baseLayersPresent, overlaysPresent, i, obj;
 
+
+
 		for (i in this._layers) {
+
 			obj = this._layers[i];
+
 			this._addItem(obj);
+
 			overlaysPresent = overlaysPresent || obj.overlay;
+
 			baseLayersPresent = baseLayersPresent || !obj.overlay;
+
 		}
+
+
 
 		this._separator.style.display = overlaysPresent && baseLayersPresent ? '' : 'none';
 
+
+
 		return this;
+
 	},
 
+
+
 	_onLayerChange: function (e) {
+
 		if (!this._handlingClick) {
+
 			this._update();
+
 		}
+
+
 
 		var overlay = this._layers[L.stamp(e.target)].overlay;
 
+
+
 		var type = overlay ?
+
 			(e.type === 'add' ? 'overlayadd' : 'overlayremove') :
+
 			(e.type === 'add' ? 'baselayerchange' : null);
 
+
+
 		if (type) {
+
 			this._map.fire(type, e.target);
+
 		}
+
 	},
+
+
 
 	// IE7 bugs out if you create a radio dynamically, so you have to do it this hacky way (see http://bit.ly/PqYLBe)
+
 	_createRadioElement: function (name, checked) {
 
+
+
 		var radioHtml = '<input type="radio" class="leaflet-control-layers-selector" name="' +
+
 				name + '"' + (checked ? ' checked="checked"' : '') + '/>';
 
+
+
 		var radioFragment = document.createElement('div');
+
 		radioFragment.innerHTML = radioHtml;
 
+
+
 		return radioFragment.firstChild;
+
 	},
 
+
+
 	_addItem: function (obj) {
+
 		var label = document.createElement('label'),
+
 		    checked = this._map.hasLayer(obj.layer),
+
 		    input;
 
+
+
 		if (obj.overlay) {
+
 			input = document.createElement('input');
+
 			input.type = 'checkbox';
+
 			input.className = 'leaflet-control-layers-selector';
+
 			input.defaultChecked = checked;
+
 		} else {
+
 			input = this._createRadioElement('leaflet-base-layers', checked);
+
 		}
+
+
 
 		input.layerId = L.stamp(obj.layer);
 
+
+
 		L.DomEvent.on(input, 'click', this._onInputClick, this);
 
+
+
 		var name = document.createElement('span');
+
 		name.innerHTML = ' ' + obj.name;
 
+
+
 		label.appendChild(input);
+
 		label.appendChild(name);
 
+
+
 		var container = obj.overlay ? this._overlaysList : this._baseLayersList;
+
 		container.appendChild(label);
 
+
+
 		return label;
+
 	},
 
+
+
 	_onInputClick: function () {
+
 		var inputs = this._form.getElementsByTagName('input'),
+
 		    input, layer, hasLayer;
+
+
 
 		this._handlingClick = true;
 
+
+
 		for (var i = 0, len = inputs.length; i < len; i++) {
+
 			input = inputs[i];
+
 			layer = this._layers[input.layerId].layer;
+
 			hasLayer = this._map.hasLayer(layer);
 
+
+
 			if (input.checked && !hasLayer) {
+
 				this._map.addLayer(layer);
 
+
+
 			} else if (!input.checked && hasLayer) {
+
 				this._map.removeLayer(layer);
+
 			}
+
 		}
+
+
 
 		this._handlingClick = false;
 
+
+
 		this._refocusOnMap();
+
 	},
+
+
 
 	_expand: function () {
+
 		L.DomUtil.addClass(this._container, 'leaflet-control-layers-expanded');
+
 	},
 
+
+
 	_collapse: function () {
+
 		L.DomUtil.removeClass(this._container, 'leaflet-control-layers-expanded');
+
 	}
+
 });
 
+
+
 L.control.layers = function (baseLayers, overlays, options) {
+
 	return new L.Control.Layers(baseLayers, overlays, options);
+
 };
+
 
 
 /*
@@ -8708,103 +13714,201 @@ L.Map.include(!zoomAnimated ? {} : {
 
 
 /*
+
  * Provides L.Map with convenient shortcuts for using browser geolocation features.
+
  */
 
+
+
 L.Map.include({
+
 	_defaultLocateOptions: {
+
 		timeout: 10000,
+
 		watch: false
+
 		// setView: false
+
 		// maxZoom: <Number>
+
 		// maximumAge: 0
+
 		// enableHighAccuracy: false
+
 	},
+
+
 
 	locate: function (/*Object*/ options) {
 
+
+
 		options = this._locateOptions = L.extend(this._defaultLocateOptions, options);
 
+
+
 		if (!navigator.geolocation) {
+
 			this._handleGeolocationError({
+
 				code: 0,
+
 				message: 'Geolocation not supported.'
+
 			});
+
 			return this;
+
 		}
+
+
 
 		var onResponse = L.bind(this._handleGeolocationResponse, this),
+
 			onError = L.bind(this._handleGeolocationError, this);
 
+
+
 		if (options.watch) {
+
 			this._locationWatchId =
+
 			        navigator.geolocation.watchPosition(onResponse, onError, options);
+
 		} else {
+
 			navigator.geolocation.getCurrentPosition(onResponse, onError, options);
+
 		}
+
 		return this;
+
 	},
+
+
 
 	stopLocate: function () {
+
 		if (navigator.geolocation) {
+
 			navigator.geolocation.clearWatch(this._locationWatchId);
+
 		}
+
 		if (this._locateOptions) {
+
 			this._locateOptions.setView = false;
+
 		}
+
 		return this;
+
 	},
+
+
 
 	_handleGeolocationError: function (error) {
+
 		var c = error.code,
+
 		    message = error.message ||
+
 		            (c === 1 ? 'permission denied' :
+
 		            (c === 2 ? 'position unavailable' : 'timeout'));
 
+
+
 		if (this._locateOptions.setView && !this._loaded) {
+
 			this.fitWorld();
+
 		}
 
+
+
 		this.fire('locationerror', {
+
 			code: c,
+
 			message: 'Geolocation error: ' + message + '.'
+
 		});
+
 	},
 
+
+
 	_handleGeolocationResponse: function (pos) {
+
 		var lat = pos.coords.latitude,
+
 		    lng = pos.coords.longitude,
+
 		    latlng = new L.LatLng(lat, lng),
 
+
+
 		    latAccuracy = 180 * pos.coords.accuracy / 40075017,
+
 		    lngAccuracy = latAccuracy / Math.cos((Math.PI / 180) * lat),
 
+
+
 		    bounds = L.latLngBounds(
+
 		            [lat - latAccuracy, lng - lngAccuracy],
+
 		            [lat + latAccuracy, lng + lngAccuracy]),
+
+
 
 		    options = this._locateOptions;
 
+
+
 		if (options.setView) {
+
 			var zoom = this.getBoundsZoom(bounds);
+
 			this.setView(latlng, options.maxZoom ? Math.min(zoom, options.maxZoom) : zoom);
+
 		}
+
+
 
 		var data = {
+
 			latlng: latlng,
+
 			bounds: bounds,
+
 			timestamp: pos.timestamp
+
 		};
 
+
+
 		for (var i in pos.coords) {
+
 			if (typeof pos.coords[i] === 'number') {
+
 				data[i] = pos.coords[i];
+
 			}
+
 		}
 
+
+
 		this.fire('locationfound', data);
+
 	}
+
 });
+
 
 
 }(window, document));
@@ -9099,7 +14203,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 /*
 	Source:
-	van Creij, Maurice (2012). "useful.polyfills.js: A library of useful polyfills to ease working with HTML5 in legacy environments.", version 20121126, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.polyfills.js: A library of useful polyfills to ease working with HTML5 in legacy environments.", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
@@ -9379,7 +14483,7 @@ var useful = useful || {};
 
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.requests.js: A library of useful functions to ease working with AJAX and JSON.", version 20140826, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.requests.js: A library of useful functions to ease working with AJAX and JSON.", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
@@ -9533,754 +14637,1472 @@ var useful = useful || {};
 })();
 
 /*
+
 	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
 
 	License:
+
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 
+
+
 	Dependencies:
+
 	http://www.leaflet.com/
+
 	https://github.com/mapbox/togeojson
+
 */
 
-// public object
+
+
+// create the constructor if needed
+
 var useful = useful || {};
 
-(function(){
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Busy = function (parent) {
+
+	// properties
 
 	"use strict";
 
-	useful.Photomap_Busy = function (parent) {
-		this.parent = parent;
-		this.setup = function () {};
-		this.show = function () {};
-		this.hide = function () {};
-	};
+	this.parent = parent;
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Busy;
-	}
+	// methods
 
-})();
+	this.setup = function () {};
+
+	this.show = function () {};
+
+	this.hide = function () {};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Busy;
+
+}
+
 
 /*
+
 	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
 
 	License:
+
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 
+
+
 	Dependencies:
+
 	http://www.leaflet.com/
+
 	https://github.com/mapbox/togeojson
+
 */
 
-// public object
+
+
+// create the constructor if needed
+
 var useful = useful || {};
 
-(function(){
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Exif = function (parent) {
+
+	// properties
 
 	"use strict";
 
-	useful.Photomap_Exif = function (parent) {
-		this.parent = parent;
-		this.load = function (url, onComplete) {
-			var cfg = this.parent.cfg, context = this,
-				path = url.split('/'), name = path[path.length - 1];
-			// if the lat and lon have been cached in exifData
-			if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
-				// send back the stored coordinates from the exifData
-				onComplete({
-					'lat' : cfg.exifData[name].lat,
-					'lon' : cfg.exifData[name].lon,
-				});
-			// else
-			} else {
-				console.log('PhotomapExif: ajax');
-				// retrieve the exif data of a photo
-				useful.request.send({
-					url : cfg.exif.replace('{src}', url),
-					post : null,
-					onProgress : function (reply) {
-						return reply;
-					},
-					onFailure : function (reply) {
-						return reply;
-					},
-					onSuccess : function (reply) {
-						var json = useful.request.decode(reply.responseText);
-						var latLon = context.convert(json);
-						// exifData the values
-						cfg.exifData[name] = json;
-						// call back the values
-						onComplete(latLon);
-					}
-				});
-			}
-		};
-		this.convert = function (exif) {
-			var deg, min, sec, lon, lat, cfg = this.parent.cfg;
-			// latitude
-			deg = (exif.GPS.GPSLatitude[0].match(/\//)) ?
-				parseInt(exif.GPS.GPSLatitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLatitude[0], 10);
-			min = (exif.GPS.GPSLatitude[1].match(/\//)) ?
-				parseInt(exif.GPS.GPSLatitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[1].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLatitude[1], 10);
-			sec = (exif.GPS.GPSLatitude[2].match(/\//)) ?
-				parseInt(exif.GPS.GPSLatitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[2].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLatitude[2], 10);
-			lat = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLatitudeRef === "N" ? 1 : -1);
-			// longitude
-			deg = (exif.GPS.GPSLongitude[0].match(/\//)) ?
-				parseInt(exif.GPS.GPSLongitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[0].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLongitude[0], 10);
-			min = (exif.GPS.GPSLongitude[1].match(/\//)) ?
-				parseInt(exif.GPS.GPSLongitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[1].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLongitude[1], 10);
-			sec = (exif.GPS.GPSLongitude[2].match(/\//)) ?
-				parseInt(exif.GPS.GPSLongitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[2].split('/')[1], 10):
-				parseInt(exif.GPS.GPSLongitude[2], 10);
-			lon = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLongitudeRef === "W" ? -1 : 1);
-			// temporary console report
-			if (typeof(console) !== 'undefined') {
-				console.log(cfg.indicator);
-			}
-			// return the values
-			return {'lat' : lat, 'lon' : lon};
-		};
-	};
+	this.parent = parent;
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Exif;
-	}
+	// methods
 
-})();
+	this.load = function (url, onComplete) {
 
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
+		var cfg = this.parent.cfg, _this = this,
 
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+			path = url.split('/'), name = path[path.length - 1];
 
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
+		// if the lat and lon have been cached in exifData
 
-// public object
-var useful = useful || {};
+		if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
 
-(function(){
+			// send back the stored coordinates from the exifData
 
-	"use strict";
+			onComplete({
 
-	useful.Photomap_Gpx = function (parent) {
-		this.parent = parent;
-		this.load = function (oncomplete) {
-			var cfg = this.parent.cfg, context = this;
-			// if the GPX have been cached in gpxData
-			if (cfg.gpxData) {
-				// call back
-				oncomplete();
-			// lead it from disk
-			} else {
-				// show the busy indicator
-				parent.busy.show();
-				// onload
-				useful.request.send({
-					url : cfg.gpx,
-					post : null,
-					onProgress : function () {},
-					onFailure : function () {},
-					onSuccess : function (reply) {
-						// store the result
-						cfg.gpxData = toGeoJSON.gpx(reply.responseXML);
-						// call back
-						oncomplete();
-						// hide the busy indicator
-						context.parent.busy.hide();
-					}
-				});
-			}
-		};
-		this.coordinates = function () {
-			var cfg = this.parent.cfg, gpx = cfg.gpxData, joined = [];
-			// get the line data from the geojson file
-			var geometryCoordinates = cfg.gpxData.features[0].geometry.coordinates;
-			// if the line data consists of multiple segments
-			if (geometryCoordinates[0][0] instanceof Array) {
-				// join all the segments
-				for (var a = 0, b = geometryCoordinates.length; a < b; a += 1) {
-					joined = joined.concat(geometryCoordinates[a]);
-				}
-				// store the joined segments
-				geometryCoordinates = joined;
-			}
-			// return the gps coordinates
-			return geometryCoordinates;
-		};
-	};
+				'lat' : cfg.exifData[name].lat,
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Gpx;
-	}
+				'lon' : cfg.exifData[name].lon,
 
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	"use strict";
-
-	useful.Photomap_Indicator = function (parent) {
-		this.parent = parent;
-		this.add = function () {
-			var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
-			// if the indicator has coordinates
-			if (indicator.lon && indicator.lat) {
-				// remove any previous indicator
-				if (indicator.object) {
-					map.object.removeLayer(indicator.object);
-				}
-				// create the icon
-				icon = L.icon({
-					iconUrl: indicator.icon,
-					iconSize: [32, 32],
-					iconAnchor: [16, 32]
-				});
-				// report the location for reference
-				console.log('location:', indicator);
-				// add the marker with the icon
-				indicator.object = L.marker(
-					[indicator.lat, indicator.lon],
-					{'icon': icon}
-				);
-				indicator.object.addTo(map.object);
-				// add the popup to the marker
-				indicator.popup = indicator.object.bindPopup(indicator.description);
-				// add the click handler
-				indicator.object.on('click', this.onIndicatorClicked(indicator));
-				// focus the map on the indicator
-				this.focus();
-			}
-		};
-		this.onIndicatorClicked = function (indicator) {
-			var context = this;
-			return function (evt) {
-				// trigger the click event
-				if (indicator.clicked) { indicator.clicked(evt, indicator); }
-				// or show the indicator message in a balloon
-				else if (indicator.object) { indicator.object.openPopup(); }
-			};
-		};
-		this.remove = function () {
-			var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
-			// remove the balloon
-			indicator.object.closePopup();
-			// remove the indicator
-			if (indicator.object) {
-				map.object.removeLayer(indicator.object);
-				indicator.object = null;
-			}
-			// unfocus the indicator
-			this.unfocus();
-		};
-		this.focus = function () {
-			var cfg = this.parent.cfg;
-			// focus the map on the indicator
-			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
-			// call for a  redraw
-			this.parent.redraw();
-		};
-		this.unfocus = function () {
-			var cfg = this.parent.cfg;
-			// focus the map on the indicator
-			cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
-			// call for a  redraw
-			this.parent.redraw();
-		};
-	};
-
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Indicator;
-	}
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	"use strict";
-
-	useful.Photomap_Location = function (parent) {
-		this.parent = parent;
-		this.object = null;
-		this.interval = null;
-		// add the Layer with the GPX Track
-		this.point = function () {
-			// if geolocation is available
-			if (navigator.geolocation) {
-				// request the position
-				navigator.geolocation.watchPosition(
-					this.onGeoSuccess(),
-					this.onGeoFailure(),
-					{ maximumAge : 10000,  timeout : 5000,  enableHighAccuracy : true }
-				);
-			}
-		};
-		// redraw the pointer layer
-		this.redraw = function () {
-			// if geolocation is available
-			if (navigator.geolocation) {
-				// request the position
-				navigator.geolocation.getCurrentPosition(
-					this.onGeoSuccess(),
-					this.onGeoFailure(),
-					{ enableHighAccuracy : true }
-				);
-			}
-		};
-		// geo location events
-		this.onGeoSuccess = function () {
-			var _this = this, _cfg = this.parent.cfg;
-			return function (geo) {
-				console.log('geolocation succeeded', geo);
-				// if the marker doesn't exist yet
-				if (_this.object === null) {
-					// create the icon
-					var icon = L.icon({
-						iconUrl: _cfg.pointer,
-						iconSize: [32, 32],
-						iconAnchor: [16, 32]
-					});
-					// add the marker with the icon
-					_this.object = L.marker(
-						[geo.coords.latitude, geo.coords.longitude],
-						{'icon': icon}
-					);
-					_this.object.addTo(_cfg.map.object);
-				} else {
-					_this.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
-				}
-			};
-		};
-		this.onGeoFailure = function () {
-			var _this = this;
-			return function () {
-				console.log('geolocation failed');
-			};
-		};
-	};
-
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Location;
-	}
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	"use strict";
-
-	useful.Photomap_Map = function (parent) {
-		this.parent = parent;
-		this.setup = function () {
-			var cfg = this.parent.cfg,
-				id = this.parent.obj.id;
-			// define the map
-			cfg.map = {};
-			cfg.map.object = L.map(id);
-			// add the tiles
-			var tileLayer = L.tileLayer(cfg.tiles, {
-				attribution: cfg.credit,
-				errorTileUrl: cfg.missing,
-				minZoom: cfg.minZoom,
-				maxZoom: cfg.maxZoom
-			}).addTo(cfg.map.object);
-			// if there is a local tile store, try and handle failing tiles
-			if (this.parent.cfg.local) {
-				tileLayer.on('tileloadstart', this.onFallback(this.parent.cfg.local));
-			}
-			// get the centre of the map
-			this.bounds();
-			// refresh the map after scrolling
-			var context = this;
-			cfg.map.object.on('moveend', function (e) { context.parent.redraw(); });
-			cfg.map.object.on('zoomend', function (e) { context.parent.redraw(); });
-		};
-		this.remove = function () {
-			var cfg = this.parent.cfg;
-			// ask leaflet to remove itself if available
-			if (cfg.map && cfg.map.object) {
-				cfg.map.object.remove();
-			}
-		};
-		this.bounds = function () {
-			var a, b, points, cfg = this.parent.cfg,
-				minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
-			// for all navigation points
-			points = this.parent.gpx.coordinates();
-			for (a = 0 , b = points.length; a < b; a += 1) {
-				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
-				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
-				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
-				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
-			}
-			// extend the bounds a little
-			minLat -= 0.01;
-			minLon -= 0.01;
-			maxLat += 0.01;
-			maxLon += 0.01;
-			// limit the bounds
-			cfg.map.object.fitBounds([
-				[minLat, minLon],
-				[maxLat, maxLon]
-			]);
-			cfg.map.object.setMaxBounds([
-				[minLat, minLon],
-				[maxLat, maxLon]
-			]);
-		};
-		this.beginning = function () {
-			var a, b, cfg = this.parent.cfg,
-				points = this.parent.gpx.coordinates(),
-				totLon = points[0][0] * points.length,
-				totLat = points[0][1] * points.length;
-			// for all navigation points
-			for (a = 0 , b = points.length; a < b; a += 1) {
-				totLon += points[a][0];
-				totLat += points[a][1];
-			}
-			// average the centre
-			cfg.map.centre = {
-				'lon' : totLon / points.length / 2,
-				'lat' : totLat / points.length / 2
-			};
-			// apply the centre
-			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
-			// call for a redraw
-			this.parent.redraw();
-		};
-		this.centre = function () {
-			var a, b, points, cfg = this.parent.cfg,
-				minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
-			// for all navigation points
-			points = this.parent.gpx.coordinates();
-			for (a = 0 , b = points.length; a < b; a += 1) {
-				totLon += points[a][0];
-				totLat += points[a][1];
-				minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
-				minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
-				maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
-				maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
-			}
-			// average the centre
-			cfg.map.centre = {
-				'lon' : totLon / points.length,
-				'lat' : totLat / points.length
-			};
-			// apply the centre
-			cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
-			// call for a redraw
-			this.parent.redraw();
-		};
-		this.onFallback = function (local) {
-			return function (element) {
-				var src = element.tile.getAttribute('src');
-				element.tile.setAttribute('data-failed', 'false')
-				element.tile.addEventListener('error', function () {
-					// if this tile has not failed before
-					if (element.tile.getAttribute('data-failed') === 'false') {
-						// mark the element as a failure
-						element.tile.setAttribute('data-failed', 'true');
-						// recover the coordinates
-						var parts = src.split('/'),
-							length = parts.length,
-							z = parseInt(parts[length - 3]),
-							x =	parseInt(parts[length - 2]),
-							y = parseInt(parts[length - 1]);
-						// try the local source instead
-						element.tile.src = local.replace('{z}', z).replace('{x}', x).replace('{y}', y);
-						console.log('fallback to:', element.tile.src);
-					}
-				});
-			};
-		};
-	};
-
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Map;
-	}
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	"use strict";
-
-	useful.Photomap_Markers = function (parent) {
-		this.parent = parent;
-		// add the Layer with the permanent markers
-		this.add = function () {
-			var name, marker, icon, cfg = this.parent.cfg;
-			// get the track points from the GPX file
-			var points = this.parent.gpx.coordinates();
-			// for all markers
-			for (name in cfg.markers) {
-				if (cfg.markers.hasOwnProperty(name)) {
-					marker = cfg.markers[name];
-					// special markers
-					switch (name) {
-						case 'start' :
-							marker.lon = marker.lon || points[0][0];
-							marker.lat = marker.lat || points[0][1];
-							break;
-						case 'end' :
-							marker.lon = marker.lon || points[points.length - 1][0];
-							marker.lat = marker.lat || points[points.length - 1][1];
-							break;
-					}
-					// create the icon
-					icon = L.icon({
-						iconUrl: marker.icon,
-						iconSize: [32, 32],
-						iconAnchor: [16, 32]
-					});
-					// add the marker with the icon
-					marker.object = L.marker(
-						[marker.lat, marker.lon],
-						{'icon': icon}
-					);
-					marker.object.addTo(cfg.map.object);
-					// add the popup to the marker
-					marker.popup = marker.object.bindPopup(marker.description);
-					// add the click handler
-					marker.object.on('click', this.onMarkerClicked(marker));
-				}
-			}
-		};
-		this.onMarkerClicked = function (marker) {
-			var context = this;
-			return function (evt) {
-				// show the marker message in a balloon
-				marker.object.openPopup();
-			};
-		};
-	};
-
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Markers;
-	}
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	"use strict";
-
-	useful.Photomap_Route = function (parent) {
-		this.parent = parent;
-		// add the Layer with the GPX Track
-		this.plot = function () {
-			var cfg = this.parent.cfg;
-			// plot the geoJson object
-			cfg.route = {};
-			cfg.route.object = L.geoJson(cfg.gpxData, {
-				style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 			});
-			cfg.route.object.addTo(cfg.map.object);
-		};
-		// redraw the geoJSON layer
-		this.redraw = function () {
-			var cfg = this.parent.cfg;
-			if (cfg.route) {
-				// remove the layer
-				cfg.map.object.removeLayer(cfg.route.object);
-				// re-add the layer
-				this.plot();
-			}
-		};
+
+		// else
+
+		} else {
+
+			console.log('PhotomapExif: ajax');
+
+			// retrieve the exif data of a photo
+
+			useful.request.send({
+
+				url : cfg.exif.replace('{src}', url),
+
+				post : null,
+
+				onProgress : function (reply) {
+
+					return reply;
+
+				},
+
+				onFailure : function (reply) {
+
+					return reply;
+
+				},
+
+				onSuccess : function (reply) {
+
+					var json = useful.request.decode(reply.responseText);
+
+					var latLon = _this.convert(json);
+
+					// exifData the values
+
+					cfg.exifData[name] = json;
+
+					// call back the values
+
+					onComplete(latLon);
+
+				}
+
+			});
+
+		}
+
 	};
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap_Route;
-	}
+	this.convert = function (exif) {
 
-})();
+		var deg, min, sec, lon, lat, cfg = this.parent.cfg;
+
+		// latitude
+
+		deg = (exif.GPS.GPSLatitude[0].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLatitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLatitude[0], 10);
+
+		min = (exif.GPS.GPSLatitude[1].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLatitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[1].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLatitude[1], 10);
+
+		sec = (exif.GPS.GPSLatitude[2].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLatitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[2].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLatitude[2], 10);
+
+		lat = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLatitudeRef === "N" ? 1 : -1);
+
+		// longitude
+
+		deg = (exif.GPS.GPSLongitude[0].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLongitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[0].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLongitude[0], 10);
+
+		min = (exif.GPS.GPSLongitude[1].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLongitude[1].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[1].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLongitude[1], 10);
+
+		sec = (exif.GPS.GPSLongitude[2].match(/\//)) ?
+
+			parseInt(exif.GPS.GPSLongitude[2].split('/')[0], 10) / parseInt(exif.GPS.GPSLongitude[2].split('/')[1], 10):
+
+			parseInt(exif.GPS.GPSLongitude[2], 10);
+
+		lon = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLongitudeRef === "W" ? -1 : 1);
+
+		// temporary console report
+
+		if (typeof(console) !== 'undefined') {
+
+			console.log(cfg.indicator);
+
+		}
+
+		// return the values
+
+		return {'lat' : lat, 'lon' : lon};
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Exif;
+
+}
+
 
 /*
+
 	Source:
-	van Creij, Maurice (2012). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20120606, http://www.woollymittens.nl/.
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
 
 	License:
+
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 
+
+
 	Dependencies:
+
 	http://www.leaflet.com/
+
 	https://github.com/mapbox/togeojson
+
 */
 
-// public object
+
+
+// create the constructor if needed
+
 var useful = useful || {};
 
-(function(){
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Gpx = function (parent) {
+
+	// properties
 
 	"use strict";
 
-	useful.Photomap = function (obj, cfg) {
-		// properties
-		this.obj = obj;
-		this.cfg = cfg;
-		// methods
-		this.start = function () {
-			var context = this;
+	this.parent = parent;
+
+	// this methods
+
+	this.load = function (oncomplete) {
+
+		var cfg = this.parent.cfg, _this = this;
+
+		// if the GPX have been cached in gpxData
+
+		if (cfg.gpxData) {
+
+			// call back
+
+			oncomplete();
+
+		// lead it from disk
+
+		} else {
+
 			// show the busy indicator
-			this.busy.setup();
-			// load the gpx track
-			this.gpx.load(function () {
-				// draw the map
-				context.map.setup();
-				// plot the route
-				context.route.plot();
-				// show the permanent markers
-				context.markers.add();
-				// show the indicator
-				context.indicator.add();
-				// start the location pointer
-				context.location.point();
+
+			parent.busy.show();
+
+			// onload
+
+			useful.request.send({
+
+				url : cfg.gpx,
+
+				post : null,
+
+				onProgress : function () {},
+
+				onFailure : function () {},
+
+				onSuccess : function (reply) {
+
+					// store the result
+
+					cfg.gpxData = toGeoJSON.gpx(reply.responseXML);
+
+					// call back
+
+					oncomplete();
+
+					// hide the busy indicator
+
+					_this.parent.busy.hide();
+
+				}
+
 			});
-			// disable the start function so it can't be started twice
-			this.start = function () {};
-		};
-		this.redraw = function () {
-			var context = this;
-			// wait for a change to redraw
-			clearTimeout(this.cfg.redrawTimeout);
-			this.cfg.redrawTimeout = setTimeout(function () {
-				// redraw the map
-				context.route.redraw();
-				// redraw the plotted route
-				context.route.redraw();
-			}, 500);
-		};
-		// components
-		this.busy = new useful.Photomap_Busy(this);
-		this.exif = new useful.Photomap_Exif(this);
-		this.gpx = new useful.Photomap_Gpx(this);
-		this.map = new useful.Photomap_Map(this);
-		this.route = new useful.Photomap_Route(this);
-		this.markers = new useful.Photomap_Markers(this);
-		this.indicator = new useful.Photomap_Indicator(this);
-		this.location = new useful.Photomap_Location(this);
-		// public API
-		this.indicate = function (element) {
-			var context = this,
-				cfg = this.cfg,
-				url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
-				title = element.getAttribute('data-title') || element.getAttribute('title');
-			this.exif.load(url, function (coords) {
-				cfg.indicator.lat = coords.lat;
-				cfg.indicator.lon = coords.lon;
-				context.indicator.add();
-			});
-		};
-		this.unindicate = function () {
-			this.indicator.remove();
-		};
-		this.stop = function () {
-			this.map.remove();
-		};
-		// go
-		this.start();
+
+		}
+
 	};
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Photomap;
-	}
+	this.coordinates = function () {
 
-})();
+		var cfg = this.parent.cfg, gpx = cfg.gpxData, joined = [];
+
+		// get the line data from the geojson file
+
+		var geometryCoordinates = cfg.gpxData.features[0].geometry.coordinates;
+
+		// if the line data consists of multiple segments
+
+		if (geometryCoordinates[0][0] instanceof Array) {
+
+			// join all the segments
+
+			for (var a = 0, b = geometryCoordinates.length; a < b; a += 1) {
+
+				joined = joined.concat(geometryCoordinates[a]);
+
+			}
+
+			// store the joined segments
+
+			geometryCoordinates = joined;
+
+		}
+
+		// return the gps coordinates
+
+		return geometryCoordinates;
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Gpx;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Indicator = function (parent) {
+
+	// properties
+
+	"use strict";
+
+	this.parent = parent;
+
+	// this methods
+
+	this.add = function () {
+
+		var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
+
+		// if the indicator has coordinates
+
+		if (indicator.lon && indicator.lat) {
+
+			// remove any previous indicator
+
+			if (indicator.object) {
+
+				map.object.removeLayer(indicator.object);
+
+			}
+
+			// create the icon
+
+			icon = L.icon({
+
+				iconUrl: indicator.icon,
+
+				iconSize: [32, 32],
+
+				iconAnchor: [16, 32]
+
+			});
+
+			// report the location for reference
+
+			console.log('location:', indicator);
+
+			// add the marker with the icon
+
+			indicator.object = L.marker(
+
+				[indicator.lat, indicator.lon],
+
+				{'icon': icon}
+
+			);
+
+			indicator.object.addTo(map.object);
+
+			// add the popup to the marker
+
+			indicator.popup = indicator.object.bindPopup(indicator.description);
+
+			// add the click handler
+
+			indicator.object.on('click', this.onIndicatorClicked(indicator));
+
+			// focus the map on the indicator
+
+			this.focus();
+
+		}
+
+	};
+
+	this.onIndicatorClicked = function (indicator) {
+
+		var _this = this;
+
+		return function (evt) {
+
+			// trigger the click event
+
+			if (indicator.clicked) { indicator.clicked(evt, indicator); }
+
+			// or show the indicator message in a balloon
+
+			else if (indicator.object) { indicator.object.openPopup(); }
+
+		};
+
+	};
+
+	this.remove = function () {
+
+		var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
+
+		// remove the balloon
+
+		indicator.object.closePopup();
+
+		// remove the indicator
+
+		if (indicator.object) {
+
+			map.object.removeLayer(indicator.object);
+
+			indicator.object = null;
+
+		}
+
+		// unfocus the indicator
+
+		this.unfocus();
+
+	};
+
+	this.focus = function () {
+
+		var cfg = this.parent.cfg;
+
+		// focus the map on the indicator
+
+		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
+
+		// call for a  redraw
+
+		this.parent.redraw();
+
+	};
+
+	this.unfocus = function () {
+
+		var cfg = this.parent.cfg;
+
+		// focus the map on the indicator
+
+		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+
+		// call for a  redraw
+
+		this.parent.redraw();
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Indicator;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Location = function (parent) {
+
+	// properties
+
+	"use strict";
+
+	this.parent = parent;
+
+	this.object = null;
+
+	this.interval = null;
+
+	// add the Layer with the GPX Track
+
+	this.point = function () {
+
+		// if geolocation is available
+
+		if (navigator.geolocation) {
+
+			// request the position
+
+			navigator.geolocation.watchPosition(
+
+				this.onGeoSuccess(),
+
+				this.onGeoFailure(),
+
+				{ maximumAge : 10000,  timeout : 5000,  enableHighAccuracy : true }
+
+			);
+
+		}
+
+	};
+
+	// redraw the pointer layer
+
+	this.redraw = function () {
+
+		// if geolocation is available
+
+		if (navigator.geolocation) {
+
+			// request the position
+
+			navigator.geolocation.getCurrentPosition(
+
+				this.onGeoSuccess(),
+
+				this.onGeoFailure(),
+
+				{ enableHighAccuracy : true }
+
+			);
+
+		}
+
+	};
+
+	// geo location events
+
+	this.onGeoSuccess = function () {
+
+		var _this = this, _cfg = this.parent.cfg;
+
+		return function (geo) {
+
+			console.log('geolocation succeeded', geo);
+
+			// if the marker doesn't exist yet
+
+			if (_this.object === null) {
+
+				// create the icon
+
+				var icon = L.icon({
+
+					iconUrl: _cfg.pointer,
+
+					iconSize: [32, 32],
+
+					iconAnchor: [16, 32]
+
+				});
+
+				// add the marker with the icon
+
+				_this.object = L.marker(
+
+					[geo.coords.latitude, geo.coords.longitude],
+
+					{'icon': icon}
+
+				);
+
+				_this.object.addTo(_cfg.map.object);
+
+			} else {
+
+				_this.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
+
+			}
+
+		};
+
+	};
+
+	this.onGeoFailure = function () {
+
+		var _this = this;
+
+		return function () {
+
+			console.log('geolocation failed');
+
+		};
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Location;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Map = function (parent) {
+
+	// properties
+
+	"use strict";
+
+	this.parent = parent;
+
+	// methods
+
+	this.setup = function () {
+
+		var cfg = this.parent.cfg,
+
+			id = this.parent.obj.id;
+
+		// define the map
+
+		cfg.map = {};
+
+		cfg.map.object = L.map(id);
+
+		// add the tiles
+
+		var tileLayer = L.tileLayer(cfg.tiles, {
+
+			attribution: cfg.credit,
+
+			errorTileUrl: cfg.missing,
+
+			minZoom: cfg.minZoom,
+
+			maxZoom: cfg.maxZoom
+
+		}).addTo(cfg.map.object);
+
+		// if there is a local tile store, try and handle failing tiles
+
+		if (this.parent.cfg.local) {
+
+			tileLayer.on('tileloadstart', this.onFallback(this.parent.cfg.local));
+
+		}
+
+		// get the centre of the map
+
+		this.bounds();
+
+		// refresh the map after scrolling
+
+		var _this = this;
+
+		cfg.map.object.on('moveend', function (e) { _this.parent.redraw(); });
+
+		cfg.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
+
+	};
+
+	this.remove = function () {
+
+		var cfg = this.parent.cfg;
+
+		// ask leaflet to remove itself if available
+
+		if (cfg.map && cfg.map.object) {
+
+			cfg.map.object.remove();
+
+		}
+
+	};
+
+	this.bounds = function () {
+
+		var a, b, points, cfg = this.parent.cfg,
+
+			minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
+
+		// for all navigation points
+
+		points = this.parent.gpx.coordinates();
+
+		for (a = 0 , b = points.length; a < b; a += 1) {
+
+			minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+
+			minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+
+			maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+
+			maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
+
+		}
+
+		// extend the bounds a little
+
+		minLat -= 0.01;
+
+		minLon -= 0.01;
+
+		maxLat += 0.01;
+
+		maxLon += 0.01;
+
+		// limit the bounds
+
+		cfg.map.object.fitBounds([
+
+			[minLat, minLon],
+
+			[maxLat, maxLon]
+
+		]);
+
+		cfg.map.object.setMaxBounds([
+
+			[minLat, minLon],
+
+			[maxLat, maxLon]
+
+		]);
+
+	};
+
+	this.beginning = function () {
+
+		var a, b, cfg = this.parent.cfg,
+
+			points = this.parent.gpx.coordinates(),
+
+			totLon = points[0][0] * points.length,
+
+			totLat = points[0][1] * points.length;
+
+		// for all navigation points
+
+		for (a = 0 , b = points.length; a < b; a += 1) {
+
+			totLon += points[a][0];
+
+			totLat += points[a][1];
+
+		}
+
+		// average the centre
+
+		cfg.map.centre = {
+
+			'lon' : totLon / points.length / 2,
+
+			'lat' : totLat / points.length / 2
+
+		};
+
+		// apply the centre
+
+		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+
+		// call for a redraw
+
+		this.parent.redraw();
+
+	};
+
+	this.centre = function () {
+
+		var a, b, points, cfg = this.parent.cfg,
+
+			minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
+
+		// for all navigation points
+
+		points = this.parent.gpx.coordinates();
+
+		for (a = 0 , b = points.length; a < b; a += 1) {
+
+			totLon += points[a][0];
+
+			totLat += points[a][1];
+
+			minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
+
+			minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
+
+			maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
+
+			maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
+
+		}
+
+		// average the centre
+
+		cfg.map.centre = {
+
+			'lon' : totLon / points.length,
+
+			'lat' : totLat / points.length
+
+		};
+
+		// apply the centre
+
+		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+
+		// call for a redraw
+
+		this.parent.redraw();
+
+	};
+
+	this.onFallback = function (local) {
+
+		return function (element) {
+
+			var src = element.tile.getAttribute('src');
+
+			element.tile.setAttribute('data-failed', 'false')
+
+			element.tile.addEventListener('error', function () {
+
+				// if this tile has not failed before
+
+				if (element.tile.getAttribute('data-failed') === 'false') {
+
+					// mark the element as a failure
+
+					element.tile.setAttribute('data-failed', 'true');
+
+					// recover the coordinates
+
+					var parts = src.split('/'),
+
+						length = parts.length,
+
+						z = parseInt(parts[length - 3]),
+
+						x =	parseInt(parts[length - 2]),
+
+						y = parseInt(parts[length - 1]);
+
+					// try the local source instead
+
+					element.tile.src = local.replace('{z}', z).replace('{x}', x).replace('{y}', y);
+
+					console.log('fallback to:', element.tile.src);
+
+				}
+
+			});
+
+		};
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Map;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Markers = function (parent) {
+
+	// properties
+
+	"use strict";
+
+	this.parent = parent;
+
+	// add the Layer with the permanent markers
+
+	this.add = function () {
+
+		var name, marker, icon, cfg = this.parent.cfg;
+
+		// get the track points from the GPX file
+
+		var points = this.parent.gpx.coordinates();
+
+		// for all markers
+
+		for (name in cfg.markers) {
+
+			if (cfg.markers.hasOwnProperty(name)) {
+
+				marker = cfg.markers[name];
+
+				// special markers
+
+				switch (name) {
+
+					case 'start' :
+
+						marker.lon = marker.lon || points[0][0];
+
+						marker.lat = marker.lat || points[0][1];
+
+						break;
+
+					case 'end' :
+
+						marker.lon = marker.lon || points[points.length - 1][0];
+
+						marker.lat = marker.lat || points[points.length - 1][1];
+
+						break;
+
+				}
+
+				// create the icon
+
+				icon = L.icon({
+
+					iconUrl: marker.icon,
+
+					iconSize: [32, 32],
+
+					iconAnchor: [16, 32]
+
+				});
+
+				// add the marker with the icon
+
+				marker.object = L.marker(
+
+					[marker.lat, marker.lon],
+
+					{'icon': icon}
+
+				);
+
+				marker.object.addTo(cfg.map.object);
+
+				// add the popup to the marker
+
+				marker.popup = marker.object.bindPopup(marker.description);
+
+				// add the click handler
+
+				marker.object.on('click', this.onMarkerClicked(marker));
+
+			}
+
+		}
+
+	};
+
+	this.onMarkerClicked = function (marker) {
+
+		var _this = this;
+
+		return function (evt) {
+
+			// show the marker message in a balloon
+
+			marker.object.openPopup();
+
+		};
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Markers;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.Route = function (parent) {
+
+	// properties
+
+	"use strict";
+
+	this.parent = parent;
+
+	// add the Layer with the GPX Track
+
+	this.plot = function () {
+
+		var cfg = this.parent.cfg;
+
+		// plot the geoJson object
+
+		cfg.route = {};
+
+		cfg.route.object = L.geoJson(cfg.gpxData, {
+
+			style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
+
+		});
+
+		cfg.route.object.addTo(cfg.map.object);
+
+	};
+
+	// redraw the geoJSON layer
+
+	this.redraw = function () {
+
+		var cfg = this.parent.cfg;
+
+		if (cfg.route) {
+
+			// remove the layer
+
+			cfg.map.object.removeLayer(cfg.route.object);
+
+			// re-add the layer
+
+			this.plot();
+
+		}
+
+	};
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap.Route;
+
+}
+
+
+/*
+
+	Source:
+
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+
+
+	License:
+
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+
+	Dependencies:
+
+	http://www.leaflet.com/
+
+	https://github.com/mapbox/togeojson
+
+*/
+
+
+
+// create the constructor if needed
+
+var useful = useful || {};
+
+useful.Photomap = useful.Photomap || function () {};
+
+
+
+// extend the constructor
+
+useful.Photomap.prototype.init = function (cfg) {
+
+	// properties
+
+	"use strict";
+
+	this.cfg = cfg;
+
+	this.obj = cfg.element;
+
+	// methods
+
+	this.start = function () {
+
+		var _this = this;
+
+		// show the busy indicator
+
+		this.busy.setup();
+
+		// load the gpx track
+
+		this.gpx.load(function () {
+
+			// draw the map
+
+			_this.map.setup();
+
+			// plot the route
+
+			_this.route.plot();
+
+			// show the permanent markers
+
+			_this.markers.add();
+
+			// show the indicator
+
+			_this.indicator.add();
+
+			// start the location pointer
+
+			_this.location.point();
+
+		});
+
+		// disable the start function so it can't be started twice
+
+		this.start = function () {};
+
+	};
+
+	this.redraw = function () {
+
+		var _this = this;
+
+		// wait for a change to redraw
+
+		clearTimeout(this.cfg.redrawTimeout);
+
+		this.cfg.redrawTimeout = setTimeout(function () {
+
+			// redraw the map
+
+			_this.route.redraw();
+
+			// redraw the plotted route
+
+			_this.route.redraw();
+
+		}, 500);
+
+	};
+
+	// components
+
+	this.busy = new this.Busy(this);
+
+	this.exif = new this.Exif(this);
+
+	this.gpx = new this.Gpx(this);
+
+	this.map = new this.Map(this);
+
+	this.route = new this.Route(this);
+
+	this.markers = new this.Markers(this);
+
+	this.indicator = new this.Indicator(this);
+
+	this.location = new this.Location(this);
+
+	// public API
+
+	this.indicate = function (element) {
+
+		var _this = this,
+
+			cfg = this.cfg,
+
+			url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
+
+			title = element.getAttribute('data-title') || element.getAttribute('title');
+
+		this.exif.load(url, function (coords) {
+
+			cfg.indicator.lat = coords.lat;
+
+			cfg.indicator.lon = coords.lon;
+
+			_this.indicator.add();
+
+		});
+
+	};
+
+	this.unindicate = function () {
+
+		this.indicator.remove();
+
+	};
+
+	this.stop = function () {
+
+		this.map.remove();
+
+	};
+
+	// go
+
+	this.start();
+
+	return this;
+
+};
+
+
+
+// return as a require.js module
+
+if (typeof module !== 'undefined') {
+
+	exports = module.exports = useful.Photomap;
+
+}
+

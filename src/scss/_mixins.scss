@@ -1,5 +1,5 @@
 /*
-	Constants
+Constants
 */
 $color-background : #ffffff;
 $color-text : #1e1e1e;
@@ -11,7 +11,7 @@ $color-highlight : #eeeeee;
 $iconSize : 64px;
 $remSize : 12;
 /*
-	Hides text in the margin
+Hides text in the margin
 */
 @mixin obfuscate ($distance:100) {
 	overflow : hidden;
@@ -20,7 +20,7 @@ $remSize : 12;
 	white-space : nowrap;
 }
 /*
-	Turns a button into an icon
+Turns a button into an icon
 */
 @mixin iconParent ($size:32, $unit:px) {
 	overflow : hidden;
@@ -33,7 +33,7 @@ $remSize : 12;
 	text-indent : -999em;
 }
 /*
-	Centres a graphic or glyph inside an icon
+Centres a graphic or glyph inside an icon
 */
 @mixin iconCenter ($size:32, $unit:px, $char:'', $margin:0.5) {
 	content : $char;
@@ -62,14 +62,14 @@ $remSize : 12;
 	top : 50%;
 }
 /*
-	Offers both the pixel and rem value of a single property
+Offers both the pixel and rem value of a single property
 */
 @mixin rem ($name:'', $value:'') {
 	#{$name} : ($remSize * $value) + px;
 	#{$name} : $value + rem;
 }
 /*
-	Offers both the pixel and rem values of a shorthand property
+Offers both the pixel and rem values of a shorthand property
 */
 @mixin rems ($name:'', $top:'', $right:'', $bottom:'', $left:'') {
 	@if $top != '' {
@@ -90,7 +90,7 @@ $remSize : 12;
 	}
 }
 /*
-	Offers the text size as both the pixel and rem value
+Offers the text size as both the pixel and rem value
 */
 @mixin text ($size) {
 	@if $size == s {
@@ -114,17 +114,17 @@ $remSize : 12;
 	}
 }
 /*
-	Adds vendor prefixed to a property
+Adds vendor prefixed to a property
 */
 @mixin vendors ($name:'', $value:'') {
-	-o-#{$name} : #{$value};
-	-ms-#{$name} : #{$value};
-	-moz-#{$name} : #{$value};
-	-webkit-#{$name} : #{$value};
-	#{$name} : #{$value};
+	-o-#{$name} : unquote($value);
+	-ms-#{$name} : unquote($value);
+	-moz-#{$name} : unquote($value);
+	-webkit-#{$name} : unquote($value);
+	#{$name} : unquote($value);
 }
 /*
-	Applies the "clearfix" hack to a container with floating content
+Applies the "clearfix" hack to a container with floating content
 */
 @mixin clearfix () {
 	*zoom: 1;
