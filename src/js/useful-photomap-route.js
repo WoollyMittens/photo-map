@@ -19,22 +19,21 @@ useful.Photomap.prototype.Route = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// add the Layer with the GPX Track
 	this.plot = function () {
-		var cfg = this.parent.cfg;
 		// plot the geoJson object
-		cfg.route = {};
-		cfg.route.object = L.geoJson(cfg.gpxData, {
+		this.config.route = {};
+		this.config.route.object = L.geoJson(this.config.gpxData, {
 			style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 		});
-		cfg.route.object.addTo(cfg.map.object);
+		this.config.route.object.addTo(this.config.map.object);
 	};
 	// redraw the geoJSON layer
 	this.redraw = function () {
-		var cfg = this.parent.cfg;
-		if (cfg.route) {
+		if (this.config.route) {
 			// remove the layer
-			cfg.map.object.removeLayer(cfg.route.object);
+			this.config.map.object.removeLayer(this.config.route.object);
 			// re-add the layer
 			this.plot();
 		}

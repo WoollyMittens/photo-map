@@ -19,23 +19,23 @@ useful.Photomap.prototype.Exif = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.load = function (url, onComplete) {
-		var cfg = this.parent.cfg, _this = this,
-			path = url.split('/'), name = path[path.length - 1];
+		var _this = this, path = url.split('/'), name = path[path.length - 1];
 		// if the lat and lon have been cached in exifData
-		if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
+		if (this.config.exifData && this.config.exifData[name] && this.config.exifData[name].lat && this.config.exifData[name].lon) {
 			// send back the stored coordinates from the exifData
 			onComplete({
-				'lat' : cfg.exifData[name].lat,
-				'lon' : cfg.exifData[name].lon,
+				'lat' : this.config.exifData[name].lat,
+				'lon' : this.config.exifData[name].lon,
 			});
 		// else
 		} else {
 			console.log('PhotomapExif: ajax');
 			// retrieve the exif data of a photo
 			useful.request.send({
-				url : cfg.exif.replace('{src}', url),
+				url : this.config.exif.replace('{src}', url),
 				post : null,
 				onProgress : function (reply) {
 					return reply;
@@ -47,7 +47,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 					var json = useful.request.decode(reply.responseText);
 					var latLon = _this.convert(json);
 					// exifData the values
-					cfg.exifData[name] = json;
+					_this.config.exifData[name] = json;
 					// call back the values
 					onComplete(latLon);
 				}
@@ -55,7 +55,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 		}
 	};
 	this.convert = function (exif) {
-		var deg, min, sec, lon, lat, cfg = this.parent.cfg;
+		var deg, min, sec, lon, lat;
 		// latitude
 		deg = (exif.GPS.GPSLatitude[0].match(/\//)) ?
 			parseInt(exif.GPS.GPSLatitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1], 10):
@@ -80,7 +80,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 		lon = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLongitudeRef === "W" ? -1 : 1);
 		// temporary console report
 		if (typeof(console) !== 'undefined') {
-			console.log(cfg.indicator);
+			console.log(this.config.indicator);
 		}
 		// return the values
 		return {'lat' : lat, 'lon' : lon};

@@ -19,41 +19,39 @@ useful.Photomap.prototype.Map = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.setup = function () {
-		var cfg = this.parent.cfg,
-			id = this.parent.obj.id;
+		var id = this.parent.element.id;
 		// define the map
-		cfg.map = {};
-		cfg.map.object = L.map(id);
+		this.config.map = {};
+		this.config.map.object = L.map(id);
 		// add the tiles
-		var tileLayer = L.tileLayer(cfg.tiles, {
-			attribution: cfg.credit,
-			errorTileUrl: cfg.missing,
-			minZoom: cfg.minZoom,
-			maxZoom: cfg.maxZoom
-		}).addTo(cfg.map.object);
+		var tileLayer = L.tileLayer(this.config.tiles, {
+			attribution: this.config.credit,
+			errorTileUrl: this.config.missing,
+			minZoom: this.config.minZoom,
+			maxZoom: this.config.maxZoom
+		}).addTo(this.config.map.object);
 		// if there is a local tile store, try and handle failing tiles
-		if (this.parent.cfg.local) {
-			tileLayer.on('tileloadstart', this.onFallback(this.parent.cfg.local));
+		if (this.config.local) {
+			tileLayer.on('tileloadstart', this.onFallback(this.config.local));
 		}
 		// get the centre of the map
 		this.bounds();
 		// refresh the map after scrolling
 		var _this = this;
-		cfg.map.object.on('moveend', function (e) { _this.parent.redraw(); });
-		cfg.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
+		this.config.map.object.on('moveend', function (e) { _this.parent.redraw(); });
+		this.config.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
 	};
 	this.remove = function () {
-		var cfg = this.parent.cfg;
 		// ask leaflet to remove itself if available
-		if (cfg.map && cfg.map.object) {
-			cfg.map.object.remove();
+		if (this.config.map && this.config.map.object) {
+			this.config.map.object.remove();
 		}
 	};
 	this.bounds = function () {
-		var a, b, points, cfg = this.parent.cfg,
-			minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
+		var a, b, points, minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
 		// for all navigation points
 		points = this.parent.gpx.coordinates();
 		for (a = 0 , b = points.length; a < b; a += 1) {
@@ -68,17 +66,17 @@ useful.Photomap.prototype.Map = function (parent) {
 		maxLat += 0.01;
 		maxLon += 0.01;
 		// limit the bounds
-		cfg.map.object.fitBounds([
+		this.config.map.object.fitBounds([
 			[minLat, minLon],
 			[maxLat, maxLon]
 		]);
-		cfg.map.object.setMaxBounds([
+		this.config.map.object.setMaxBounds([
 			[minLat, minLon],
 			[maxLat, maxLon]
 		]);
 	};
 	this.beginning = function () {
-		var a, b, cfg = this.parent.cfg,
+		var a, b,
 			points = this.parent.gpx.coordinates(),
 			totLon = points[0][0] * points.length,
 			totLat = points[0][1] * points.length;
@@ -88,17 +86,17 @@ useful.Photomap.prototype.Map = function (parent) {
 			totLat += points[a][1];
 		}
 		// average the centre
-		cfg.map.centre = {
+		this.config.map.centre = {
 			'lon' : totLon / points.length / 2,
 			'lat' : totLat / points.length / 2
 		};
 		// apply the centre
-		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.map.centre.lat, this.config.map.centre.lon], this.config.zoom);
 		// call for a redraw
 		this.parent.redraw();
 	};
 	this.centre = function () {
-		var a, b, points, cfg = this.parent.cfg,
+		var a, b, points,
 			minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
 		// for all navigation points
 		points = this.parent.gpx.coordinates();
@@ -111,19 +109,19 @@ useful.Photomap.prototype.Map = function (parent) {
 			maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
 		}
 		// average the centre
-		cfg.map.centre = {
+		this.config.map.centre = {
 			'lon' : totLon / points.length,
 			'lat' : totLat / points.length
 		};
 		// apply the centre
-		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.map.centre.lat, this.config.map.centre.lon], this.config.zoom);
 		// call for a redraw
 		this.parent.redraw();
 	};
 	this.onFallback = function (local) {
 		return function (element) {
 			var src = element.tile.getAttribute('src');
-			element.tile.setAttribute('data-failed', 'false')
+			element.tile.setAttribute('data-failed', 'false');
 			element.tile.addEventListener('error', function () {
 				// if this tile has not failed before
 				if (element.tile.getAttribute('data-failed') === 'false') {

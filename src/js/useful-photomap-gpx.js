@@ -19,11 +19,12 @@ useful.Photomap.prototype.Gpx = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// this methods
 	this.load = function (oncomplete) {
-		var cfg = this.parent.cfg, _this = this;
+		var _this = this;
 		// if the GPX have been cached in gpxData
-		if (cfg.gpxData) {
+		if (this.config.gpxData) {
 			// call back
 			oncomplete();
 		// lead it from disk
@@ -32,13 +33,13 @@ useful.Photomap.prototype.Gpx = function (parent) {
 			parent.busy.show();
 			// onload
 			useful.request.send({
-				url : cfg.gpx,
+				url : this.config.gpx,
 				post : null,
 				onProgress : function () {},
 				onFailure : function () {},
 				onSuccess : function (reply) {
 					// store the result
-					cfg.gpxData = toGeoJSON.gpx(reply.responseXML);
+					_this.config.gpxData = toGeoJSON.gpx(reply.responseXML);
 					// call back
 					oncomplete();
 					// hide the busy indicator
@@ -48,9 +49,9 @@ useful.Photomap.prototype.Gpx = function (parent) {
 		}
 	};
 	this.coordinates = function () {
-		var cfg = this.parent.cfg, gpx = cfg.gpxData, joined = [];
+		var gpx = this.config.gpxData, joined = [];
 		// get the line data from the geojson file
-		var geometryCoordinates = cfg.gpxData.features[0].geometry.coordinates;
+		var geometryCoordinates = this.config.gpxData.features[0].geometry.coordinates;
 		// if the line data consists of multiple segments
 		if (geometryCoordinates[0][0] instanceof Array) {
 			// join all the segments

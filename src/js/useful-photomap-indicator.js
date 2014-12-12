@@ -19,9 +19,10 @@ useful.Photomap.prototype.Indicator = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// this methods
 	this.add = function () {
-		var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
+		var icon, map = this.config.map, indicator = this.config.indicator;
 		// if the indicator has coordinates
 		if (indicator.lon && indicator.lat) {
 			// remove any previous indicator
@@ -60,7 +61,7 @@ useful.Photomap.prototype.Indicator = function (parent) {
 		};
 	};
 	this.remove = function () {
-		var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
+		var map = this.config.map, indicator = this.config.indicator;
 		// remove the balloon
 		indicator.object.closePopup();
 		// remove the indicator
@@ -72,16 +73,14 @@ useful.Photomap.prototype.Indicator = function (parent) {
 		this.unfocus();
 	};
 	this.focus = function () {
-		var cfg = this.parent.cfg;
 		// focus the map on the indicator
-		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
+		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom + 2);
 		// call for a  redraw
 		this.parent.redraw();
 	};
 	this.unfocus = function () {
-		var cfg = this.parent.cfg;
 		// focus the map on the indicator
-		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom);
 		// call for a  redraw
 		this.parent.redraw();
 	};

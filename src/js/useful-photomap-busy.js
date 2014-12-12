@@ -19,6 +19,7 @@ useful.Photomap.prototype.Busy = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.setup = function () {};
 	this.show = function () {};

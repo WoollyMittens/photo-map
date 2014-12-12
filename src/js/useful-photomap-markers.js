@@ -19,15 +19,16 @@ useful.Photomap.prototype.Markers = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// add the Layer with the permanent markers
 	this.add = function () {
-		var name, marker, icon, cfg = this.parent.cfg;
+		var name, marker, icon;
 		// get the track points from the GPX file
 		var points = this.parent.gpx.coordinates();
 		// for all markers
-		for (name in cfg.markers) {
-			if (cfg.markers.hasOwnProperty(name)) {
-				marker = cfg.markers[name];
+		for (name in this.config.markers) {
+			if (this.config.markers.hasOwnProperty(name)) {
+				marker = this.config.markers[name];
 				// special markers
 				switch (name) {
 					case 'start' :
@@ -50,7 +51,7 @@ useful.Photomap.prototype.Markers = function (parent) {
 					[marker.lat, marker.lon],
 					{'icon': icon}
 				);
-				marker.object.addTo(cfg.map.object);
+				marker.object.addTo(this.config.map.object);
 				// add the popup to the marker
 				marker.popup = marker.object.bindPopup(marker.description);
 				// add the click handler

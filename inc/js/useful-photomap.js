@@ -9553,6 +9553,7 @@ useful.Photomap.prototype.Busy = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.setup = function () {};
 	this.show = function () {};
@@ -9585,23 +9586,23 @@ useful.Photomap.prototype.Exif = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.load = function (url, onComplete) {
-		var cfg = this.parent.cfg, _this = this,
-			path = url.split('/'), name = path[path.length - 1];
+		var _this = this, path = url.split('/'), name = path[path.length - 1];
 		// if the lat and lon have been cached in exifData
-		if (cfg.exifData && cfg.exifData[name] && cfg.exifData[name].lat && cfg.exifData[name].lon) {
+		if (this.config.exifData && this.config.exifData[name] && this.config.exifData[name].lat && this.config.exifData[name].lon) {
 			// send back the stored coordinates from the exifData
 			onComplete({
-				'lat' : cfg.exifData[name].lat,
-				'lon' : cfg.exifData[name].lon,
+				'lat' : this.config.exifData[name].lat,
+				'lon' : this.config.exifData[name].lon,
 			});
 		// else
 		} else {
 			console.log('PhotomapExif: ajax');
 			// retrieve the exif data of a photo
 			useful.request.send({
-				url : cfg.exif.replace('{src}', url),
+				url : this.config.exif.replace('{src}', url),
 				post : null,
 				onProgress : function (reply) {
 					return reply;
@@ -9613,7 +9614,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 					var json = useful.request.decode(reply.responseText);
 					var latLon = _this.convert(json);
 					// exifData the values
-					cfg.exifData[name] = json;
+					_this.config.exifData[name] = json;
 					// call back the values
 					onComplete(latLon);
 				}
@@ -9621,7 +9622,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 		}
 	};
 	this.convert = function (exif) {
-		var deg, min, sec, lon, lat, cfg = this.parent.cfg;
+		var deg, min, sec, lon, lat;
 		// latitude
 		deg = (exif.GPS.GPSLatitude[0].match(/\//)) ?
 			parseInt(exif.GPS.GPSLatitude[0].split('/')[0], 10) / parseInt(exif.GPS.GPSLatitude[0].split('/')[1], 10):
@@ -9646,7 +9647,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 		lon = (deg + min / 60 + sec / 3600) * (exif.GPS.GPSLongitudeRef === "W" ? -1 : 1);
 		// temporary console report
 		if (typeof(console) !== 'undefined') {
-			console.log(cfg.indicator);
+			console.log(this.config.indicator);
 		}
 		// return the values
 		return {'lat' : lat, 'lon' : lon};
@@ -9679,11 +9680,12 @@ useful.Photomap.prototype.Gpx = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// this methods
 	this.load = function (oncomplete) {
-		var cfg = this.parent.cfg, _this = this;
+		var _this = this;
 		// if the GPX have been cached in gpxData
-		if (cfg.gpxData) {
+		if (this.config.gpxData) {
 			// call back
 			oncomplete();
 		// lead it from disk
@@ -9692,13 +9694,13 @@ useful.Photomap.prototype.Gpx = function (parent) {
 			parent.busy.show();
 			// onload
 			useful.request.send({
-				url : cfg.gpx,
+				url : this.config.gpx,
 				post : null,
 				onProgress : function () {},
 				onFailure : function () {},
 				onSuccess : function (reply) {
 					// store the result
-					cfg.gpxData = toGeoJSON.gpx(reply.responseXML);
+					_this.config.gpxData = toGeoJSON.gpx(reply.responseXML);
 					// call back
 					oncomplete();
 					// hide the busy indicator
@@ -9708,9 +9710,9 @@ useful.Photomap.prototype.Gpx = function (parent) {
 		}
 	};
 	this.coordinates = function () {
-		var cfg = this.parent.cfg, gpx = cfg.gpxData, joined = [];
+		var gpx = this.config.gpxData, joined = [];
 		// get the line data from the geojson file
-		var geometryCoordinates = cfg.gpxData.features[0].geometry.coordinates;
+		var geometryCoordinates = this.config.gpxData.features[0].geometry.coordinates;
 		// if the line data consists of multiple segments
 		if (geometryCoordinates[0][0] instanceof Array) {
 			// join all the segments
@@ -9751,9 +9753,10 @@ useful.Photomap.prototype.Indicator = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// this methods
 	this.add = function () {
-		var cfg = this.parent.cfg, icon, map = cfg.map, indicator = cfg.indicator;
+		var icon, map = this.config.map, indicator = this.config.indicator;
 		// if the indicator has coordinates
 		if (indicator.lon && indicator.lat) {
 			// remove any previous indicator
@@ -9792,7 +9795,7 @@ useful.Photomap.prototype.Indicator = function (parent) {
 		};
 	};
 	this.remove = function () {
-		var cfg = this.parent.cfg, map = cfg.map, indicator = cfg.indicator;
+		var map = this.config.map, indicator = this.config.indicator;
 		// remove the balloon
 		indicator.object.closePopup();
 		// remove the indicator
@@ -9804,16 +9807,14 @@ useful.Photomap.prototype.Indicator = function (parent) {
 		this.unfocus();
 	};
 	this.focus = function () {
-		var cfg = this.parent.cfg;
 		// focus the map on the indicator
-		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom + 2);
+		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom + 2);
 		// call for a  redraw
 		this.parent.redraw();
 	};
 	this.unfocus = function () {
-		var cfg = this.parent.cfg;
 		// focus the map on the indicator
-		cfg.map.object.setView([cfg.indicator.lat, cfg.indicator.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom);
 		// call for a  redraw
 		this.parent.redraw();
 	};
@@ -9845,6 +9846,7 @@ useful.Photomap.prototype.Location = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	this.object = null;
 	this.interval = null;
 	// add the Layer with the GPX Track
@@ -9873,14 +9875,14 @@ useful.Photomap.prototype.Location = function (parent) {
 	};
 	// geo location events
 	this.onGeoSuccess = function () {
-		var _this = this, _cfg = this.parent.cfg;
+		var _this = this, _config = this.parent.config;
 		return function (geo) {
 			console.log('geolocation succeeded', geo);
 			// if the marker doesn't exist yet
 			if (_this.object === null) {
 				// create the icon
 				var icon = L.icon({
-					iconUrl: _cfg.pointer,
+					iconUrl: _config.pointer,
 					iconSize: [32, 32],
 					iconAnchor: [16, 32]
 				});
@@ -9889,7 +9891,7 @@ useful.Photomap.prototype.Location = function (parent) {
 					[geo.coords.latitude, geo.coords.longitude],
 					{'icon': icon}
 				);
-				_this.object.addTo(_cfg.map.object);
+				_this.object.addTo(_config.map.object);
 			} else {
 				_this.object.setLatLng([geo.coords.latitude, geo.coords.longitude]);
 			}
@@ -9925,45 +9927,132 @@ var useful = useful || {};
 useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
+useful.Photomap.prototype.Main = function (config, context) {
+	// properties
+	"use strict";
+	this.config = config;
+	this.context = context;
+	this.element = config.element;
+	// methods
+	this.init = function () {
+		var _this = this;
+		// show the busy indicator
+		this.busy.setup();
+		// load the gpx track
+		this.gpx.load(function () {
+			// draw the map
+			_this.map.setup();
+			// plot the route
+			_this.route.plot();
+			// show the permanent markers
+			_this.markers.add();
+			// show the indicator
+			_this.indicator.add();
+			// start the location pointer
+			_this.location.point();
+		});
+		// return the object
+		return this;
+	};
+	this.redraw = function () {
+		var _this = this;
+		// wait for a change to redraw
+		clearTimeout(this.config.redrawTimeout);
+		this.config.redrawTimeout = setTimeout(function () {
+			// redraw the map
+			_this.route.redraw();
+			// redraw the plotted route
+			_this.route.redraw();
+		}, 500);
+	};
+	// components
+	this.busy = new this.context.Busy(this);
+	this.exif = new this.context.Exif(this);
+	this.gpx = new this.context.Gpx(this);
+	this.map = new this.context.Map(this);
+	this.route = new this.context.Route(this);
+	this.markers = new this.context.Markers(this);
+	this.indicator = new this.context.Indicator(this);
+	this.location = new this.context.Location(this);
+	// public API
+	this.indicate = function (element) {
+		var _this = this,
+			config = this.config,
+			url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
+			title = element.getAttribute('data-title') || element.getAttribute('title');
+		this.exif.load(url, function (coords) {
+			config.indicator.lat = coords.lat;
+			config.indicator.lon = coords.lon;
+			_this.indicator.add();
+		});
+	};
+	this.unindicate = function () {
+		this.indicator.remove();
+	};
+	this.stop = function () {
+		this.map.remove();
+	};
+};
+
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = useful.Photomap.Main;
+}
+
+/*
+	Source:
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+
+	License:
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+	Dependencies:
+	http://www.leaflet.com/
+	https://github.com/mapbox/togeojson
+*/
+
+// create the constructor if needed
+var useful = useful || {};
+useful.Photomap = useful.Photomap || function () {};
+
+// extend the constructor
 useful.Photomap.prototype.Map = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
 	this.setup = function () {
-		var cfg = this.parent.cfg,
-			id = this.parent.obj.id;
+		var id = this.parent.element.id;
 		// define the map
-		cfg.map = {};
-		cfg.map.object = L.map(id);
+		this.config.map = {};
+		this.config.map.object = L.map(id);
 		// add the tiles
-		var tileLayer = L.tileLayer(cfg.tiles, {
-			attribution: cfg.credit,
-			errorTileUrl: cfg.missing,
-			minZoom: cfg.minZoom,
-			maxZoom: cfg.maxZoom
-		}).addTo(cfg.map.object);
+		var tileLayer = L.tileLayer(this.config.tiles, {
+			attribution: this.config.credit,
+			errorTileUrl: this.config.missing,
+			minZoom: this.config.minZoom,
+			maxZoom: this.config.maxZoom
+		}).addTo(this.config.map.object);
 		// if there is a local tile store, try and handle failing tiles
-		if (this.parent.cfg.local) {
-			tileLayer.on('tileloadstart', this.onFallback(this.parent.cfg.local));
+		if (this.config.local) {
+			tileLayer.on('tileloadstart', this.onFallback(this.config.local));
 		}
 		// get the centre of the map
 		this.bounds();
 		// refresh the map after scrolling
 		var _this = this;
-		cfg.map.object.on('moveend', function (e) { _this.parent.redraw(); });
-		cfg.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
+		this.config.map.object.on('moveend', function (e) { _this.parent.redraw(); });
+		this.config.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
 	};
 	this.remove = function () {
-		var cfg = this.parent.cfg;
 		// ask leaflet to remove itself if available
-		if (cfg.map && cfg.map.object) {
-			cfg.map.object.remove();
+		if (this.config.map && this.config.map.object) {
+			this.config.map.object.remove();
 		}
 	};
 	this.bounds = function () {
-		var a, b, points, cfg = this.parent.cfg,
-			minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
+		var a, b, points, minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
 		// for all navigation points
 		points = this.parent.gpx.coordinates();
 		for (a = 0 , b = points.length; a < b; a += 1) {
@@ -9978,17 +10067,17 @@ useful.Photomap.prototype.Map = function (parent) {
 		maxLat += 0.01;
 		maxLon += 0.01;
 		// limit the bounds
-		cfg.map.object.fitBounds([
+		this.config.map.object.fitBounds([
 			[minLat, minLon],
 			[maxLat, maxLon]
 		]);
-		cfg.map.object.setMaxBounds([
+		this.config.map.object.setMaxBounds([
 			[minLat, minLon],
 			[maxLat, maxLon]
 		]);
 	};
 	this.beginning = function () {
-		var a, b, cfg = this.parent.cfg,
+		var a, b,
 			points = this.parent.gpx.coordinates(),
 			totLon = points[0][0] * points.length,
 			totLat = points[0][1] * points.length;
@@ -9998,17 +10087,17 @@ useful.Photomap.prototype.Map = function (parent) {
 			totLat += points[a][1];
 		}
 		// average the centre
-		cfg.map.centre = {
+		this.config.map.centre = {
 			'lon' : totLon / points.length / 2,
 			'lat' : totLat / points.length / 2
 		};
 		// apply the centre
-		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.map.centre.lat, this.config.map.centre.lon], this.config.zoom);
 		// call for a redraw
 		this.parent.redraw();
 	};
 	this.centre = function () {
-		var a, b, points, cfg = this.parent.cfg,
+		var a, b, points,
 			minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
 		// for all navigation points
 		points = this.parent.gpx.coordinates();
@@ -10021,19 +10110,19 @@ useful.Photomap.prototype.Map = function (parent) {
 			maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
 		}
 		// average the centre
-		cfg.map.centre = {
+		this.config.map.centre = {
 			'lon' : totLon / points.length,
 			'lat' : totLat / points.length
 		};
 		// apply the centre
-		cfg.map.object.setView([cfg.map.centre.lat, cfg.map.centre.lon], cfg.zoom);
+		this.config.map.object.setView([this.config.map.centre.lat, this.config.map.centre.lon], this.config.zoom);
 		// call for a redraw
 		this.parent.redraw();
 	};
 	this.onFallback = function (local) {
 		return function (element) {
 			var src = element.tile.getAttribute('src');
-			element.tile.setAttribute('data-failed', 'false')
+			element.tile.setAttribute('data-failed', 'false');
 			element.tile.addEventListener('error', function () {
 				// if this tile has not failed before
 				if (element.tile.getAttribute('data-failed') === 'false') {
@@ -10080,15 +10169,16 @@ useful.Photomap.prototype.Markers = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// add the Layer with the permanent markers
 	this.add = function () {
-		var name, marker, icon, cfg = this.parent.cfg;
+		var name, marker, icon;
 		// get the track points from the GPX file
 		var points = this.parent.gpx.coordinates();
 		// for all markers
-		for (name in cfg.markers) {
-			if (cfg.markers.hasOwnProperty(name)) {
-				marker = cfg.markers[name];
+		for (name in this.config.markers) {
+			if (this.config.markers.hasOwnProperty(name)) {
+				marker = this.config.markers[name];
 				// special markers
 				switch (name) {
 					case 'start' :
@@ -10111,7 +10201,7 @@ useful.Photomap.prototype.Markers = function (parent) {
 					[marker.lat, marker.lon],
 					{'icon': icon}
 				);
-				marker.object.addTo(cfg.map.object);
+				marker.object.addTo(this.config.map.object);
 				// add the popup to the marker
 				marker.popup = marker.object.bindPopup(marker.description);
 				// add the click handler
@@ -10154,22 +10244,21 @@ useful.Photomap.prototype.Route = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// add the Layer with the GPX Track
 	this.plot = function () {
-		var cfg = this.parent.cfg;
 		// plot the geoJson object
-		cfg.route = {};
-		cfg.route.object = L.geoJson(cfg.gpxData, {
+		this.config.route = {};
+		this.config.route.object = L.geoJson(this.config.gpxData, {
 			style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 		});
-		cfg.route.object.addTo(cfg.map.object);
+		this.config.route.object.addTo(this.config.map.object);
 	};
 	// redraw the geoJSON layer
 	this.redraw = function () {
-		var cfg = this.parent.cfg;
-		if (cfg.route) {
+		if (this.config.route) {
 			// remove the layer
-			cfg.map.object.removeLayer(cfg.route.object);
+			this.config.map.object.removeLayer(this.config.route.object);
 			// re-add the layer
 			this.plot();
 		}
@@ -10183,14 +10272,10 @@ if (typeof module !== 'undefined') {
 
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
 */
 
 // create the constructor if needed
@@ -10198,73 +10283,32 @@ var useful = useful || {};
 useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
-useful.Photomap.prototype.init = function (cfg) {
+useful.Photomap.prototype.init = function (config) {
 	// properties
 	"use strict";
-	this.cfg = cfg;
-	this.obj = cfg.element;
 	// methods
-	this.start = function () {
-		var _this = this;
-		// show the busy indicator
-		this.busy.setup();
-		// load the gpx track
-		this.gpx.load(function () {
-			// draw the map
-			_this.map.setup();
-			// plot the route
-			_this.route.plot();
-			// show the permanent markers
-			_this.markers.add();
-			// show the indicator
-			_this.indicator.add();
-			// start the location pointer
-			_this.location.point();
-		});
-		// disable the start function so it can't be started twice
-		this.start = function () {};
+	this.only = function (config) {
+		// start an instance of the script
+		return new this.Main(config, this).init();
 	};
-	this.redraw = function () {
-		var _this = this;
-		// wait for a change to redraw
-		clearTimeout(this.cfg.redrawTimeout);
-		this.cfg.redrawTimeout = setTimeout(function () {
-			// redraw the map
-			_this.route.redraw();
-			// redraw the plotted route
-			_this.route.redraw();
-		}, 500);
+	this.each = function (config) {
+		var _config, _context = this, instances = [];
+		// for all element
+		for (var a = 0, b = config.elements.length; a < b; a += 1) {
+			// clone the configuration
+			_config = Object.create(config);
+			// insert the current element
+			_config.element = config.elements[a];
+			// delete the list of elements from the clone
+			delete _config.elements;
+			// start a new instance of the object
+			instances[a] = new this.Main(_config, _context).init();
+		}
+		// return the instances
+		return instances;
 	};
-	// components
-	this.busy = new this.Busy(this);
-	this.exif = new this.Exif(this);
-	this.gpx = new this.Gpx(this);
-	this.map = new this.Map(this);
-	this.route = new this.Route(this);
-	this.markers = new this.Markers(this);
-	this.indicator = new this.Indicator(this);
-	this.location = new this.Location(this);
-	// public API
-	this.indicate = function (element) {
-		var _this = this,
-			cfg = this.cfg,
-			url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
-			title = element.getAttribute('data-title') || element.getAttribute('title');
-		this.exif.load(url, function (coords) {
-			cfg.indicator.lat = coords.lat;
-			cfg.indicator.lon = coords.lon;
-			_this.indicator.add();
-		});
-	};
-	this.unindicate = function () {
-		this.indicator.remove();
-	};
-	this.stop = function () {
-		this.map.remove();
-	};
-	// go
-	this.start();
-	return this;
+	// return a single or multiple instances of the script
+	return (config.elements) ? this.each(config) : this.only(config);
 };
 
 // return as a require.js module
