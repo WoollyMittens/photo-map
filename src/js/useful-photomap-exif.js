@@ -16,11 +16,15 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Exif = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
-	// methods
+
+	// METHODS
+	
 	this.load = function (url, onComplete) {
 		var _this = this, path = url.split('/'), name = path[path.length - 1];
 		// if the lat and lon have been cached in exifData
@@ -54,6 +58,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 			});
 		}
 	};
+	
 	this.convert = function (exif) {
 		var deg, min, sec, lon, lat;
 		// latitude

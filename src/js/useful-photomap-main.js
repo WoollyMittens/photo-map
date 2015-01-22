@@ -16,12 +16,16 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Main = function (config, context) {
-	// properties
+
+	// PROPERTIES
+
 	"use strict";
 	this.config = config;
 	this.context = context;
 	this.element = config.element;
-	// methods
+
+	// METHODS
+
 	this.init = function () {
 		var _this = this;
 		// show the busy indicator
@@ -42,6 +46,7 @@ useful.Photomap.prototype.Main = function (config, context) {
 		// return the object
 		return this;
 	};
+
 	this.redraw = function () {
 		var _this = this;
 		// wait for a change to redraw
@@ -53,7 +58,9 @@ useful.Photomap.prototype.Main = function (config, context) {
 			_this.route.redraw();
 		}, 500);
 	};
-	// components
+
+	// COMPONENTS
+
 	this.busy = new this.context.Busy(this);
 	this.exif = new this.context.Exif(this);
 	this.gpx = new this.context.Gpx(this);
@@ -62,7 +69,9 @@ useful.Photomap.prototype.Main = function (config, context) {
 	this.markers = new this.context.Markers(this);
 	this.indicator = new this.context.Indicator(this);
 	this.location = new this.context.Location(this);
-	// public API
+
+	// PUBLIC
+
 	this.indicate = function (element) {
 		var _this = this,
 			config = this.config,
@@ -74,9 +83,11 @@ useful.Photomap.prototype.Main = function (config, context) {
 			_this.indicator.add();
 		});
 	};
+
 	this.unindicate = function () {
 		this.indicator.remove();
 	};
+
 	this.stop = function () {
 		this.map.remove();
 	};

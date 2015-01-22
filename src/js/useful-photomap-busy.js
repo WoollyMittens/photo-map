@@ -16,11 +16,15 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Busy = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
-	// methods
+
+	// METHODS
+	
 	this.setup = function () {};
 	this.show = function () {};
 	this.hide = function () {};

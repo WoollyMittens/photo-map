@@ -16,7 +16,9 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Route = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;

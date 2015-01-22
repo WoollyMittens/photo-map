@@ -16,7 +16,9 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Markers = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
@@ -59,6 +61,7 @@ useful.Photomap.prototype.Markers = function (parent) {
 			}
 		}
 	};
+	
 	this.onMarkerClicked = function (marker) {
 		var _this = this;
 		return function (evt) {

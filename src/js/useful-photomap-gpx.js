@@ -16,7 +16,9 @@ useful.Photomap = useful.Photomap || function () {};
 
 // extend the constructor
 useful.Photomap.prototype.Gpx = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
@@ -48,6 +50,7 @@ useful.Photomap.prototype.Gpx = function (parent) {
 			});
 		}
 	};
+	
 	this.coordinates = function () {
 		var gpx = this.config.gpxData, joined = [];
 		// get the line data from the geojson file
