@@ -66,11 +66,31 @@ var photomap = new useful.Photomap().init( document.getElementById('id'), {
 
 **id : {string}** - The ID attribute of an element somewhere in the document.
 
-**gpx : {string}** - Path to a GPS log in GPX format.
+**duration : {DOM node}** - The duration of the GPX log will be written to this HTML element.
 
-**exif : {string}** - Path to the web service used to read EXIF information from photos.
+**onlineTiles : {URL}** - The source of the map tiles when an internet connection is available.
+
+**offlineTiles : {path}** - The source of the map tiles when no internet connection is available.
+
+**gpx : {path}** - Path to a GPS log in GPX format.
+
+**gpxData : {json}** - An optional cache of GPS data in the GeoJSON format.
+
+**exif : {URL}** - Path to the web service used to read EXIF information from photos.
+
+**exifData : {json}** - An optional cache of geolocation data taken from the EXIF information of the photos.
+
+**pointer : {image}** - An image to use for indicating the current location.
+
+**missing : {image}** - An image to substitute for unavailable map tiles.
+
+**credit : {string}** - Copyright information for the map source.
 
 **zoom : {integer}** - Starting zoom level of the map.
+
+**minZoom : {integer}** - Lowest level of zoom for which tiles are available.
+
+**maxZoom : {integer}** - Highest level of zoom for which tiles are available.
 
 **start : {integer}** - The starting marker of of the GPS log.
 
