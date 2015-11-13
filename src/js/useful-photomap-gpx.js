@@ -18,7 +18,7 @@ useful.Photomap = useful.Photomap || function () {};
 useful.Photomap.prototype.Gpx = function (parent) {
 
 	// PROPERTIES
-	
+
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
@@ -50,24 +50,28 @@ useful.Photomap.prototype.Gpx = function (parent) {
 			});
 		}
 	};
-	
+
 	this.coordinates = function () {
-		var gpx = this.config.gpxData, joined = [];
 		// get the line data from the geojson file
-		var geometryCoordinates = this.config.gpxData.features[0].geometry.coordinates;
-		// if the line data consists of multiple segments
-		if (geometryCoordinates[0][0] instanceof Array) {
-			// join all the segments
-			for (var a = 0, b = geometryCoordinates.length; a < b; a += 1) {
-				joined = joined.concat(geometryCoordinates[a]);
+		var features = this.config.gpxData.features, segments = [], coordinates;
+		// for all features
+		for (var a = 0, b = features.length; a < b; a += 1) {
+			// if the coordinates come in sections
+			if (features[a].geometry.coordinates[0][0] instanceof Array) {
+				// flatten the sections
+				coordinates = [].concat.apply([], features[a].geometry.coordinates);
+			// else
+			} else {
+				// use the coordinates directly
+				coordinates = features[a].geometry.coordinates;
 			}
-			// store the joined segments
-			geometryCoordinates = joined;
+			// gather all the segments
+			segments.push(coordinates);
 		}
-		// return the gps coordinates
-		return geometryCoordinates;
+		// return the flattened segments
+		console.log('segments', [].concat.apply([], segments));
+		return [].concat.apply([], segments);
 	};
-};
 
 // return as a require.js module
 if (typeof module !== 'undefined') {
