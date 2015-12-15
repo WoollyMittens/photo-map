@@ -5515,7 +5515,7 @@ L.Popup = L.Layer.extend({
 
 	},
 
-	
+
 	isOpen: function () {
 
 		return !!this._map && this._map.hasLayer(this);
@@ -7325,9 +7325,6 @@ L.SVG = L.Renderer.extend({
 			pane.appendChild(container);
 		}
 	},
-
-	// METHODS
-	 below are called by vector layers implementations
 
 	_initPath: function (layer) {
 		var path = layer._path = L.SVG.create('path');
@@ -9612,7 +9609,7 @@ L.Map.Tap = L.Handler.extend({
 				this._simulateEvent('contextmenu', first);
 			}
 		}, this), 1000);
-		
+
 		this._simulateEvent('mousedown', first);
 
 		L.DomEvent.on(document, {
@@ -9637,7 +9634,7 @@ L.Map.Tap = L.Handler.extend({
 			if (el && el.tagName && el.tagName.toLowerCase() === 'a') {
 				L.DomUtil.removeClass(el, 'leaflet-active');
 			}
-			
+
 			this._simulateEvent('mouseup', first);
 
 			// simulate click if the touch didn't move too much

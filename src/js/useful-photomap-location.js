@@ -18,7 +18,7 @@ useful.Photomap = useful.Photomap || function () {};
 useful.Photomap.prototype.Location = function (parent) {
 
 	// PROPERTIES
-	
+
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
@@ -72,7 +72,7 @@ useful.Photomap.prototype.Location = function (parent) {
 			}
 		};
 	};
-	
+
 	this.onGeoFailure = function () {
 		var _this = this;
 		return function () {

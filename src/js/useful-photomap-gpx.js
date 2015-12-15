@@ -69,9 +69,10 @@ useful.Photomap.prototype.Gpx = function (parent) {
 			segments.push(coordinates);
 		}
 		// return the flattened segments
-		console.log('segments', [].concat.apply([], segments));
 		return [].concat.apply([], segments);
 	};
+
+};
 
 // return as a require.js module
 if (typeof module !== 'undefined') {

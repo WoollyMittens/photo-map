@@ -18,13 +18,13 @@ useful.Photomap = useful.Photomap || function () {};
 useful.Photomap.prototype.Map = function (parent) {
 
 	// PROPERTIES
-	
+
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
 
 	// METHODS
-	
+
 	this.setup = function () {
 		var id = this.parent.element.id;
 		// define the map
@@ -48,14 +48,14 @@ useful.Photomap.prototype.Map = function (parent) {
 		this.config.map.object.on('moveend', function (e) { _this.parent.redraw(); });
 		this.config.map.object.on('zoomend', function (e) { _this.parent.redraw(); });
 	};
-	
+
 	this.remove = function () {
 		// ask leaflet to remove itself if available
 		if (this.config.map && this.config.map.object) {
 			this.config.map.object.remove();
 		}
 	};
-	
+
 	this.bounds = function () {
 		var a, b, points, minLat = 999, minLon = 999, maxLat = -999, maxLon = -999;
 		// for all navigation points
@@ -81,7 +81,7 @@ useful.Photomap.prototype.Map = function (parent) {
 			[maxLat, maxLon]
 		]);
 	};
-	
+
 	this.beginning = function () {
 		var a, b,
 			points = this.parent.gpx.coordinates(),
@@ -102,7 +102,7 @@ useful.Photomap.prototype.Map = function (parent) {
 		// call for a redraw
 		this.parent.redraw();
 	};
-	
+
 	this.centre = function () {
 		var a, b, points,
 			minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
@@ -126,7 +126,7 @@ useful.Photomap.prototype.Map = function (parent) {
 		// call for a redraw
 		this.parent.redraw();
 	};
-	
+
 	this.onFallback = function (local) {
 		return function (element) {
 			var src = element.tile.getAttribute('src');

@@ -36,29 +36,29 @@ var photomap = new useful.Photomap().init( document.getElementById('id'), {
 	//'tiles' : 'http://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png',
 	//'tiles' : 'http://4umaps.eu/{z}/{x}/{y}.png';
 	'onlineTiles' : 'http://4umaps.eu/{z}/{x}/{y}.png',
-	'offlineTiles' : './inc/tiles/{z}/{x}/{y}.png',
-	'gpx' : './inc/xml/cowan-taffyslookout-brooklyn.xml',
+	'offlineTiles' : './tiles/{z}/{x}/{y}.png',
+	'gpx' : './xml/cowan-taffyslookout-brooklyn.xml',
 	'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
-	'exif' : './inc/php/imageexif.php?src=../../{src}',
+	'exif' : 'php/imageexif.php?src=../{src}',
 	'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
-	'pointer' : './inc/img/marker-location.png',
-	'missing' : './inc/img/missing.png',
+	'pointer' : './img/marker-location.png',
+	'missing' : './img/missing.png',
 	'credit' : 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA',
 	'zoom' : 13,
 	'minZoom' : 10,
 	'maxZoom' : 15,
 	'markers' : {
 		'start' : {
-			'icon' : './inc/img/marker-train.png',
+			'icon' : './img/marker-train.png',
 			'description' : 'Transport to this location: <a href="http://131500.com.au">131500.com.au</a>'
 		},
 		'end' : {
-			'icon' : './inc/img/marker-train.png',
+			'icon' : './img/marker-train.png',
 			'description' : 'Transport from this location: <a href="http://131500.com.au">131500.com.au</a>'
 		}
 	},
 	'indicator' : {
-		'icon' : './inc/img/marker-photo.png',
+		'icon' : './img/marker-photo.png',
 		'description' : 'Photo taken at this location.'
 	}
 });
@@ -120,15 +120,15 @@ Highlights and centres a specific location.
 
 This project uses node.js from http://nodejs.org/
 
-This project uses grunt.js from http://gruntjs.com/
+This project uses gulp.js from http://gulpjs.com/
 
 The following commands are available for development:
 + `npm install` - Installs the prerequisites.
-+ `grunt import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
-+ `grunt dev` - Builds the project for development purposes.
-+ `grunt prod` - Builds the project for deployment purposes.
-+ `grunt watch` - Continuously recompiles updated files during development sessions.
-+ `grunt serve` - Serves the project on a temporary web server at http://localhost:8000/ .
++ `gulp import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
++ `gulp dev` - Builds the project for development purposes.
++ `gulp prod` - Builds the project for deployment purposes.
++ `gulp watch` - Continuously recompiles updated files during development sessions.
++ `gulp serve` - Serves the project on a temporary web server at http://localhost:8000/ .
 
 ## License
 

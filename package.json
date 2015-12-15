@@ -1,18 +1,16 @@
 {
-  "name": "useful.js",
+  "name": "gulp-boilerplate",
   "version": "0.0.0",
   "devDependencies": {
-    "grunt": "",
-    "grunt-contrib-watch": "",
-    "grunt-contrib-compass": "",
-    "grunt-contrib-uglify": "",
-    "grunt-contrib-concat": "",
-    "grunt-contrib-jshint": "",
-    "grunt-contrib-copy": "",
-    "grunt-contrib-connect": "",
-    "grunt-font-optimizer": "",
-    "grunt-autoprefixer": "",
-    "sass": "",
-    "compass": ""
+    "gulp": "",
+    "gulp-connect": "",
+    "gulp-sass": "",
+    "gulp-autoprefixer": "",
+    "gulp-uglify": "",
+    "gulp-concat": "",
+    "gulp-imagemin": "",
+    "gulp-special-html": "",
+    "imagemin-pngquant": "",
+    "gulp-clean": ""
   }
 }
