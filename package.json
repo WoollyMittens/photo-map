@@ -11,6 +11,9 @@
     "gulp-imagemin": "",
     "gulp-special-html": "",
     "imagemin-pngquant": "",
-    "gulp-clean": ""
+    "gulp-clean": "",
+    "exif": "",
+    "xmldom": "",
+    "jsdom": ""
   }
 }

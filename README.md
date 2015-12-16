@@ -129,6 +129,8 @@ The following commands are available for development:
 + `gulp prod` - Builds the project for deployment purposes.
 + `gulp watch` - Continuously recompiles updated files during development sessions.
 + `gulp serve` - Serves the project on a temporary web server at http://localhost:8000/ .
++ `node node_scripts/importexif.js` - Imports EXIF data and creates a JSON cache file.
++ `node node_scripts/importgpx.js` - Imports GPS data and creates a JSON cache file.
 
 ## License
 

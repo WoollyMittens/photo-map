@@ -29,6 +29,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 		var _this = this, path = url.split('/'), name = path[path.length - 1];
 		// if the lat and lon have been cached in exifData
 		if (this.config.exifData && this.config.exifData[name] && this.config.exifData[name].lat && this.config.exifData[name].lon) {
+			console.log('PhotomapExif: from cached');
 			// send back the stored coordinates from the exifData
 			onComplete({
 				'lat' : this.config.exifData[name].lat,
@@ -36,7 +37,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 			});
 		// else
 		} else {
-			console.log('PhotomapExif: ajax');
+			console.log('PhotomapExif: using ajax');
 			// retrieve the exif data of a photo
 			useful.request.send({
 				url : this.config.exif.replace('{src}', url),
@@ -51,6 +52,7 @@ useful.Photomap.prototype.Exif = function (parent) {
 					var json = useful.request.decode(reply.responseText);
 					var latLon = _this.convert(json);
 					// exifData the values
+					_this.config.exifData = _this.config.exifData || {};
 					_this.config.exifData[name] = json;
 					// call back the values
 					onComplete(latLon);

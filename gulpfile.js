@@ -68,9 +68,6 @@ gulp.task('markup', function () {
   gulp.src('src/php/**/*.php')
     .pipe(special())
     .pipe(gulp.dest('dist/php/'));
-  gulp.src('src/json/**/*.js')
-    .pipe(special())
-    .pipe(gulp.dest('dist/json/'));
 });
 
 gulp.task('assets', function () {
@@ -80,6 +77,10 @@ gulp.task('assets', function () {
     .pipe(gulp.dest('dist/tiles/'));
   gulp.src('src/fonts/*')
     .pipe(gulp.dest('dist/fonts/'));
+  gulp.src('src/json/**/*.js')
+    .pipe(gulp.dest('dist/json/'));
+  gulp.src('src/photos/**/*.jpg')
+    .pipe(gulp.dest('dist/photos/'));
 });
 
 gulp.task('images', function () {

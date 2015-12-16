@@ -27,10 +27,12 @@ useful.Photomap.prototype.Gpx = function (parent) {
 		var _this = this;
 		// if the GPX have been cached in gpxData
 		if (this.config.gpxData) {
+			console.log('PhotomapGpx: from cache');
 			// call back
 			oncomplete();
 		// lead it from disk
 		} else {
+			console.log('PhotomapGpx: using ajax');
 			// show the busy indicator
 			parent.busy.show();
 			// onload
