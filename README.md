@@ -26,6 +26,10 @@ To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5
 <![endif]-->
 ```
 
+## Dependencies
+
+This script relies on the Leaflet library from http://leafletjs.com/
+
 ## How to start the script
 
 ```javascript
