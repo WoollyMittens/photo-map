@@ -1,19 +1,18 @@
 {
-  "name": "gulp-boilerplate",
-  "version": "0.0.0",
-  "devDependencies": {
-    "gulp": "",
-    "gulp-connect": "",
-    "gulp-sass": "",
-    "gulp-autoprefixer": "",
-    "gulp-uglify": "",
-    "gulp-concat": "",
-    "gulp-imagemin": "",
-    "gulp-special-html": "",
-    "imagemin-pngquant": "",
-    "gulp-clean": "",
-    "exif": "",
-    "xmldom": "",
-    "jsdom": ""
-  }
+	"name": "gulp-boilerplate",
+	"version": "0.0.0",
+	"devDependencies": {
+		"gulp": "",
+		"gulp-connect": "",
+		"gulp-connect": "",
+		"gulp-connect-php": "",
+		"gulp-sass": "",
+		"gulp-autoprefixer": "",
+		"gulp-uglify": "",
+		"gulp-concat": "",
+		"gulp-imagemin": "",
+		"gulp-special-html": "",
+		"imagemin-pngquant": "",
+		"gulp-clean": ""
+	}
 }

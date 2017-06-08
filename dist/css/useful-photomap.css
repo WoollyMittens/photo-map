@@ -86,6 +86,7 @@ Applies the "clearfix" hack to a container with floating content
 .leaflet-zoom-box {
   width: 0;
   height: 0;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   z-index: 8; }
 
@@ -173,6 +174,7 @@ Applies the "clearfix" hack to a container with floating content
 .leaflet-fade-anim .leaflet-tile,
 .leaflet-fade-anim .leaflet-popup {
   opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear; }
 
 .leaflet-fade-anim .leaflet-tile-loaded,
@@ -180,11 +182,14 @@ Applies the "clearfix" hack to a container with floating content
   opacity: 1; }
 
 .leaflet-zoom-anim .leaflet-zoom-animated {
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
   transition: -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
-  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1); }
+  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1), -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1); }
 
 .leaflet-zoom-anim .leaflet-tile,
 .leaflet-pan-anim .leaflet-tile {
+  -webkit-transition: none;
   transition: none; }
 
 .leaflet-zoom-anim .leaflet-zoom-hide {
@@ -233,6 +238,7 @@ Applies the "clearfix" hack to a container with floating content
 
 /* general toolbar styles */
 .leaflet-bar {
+  -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   border-radius: 4px; }
 
@@ -279,7 +285,7 @@ Applies the "clearfix" hack to a container with floating content
 /* zoom control */
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out {
-  font: bold 18px "Lucida Console", Monaco, monospace;
+  font: bold 18px 'Lucida Console', Monaco, monospace;
   text-indent: 1px; }
 
 .leaflet-control-zoom-out {
@@ -293,6 +299,7 @@ Applies the "clearfix" hack to a container with floating content
 
 /* layers control */
 .leaflet-control-layers {
+  -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
   background: #fff;
   border-radius: 5px; }
@@ -371,6 +378,7 @@ Applies the "clearfix" hack to a container with floating content
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
+  -webkit-box-sizing: content-box;
   box-sizing: content-box;
   background: #fff;
   background: rgba(255, 255, 255, 0.5); }
@@ -386,6 +394,7 @@ Applies the "clearfix" hack to a container with floating content
 .leaflet-touch .leaflet-control-attribution,
 .leaflet-touch .leaflet-control-layers,
 .leaflet-touch .leaflet-bar {
+  -webkit-box-shadow: none;
   box-shadow: none; }
 
 .leaflet-touch .leaflet-control-layers,
@@ -428,6 +437,7 @@ Applies the "clearfix" hack to a container with floating content
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background: white;
+  -webkit-box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4); }
 
 .leaflet-container a.leaflet-popup-close-button {

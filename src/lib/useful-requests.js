@@ -22,6 +22,46 @@ var useful = useful || {};
 			return url.replace('?', '?time=' + new Date().getTime() + '&');
 		},
 
+		// perform all requests in a single application
+		all : function (queue, results) {
+			// set up storage for the results
+			var _this = this, _url = queue.urls[queue.urls.length - 1], _results = results || [];
+			// perform the first request in the queue
+			this.send({
+				url : _url,
+				post : queue.post || null,
+				contentType : queue.contentType || 'text/xml',
+				timeout : queue.timeout || 4000,
+				onTimeout : queue.onTimeout || function (reply) { return reply; },
+				onProgress : function (reply) {
+					// report the fractional progress of the whole queue
+					queue.onProgress({});
+				},
+				onFailure : queue.onFailure || function (reply) { return reply; },
+				onSuccess : function (reply) {
+					// store the results
+					_results.push({
+						'url' : _url,
+						'response' : reply.response,
+						'responseText' : reply.responseText,
+						'responseXML' : reply.responseXML,
+						'status' : reply.status,
+					});
+					// pop one request off the queue
+					queue.urls.length = queue.urls.length - 1;
+					// if there are more items in the queue
+					if (queue.urls.length > 0) {
+						// perform the next request
+						_this.all(queue, _results);
+					// else
+					} else {
+						// trigger the success handler
+						queue.onSuccess(_results);
+					}
+				}
+			});
+		},
+
 		// create a request that is compatible with the browser
 		create : function (properties) {
 			var serverRequest,
