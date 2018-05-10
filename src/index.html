@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<title>useful-photomap.js: Photo Map</title>
+		<title>Photo Map</title>
 		<style>
 			html { font-family:Sans-Serif; font-size:75%; height:100%; }
 			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:1%; }
@@ -12,12 +12,6 @@
 			.example-left > article, .example-left > aside { width:48%; padding:1%; float:left; }
 			.example-right > article, .example-right > aside { width:48%; padding:1%; float:right; }
 		</style>
-		<!--[if lte IE 9]>
-			<meta http-equiv="imagetoolbar" content="no"/>
-			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-			<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
-			<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.js"></script>
-		<![endif]-->
 	</head>
 	<body>
 		<section class="example example-full">
@@ -31,15 +25,15 @@
 			<aside>
 
 				<!-- Cut below this -->
-				<style>@import url("./css/useful-photomap.css");</style>
+				<style>@import url("./css/photomap.css");</style>
 				<figure id="testmap" class="photomap"></figure>
 				<p id="duration"></p>
 				<script src="./json/exif-data.js"></script>
 				<script src="./json/gpx-data.js"></script>
-				<script src="./js/useful-photomap.js"></script>
+				<script src="./js/photomap.js"></script>
 				<script>
 				//<!--
-					var combiPhotomap = new useful.Photomap().init({
+					var combiPhotomap = new Photomap({
 						'element' : document.getElementById('testmap'),
 						'duration' : document.getElementById('duration'),
 						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',

@@ -1,4 +1,4 @@
-# useful.photomap.js: Photo Map
+# Photo Map
 
 Plots the GPS data of the photos in a slideshow on a map.
 
@@ -9,27 +9,20 @@ Try the <a href="http://www.woollymittens.nl/default.php?url=useful-photomap">de
 The stylesheet is best included in the header of the document.
 
 ```html
-<link rel="stylesheet" href="./css/useful-photomap.css"/>
+<link rel="stylesheet" href="./css/photomap.css"/>
 ```
 
 This include can be added to the header or placed inline before the script is invoked.
 
 ```html
-<script src="./js/useful-photomap.js"></script>
-```
-
-To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5.js*.
-
-```html
-<!--[if lte IE 9]>
-	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
+<script src="./js/photomap.js"></script>
 ```
 
 ## How to start the script
 
 ```javascript
-var photomap = new useful.Photomap().init( document.getElementById('id'), {
+var photomap = new Photomap({
+	'element' : document.getElementById('id'),
 	'duration' : document.getElementById('duration'),
 	//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 	//'tiles' : 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',

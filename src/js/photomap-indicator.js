@@ -1,28 +1,13 @@
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Dependencies:
-	http://www.leaflet.com/
-	https://github.com/mapbox/togeojson
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Photomap = useful.Photomap || function () {};
-
-// extend the constructor
-useful.Photomap.prototype.Indicator = function (parent) {
+// extend the class
+Photomap.prototype.Indicator = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
-	// this methods
+
+	// METHODS
+
 	this.add = function () {
 		var icon, map = this.config.map, indicator = this.config.indicator;
 		// if the indicator has coordinates
@@ -53,7 +38,7 @@ useful.Photomap.prototype.Indicator = function (parent) {
 			this.focus();
 		}
 	};
-	
+
 	this.onIndicatorClicked = function (indicator) {
 		var _this = this;
 		return function (evt) {
@@ -63,7 +48,7 @@ useful.Photomap.prototype.Indicator = function (parent) {
 			else if (indicator.object) { indicator.object.openPopup(); }
 		};
 	};
-	
+
 	this.remove = function () {
 		var map = this.config.map, indicator = this.config.indicator;
 		// remove the balloon
@@ -76,23 +61,19 @@ useful.Photomap.prototype.Indicator = function (parent) {
 		// unfocus the indicator
 		this.unfocus();
 	};
-	
+
 	this.focus = function () {
 		// focus the map on the indicator
 		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom + 2);
 		// call for a  redraw
 		this.parent.redraw();
 	};
-	
+
 	this.unfocus = function () {
 		// focus the map on the indicator
 		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom);
 		// call for a  redraw
 		this.parent.redraw();
 	};
-};
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Photomap.Indicator;
-}
+};

@@ -1,6 +1,6 @@
-// project
+// project name
 
-var project = __dirname.split('/').pop();
+var project = __dirname.split(/\/|-/).pop();
 
 // dependencies
 
@@ -16,15 +16,15 @@ var gulp = require('gulp'),
 	special = require('gulp-special-html'),
 	clean = require('gulp-clean'),
 	prerequisites = [
-		'polyfills',
-		'requests'
+		//'polyfills',
+		//'requests'
 	];
 
 // prerequisites
 
 gulp.task('unimport', function() {
-//	gulp.src('src/lib/*', {read: false})
-//		.pipe(clean());
+	gulp.src('src/lib/*', {read: false})
+		.pipe(clean());
 });
 
 gulp.task('import', function() {
@@ -141,13 +141,13 @@ gulp.task('styles:dist', function() {
 });
 
 gulp.task('scripts:dev', function() {
-	gulp.src(['src/lib/*.js', 'src/js/*.js'])
+	gulp.src(['src/lib/*.js', 'src/js/' + project + '.js', 'src/js/*.js'])
 		.pipe(concat(project + '.js'))
 		.pipe(gulp.dest('dist/js/'));
 });
 
 gulp.task('scripts:dist', function() {
-	gulp.src(['src/lib/*.js', 'src/js/*.js'])
+	gulp.src(['src/lib/*.js', 'src/js/' + project + '.js', 'src/js/*.js'])
 		.pipe(concat(project + '.js'))
 		.pipe(uglify())
 		.pipe(gulp.dest('dist/js/'));
@@ -177,13 +177,3 @@ function errorHandler(error) {
 	console.log(error.toString());
 	this.emit('end');
 }
-
-
-
-
-
-
-
-
-
-// EOF

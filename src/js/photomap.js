@@ -1,29 +1,19 @@
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20141127, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20180510, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-// create the constructor if needed
-var useful = useful || {};
-useful.Photomap = useful.Photomap || function () {};
+// establish the class
+var Photomap = function (config) {
 
-// extend the constructor
-useful.Photomap.prototype.init = function (config) {
-
-	// PROPERTIES
-	
-	"use strict";
-
-	// METHODS
-	
 	this.only = function (config) {
 		// start an instance of the script
-		return new this.Main(config, this).init();
+		return new this.Main(config, this);
 	};
-	
+
 	this.each = function (config) {
 		var _config, _context = this, instances = [];
 		// for all element
@@ -41,13 +31,11 @@ useful.Photomap.prototype.init = function (config) {
 		return instances;
 	};
 
-	// START
-
 	return (config.elements) ? this.each(config) : this.only(config);
 
 };
 
 // return as a require.js module
 if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Photomap;
+	exports = module.exports = Photomap;
 }
