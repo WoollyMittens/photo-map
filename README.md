@@ -1,4 +1,4 @@
-# Photo Map
+# photomap.js: Photo Map
 
 Plots the GPS data of the photos in a slideshow on a map.
 

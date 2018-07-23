@@ -8,6 +8,7 @@
 		"gulp-connect-php": "",
 		"gulp-sass": "",
 		"gulp-autoprefixer": "",
+		"gulp-sourcemaps": "",
 		"gulp-uglify": "",
 		"gulp-concat": "",
 		"gulp-imagemin": "",
