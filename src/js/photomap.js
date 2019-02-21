@@ -36,6 +36,5 @@ var Photomap = function (config) {
 };
 
 // return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = Photomap;
-}
+if (typeof define != 'undefined') define(['photomap'], function () { return Photomap });
+if (typeof module != 'undefined') module.exports = Photomap;
