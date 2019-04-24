@@ -12,7 +12,7 @@ Photomap.prototype.Route = function (parent) {
 	this.plot = function () {
 		// plot the geoJson object
 		this.config.route = {};
-		this.config.route.object = L.geoJson(this.config.gpxData, {
+		this.config.route.object = this.config.leaflet.geoJson(this.config.gpxData, {
 			style : function (feature) { return { 'color': '#ff6600', 'weight': 5, 'opacity': 0.66 }; }
 		});
 		this.config.route.object.addTo(this.config.map.object);

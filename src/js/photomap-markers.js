@@ -29,13 +29,13 @@ Photomap.prototype.Markers = function (parent) {
 						break;
 				}
 				// create the icon
-				icon = L.icon({
+				icon = this.config.leaflet.icon({
 					iconUrl: marker.icon,
 					iconSize: [32, 32],
 					iconAnchor: [16, 32]
 				});
 				// add the marker with the icon
-				marker.object = L.marker(
+				marker.object = this.config.leaflet.marker(
 					[marker.lat, marker.lon],
 					{'icon': icon}
 				);

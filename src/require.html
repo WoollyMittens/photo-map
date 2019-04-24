@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>Photo Map</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+		<style>
+			html { font-family:Sans-Serif; font-size:75%; height:100%; }
+			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:1%; }
+			.example { max-width:960px; margin:0 auto; padding:0; clear:both; }
+			.example > article, .example > aside { width:98%; padding:2%; }
+			.example-left > article, .example-left > aside { width:48%; padding:1%; float:left; }
+			.example-right > article, .example-right > aside { width:48%; padding:1%; float:right; }
+		</style>
+	</head>
+	<body>
+		<section class="example example-full">
+			<article>
+				<h2>Photo Map</h2>
+				<p>Plots the GPS data of the photos in a slideshow on a map.</p>
+				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-photomap" target="_blank">Download (GitHub)</a></p>
+			</article>
+		</section>
+		<section class="example example-right">
+			<aside>
+
+				<!-- Cut below this -->
+				<style>@import url("./css/photomap.css");</style>
+				<figure id="testmap" class="photomap"></figure>
+				<p id="duration"></p>
+				<script>
+					requirejs([
+						"js/photomap.js",
+						"lib/leaflet-src.js",
+						"lib/togeojson.js",
+						"data/exif-data.js",
+						"data/gpx-data.js"
+					], function(Photomap, Leaflet, toGeoJSON, ExifData, GpxData) {
+						window.combiPhotomap = new Photomap({
+							'element' : document.getElementById('testmap'),
+							'duration' : document.getElementById('duration'),
+							'leaflet' : Leaflet,
+							'togeojson': toGeoJSON,
+							//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+							//'tiles' : 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+							//'tiles' : 'http://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png',
+							//'tiles' : 'http://4umaps.eu/{z}/{x}/{y}.png';
+							'tiles' : 'http://4umaps.eu/{z}/{x}/{y}.png',
+							'local' : './tiles/{z}/{x}/{y}.png',
+							'gpx' : './xml/cowan-taffyslookout-brooklyn.xml',
+							'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
+							'exif' : 'php/imageexif.php?src=../{src}',
+							'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
+							'pointer' : './img/marker-location.png',
+							'missing' : './img/missing.png',
+							'credit' : 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA',
+							'zoom' : 13,
+							'minZoom' : 10,
+							'maxZoom' : 15,
+							'markers' : {
+								'start' : {
+									'icon' : './img/marker-train.png',
+									'description' : 'Transport to this location: <a href="http://131500.com.au">131500.com.au</a>'
+								},
+								'end' : {
+									'icon' : './img/marker-train.png',
+									'description' : 'Transport from this location: <a href="http://131500.com.au">131500.com.au</a>'
+								}
+							},
+							'indicator' : {
+								'icon' : './img/marker-photo.png',
+								'description' : 'Photo taken at this location.'
+							}
+						});
+					});
+				</script>
+				<!-- Cut above this -->
+
+			</aside>
+			<article>
+				<style>
+					#testImages { height : 400px; margin : 0; padding : 0; overflow : hidden; overflow-y : scroll; }
+					#testImages li { display : inline; margin : 0; padding : 0; list-style-type : none; }
+					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
+				</style>
+				<ul id="testImages">
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg"/></a></li>
+					<li><a onclick="window.combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg"/></a></li>
+				</ul>
+			</article>
+		</section>
+	</body>
+</html>

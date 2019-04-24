@@ -18,6 +18,26 @@ This include can be added to the header or placed inline before the script is in
 <script src="./js/photomap.js"></script>
 ```
 
+Or use [Require.js](https://requirejs.org/).
+
+```js
+requirejs([
+	"js/photomap.js",
+	"lib/leaflet-src.js",
+	"lib/togeojson.js",
+	"data/exif-data.js",
+	"data/gpx-data.js"
+], function(Photomap, Leaflet, toGeoJSON, ExifData, GpxData) {
+	...
+});
+```
+
+Or import into an MVC framework.
+
+```js
+var Photomap = require('js/photomap.js');
+```
+
 ## How to start the script
 
 ```javascript

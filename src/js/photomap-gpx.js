@@ -28,7 +28,7 @@ Photomap.prototype.Gpx = function (parent) {
 				onFailure : function () {},
 				onSuccess : function (reply) {
 					// store the result
-					_this.config.gpxData = toGeoJSON.gpx(reply.responseXML);
+					_this.config.gpxData = _this.config.togeojson.gpx(reply.responseXML);
 					// call back
 					oncomplete();
 					// hide the busy indicator

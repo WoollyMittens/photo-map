@@ -17,7 +17,7 @@ Photomap.prototype.Indicator = function (parent) {
 				map.object.removeLayer(indicator.object);
 			}
 			// create the icon
-			icon = L.icon({
+			icon = this.config.leaflet.icon({
 				iconUrl: indicator.icon,
 				iconSize: [32, 32],
 				iconAnchor: [16, 32]
@@ -25,7 +25,7 @@ Photomap.prototype.Indicator = function (parent) {
 			// report the location for reference
 			console.log('location:', indicator);
 			// add the marker with the icon
-			indicator.object = L.marker(
+			indicator.object = this.config.leaflet.marker(
 				[indicator.lat, indicator.lon],
 				{'icon': icon}
 			);

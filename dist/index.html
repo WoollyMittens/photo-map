@@ -28,14 +28,18 @@
 				<style>@import url("./css/photomap.css");</style>
 				<figure id="testmap" class="photomap"></figure>
 				<p id="duration"></p>
-				<script src="./json/exif-data.js"></script>
-				<script src="./json/gpx-data.js"></script>
+				<script src="./lib/togeojson.js"></script>
+				<script src="./lib/leaflet-src.js"></script>
+				<script src="./data/exif-data.js"></script>
+				<script src="./data/gpx-data.js"></script>
 				<script src="./js/photomap.js"></script>
 				<script>
 				//<!--
 					var combiPhotomap = new Photomap({
 						'element' : document.getElementById('testmap'),
 						'duration' : document.getElementById('duration'),
+						'leaflet' : L,
+						'togeojson': toGeoJSON,
 						//'tiles' : 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 						//'tiles' : 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
 						//'tiles' : 'http://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png',
@@ -79,26 +83,14 @@
 					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
 				</style>
 				<ul id="testImages">
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg"/></a></li>
-					<li><a href="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg"/></a></li>
 				</ul>
-				<script>
-					var a, b, links = document.querySelectorAll('#testImages a'),
-						indicate = function (element) {
-							return function (evt) {
-								evt.preventDefault();
-								combiPhotomap.indicate(element);
-							}
-						};
-					for (a = 0, b = links.length; a < b; a += 1) {
-						links[a].addEventListener('click', indicate(links[a]));
-					}
-				</script>
 			</article>
 		</section>
 	</body>

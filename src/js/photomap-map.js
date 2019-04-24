@@ -12,9 +12,9 @@ Photomap.prototype.Map = function (parent) {
 		var id = this.parent.element.id;
 		// define the map
 		this.config.map = {};
-		this.config.map.object = L.map(id);
+		this.config.map.object = this.config.leaflet.map(id);
 		// add the tiles
-		var tileLayer = L.tileLayer(this.config.tiles, {
+		var tileLayer = this.config.leaflet.tileLayer(this.config.tiles, {
 			attribution: this.config.credit,
 			errorTileUrl: this.config.missing,
 			minZoom: this.config.minZoom,

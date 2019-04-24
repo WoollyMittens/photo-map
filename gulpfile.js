@@ -20,15 +20,9 @@ var prerequisites = require('./prerequisites.json');
 
 // prerequisites
 
-function task_unimport(cb) {
-	gulp.src('src/lib/*', {read: false})
-		.pipe(clean());
-	cb();
-}
-
 function task_import(cb) {
 	prerequisites.forEach(function(a) {
-		gulp.src('../useful-' + a + '/dist/js/*.js', {base: '../useful-' + a + '/dist/js/'})
+		gulp.src(['../useful-' + a + '/dist/js/*.js', '../useful-' + a + '/dist/lib/*.js'])
 			.pipe(gulp.dest('src/lib/'));
 	});
 	cb();
@@ -99,16 +93,13 @@ function task_markup(cb) {
 }
 
 function task_assets(cb) {
-	gulp.src('src/xml/*.xml')
-		.pipe(gulp.dest('dist/xml/'));
-	gulp.src('src/tiles/**/*.*')
-		.pipe(gulp.dest('dist/tiles/'));
-	gulp.src('src/fonts/*')
-		.pipe(gulp.dest('dist/fonts/'));
-	gulp.src('src/json/**/*.js')
-		.pipe(gulp.dest('dist/json/'));
-	gulp.src('src/photos/**/*.jpg')
-		.pipe(gulp.dest('dist/photos/'));
+	gulp.src('src/xml/**/*').pipe(gulp.dest('dist/xml/'));
+	gulp.src('src/lib/**/*').pipe(gulp.dest('dist/lib/'));
+	gulp.src('src/data/**/*').pipe(gulp.dest('dist/data/'));
+	gulp.src('src/tiles/**/*').pipe(gulp.dest('dist/tiles/'));
+	gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts/'));
+	gulp.src('src/json/**/*').pipe(gulp.dest('dist/json/'));
+	gulp.src('src/photos/**/*').pipe(gulp.dest('dist/photos/'));
 	cb();
 }
 
@@ -154,14 +145,14 @@ function task_styles_dist(cb) {
 }
 
 function task_scripts_dev(cb) {
-	gulp.src(['src/lib/*.js', 'src/js/' + project + '.js', 'src/js/*.js'])
+	gulp.src(['src/js/' + project + '.js', 'src/js/*.js'])
 		.pipe(concat(project + '.js'))
 		.pipe(gulp.dest('dist/js/'));
 	cb();
 }
 
 function task_scripts_dist(cb) {
-	gulp.src(['src/lib/*.js', 'src/js/' + project + '.js', 'src/js/*.js'])
+	gulp.src(['src/js/' + project + '.js', 'src/js/*.js'])
 		.pipe(concat(project + '.js'))
 		.pipe(uglify())
 		.pipe(gulp.dest('dist/js/'));
@@ -182,6 +173,9 @@ function task_default(cb) {
 
 // tasks
 
+exports.clean = gulp.series(
+	task_clean
+);
 exports.dist = gulp.series(
 	task_import,
 	task_markup,

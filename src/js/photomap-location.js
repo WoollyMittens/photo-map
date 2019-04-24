@@ -44,13 +44,13 @@ Photomap.prototype.Location = function (parent) {
 			// if the marker doesn't exist yet
 			if (_this.object === null) {
 				// create the icon
-				var icon = L.icon({
+				var icon = _config.leaflet.icon({
 					iconUrl: _config.pointer,
 					iconSize: [32, 32],
 					iconAnchor: [16, 32]
 				});
 				// add the marker with the icon
-				_this.object = L.marker(
+				_this.object = _config.leaflet.marker(
 					[geo.coords.latitude, geo.coords.longitude],
 					{'icon': icon}
 				);
