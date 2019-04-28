@@ -22,7 +22,7 @@ Photomap.prototype.Exif = function (parent) {
 		} else {
 			console.log('PhotomapExif: using ajax');
 			// retrieve the exif data of a photo
-			useful.request.send({
+			requests.send({
 				url : this.config.exif.replace('{src}', url),
 				post : null,
 				onProgress : function (reply) {
@@ -32,7 +32,7 @@ Photomap.prototype.Exif = function (parent) {
 					return reply;
 				},
 				onSuccess : function (reply) {
-					var json = useful.request.decode(reply.responseText);
+					var json = requests.decode(reply.responseText);
 					var latLon = _this.convert(json);
 					// exifData the values
 					_this.config.exifData = _this.config.exifData || {};

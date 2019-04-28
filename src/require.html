@@ -32,11 +32,12 @@
 				<script>
 					requirejs([
 						"js/photomap.js",
+						"lib/requests.js",
 						"lib/leaflet-src.js",
 						"lib/togeojson.js",
 						"data/exif-data.js",
 						"data/gpx-data.js"
-					], function(Photomap, Leaflet, toGeoJSON, ExifData, GpxData) {
+					], function(Photomap, requests, Leaflet, toGeoJSON, ExifData, GpxData) {
 						window.combiPhotomap = new Photomap({
 							'element' : document.getElementById('testmap'),
 							'duration' : document.getElementById('duration'),

@@ -9,13 +9,18 @@ Try the <a href="http://www.woollymittens.nl/default.php?url=useful-photomap">de
 The stylesheet is best included in the header of the document.
 
 ```html
-<link rel="stylesheet" href="./css/photomap.css"/>
+<link rel="stylesheet" href="css/photomap.css"/>
 ```
 
 This include can be added to the header or placed inline before the script is invoked.
 
 ```html
-<script src="./js/photomap.js"></script>
+<script src="lib/requests.js"></script>
+<script src="lib/togeojson.js"></script>
+<script src="lib/leaflet-src.js"></script>
+<script src="data/exif-data.js"></script>
+<script src="data/gpx-data.js"></script>
+<script src="js/photomap.js"></script>
 ```
 
 Or use [Require.js](https://requirejs.org/).
@@ -23,11 +28,12 @@ Or use [Require.js](https://requirejs.org/).
 ```js
 requirejs([
 	"js/photomap.js",
+	"lib/requests.js",
 	"lib/leaflet-src.js",
 	"lib/togeojson.js",
 	"data/exif-data.js",
 	"data/gpx-data.js"
-], function(Photomap, Leaflet, toGeoJSON, ExifData, GpxData) {
+], function(Photomap, requests, Leaflet, toGeoJSON, ExifData, GpxData) {
 	...
 });
 ```
@@ -35,6 +41,11 @@ requirejs([
 Or import into an MVC framework.
 
 ```js
+var Leaflet = require('lib/leaflet-src.js');
+var requests = require('lib/requests.js');
+var toGeoJSON = require('lib/togeojson.js');
+var ExifData = require('data/exif-data.js');
+var GpxData = require('data/gpx-data.js');
 var Photomap = require('js/photomap.js');
 ```
 

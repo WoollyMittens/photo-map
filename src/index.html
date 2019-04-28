@@ -28,6 +28,7 @@
 				<style>@import url("./css/photomap.css");</style>
 				<figure id="testmap" class="photomap"></figure>
 				<p id="duration"></p>
+				<script src="./lib/requests.js"></script>
 				<script src="./lib/togeojson.js"></script>
 				<script src="./lib/leaflet-src.js"></script>
 				<script src="./data/exif-data.js"></script>
@@ -48,7 +49,7 @@
 						'local' : './tiles/{z}/{x}/{y}.png',
 						'gpx' : './xml/cowan-taffyslookout-brooklyn.xml',
 						'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
-						'exif' : 'php/imageexif.php?src=../{src}',
+						'exif' : './php/imageexif.php?src=../{src}',
 						'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
 						'pointer' : './img/marker-location.png',
 						'missing' : './img/missing.png',
@@ -83,13 +84,13 @@
 					#testImages img { display : block; margin : 0 0 0.3em 0; width : 100%; }
 				</style>
 				<ul id="testImages">
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg"/></a></li>
-					<li><a onclick="combiPhotomap.indicate(this);return false;" href="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6098685p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098685p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6098815p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098815p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6098876p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098876p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6098922p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098922p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6098939p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6098939p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6099010p.jpg" title="Dolor Sit Amet"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099010p.jpg"/></a></li>
+					<li><a onclick="combiPhotomap.indicate(this);return false;" href="photos/cowan-taffyslookout-brooklyn/p6099096p.jpg" title="Lorem Ipsum"><img alt="" src="./photos/cowan-taffyslookout-brooklyn/p6099096p.jpg"/></a></li>
 				</ul>
 			</article>
 		</section>

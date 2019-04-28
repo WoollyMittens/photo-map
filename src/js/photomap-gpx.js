@@ -21,7 +21,7 @@ Photomap.prototype.Gpx = function (parent) {
 			// show the busy indicator
 			parent.busy.show();
 			// onload
-			useful.request.send({
+			requests.send({
 				url : this.config.gpx,
 				post : null,
 				onProgress : function () {},
