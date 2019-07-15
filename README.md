@@ -131,14 +131,20 @@ var photomap = new Photomap({
 ### Indicate
 
 ```javascript
-photomap.indicate(source, description);
+photomap.indicate(element);
 ```
 
 Highlights and centres a specific location.
 
-**source : {string}** - Path to an image containing EXIF information.
+**element : {DOM node}** - Reference to a link or image for which EXIF geolocation data is available.
 
-**description : {string}** - A description to pop up in a message balloon.
+### Unindicate
+
+```javascript
+photomap.unindicate(element);
+```
+
+Reset the map after "indicate" was used.
 
 ## How to build the script
 

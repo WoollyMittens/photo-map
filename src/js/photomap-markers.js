@@ -14,38 +14,31 @@ Photomap.prototype.Markers = function (parent) {
 		// get the track points from the GPX file
 		var points = this.parent.gpx.coordinates();
 		// for all markers
-		for (name in this.config.markers) {
-			if (this.config.markers.hasOwnProperty(name)) {
-				marker = this.config.markers[name];
-				// special markers
-				switch (name) {
-					case 'start' :
-						marker.lon = marker.lon || points[0][0];
-						marker.lat = marker.lat || points[0][1];
-						break;
-					case 'end' :
-						marker.lon = marker.lon || points[points.length - 1][0];
-						marker.lat = marker.lat || points[points.length - 1][1];
-						break;
-				}
+		var _this = this;
+		this.config.markers.map(function (marker, index) {
+			// disregard the waypoints with photos
+			if (!marker.photo) {
 				// create the icon
-				icon = this.config.leaflet.icon({
-					iconUrl: marker.icon,
-					iconSize: [32, 32],
-					iconAnchor: [16, 32]
+				icon = _this.config.leaflet.icon({
+					iconUrl: _this.config.marker.replace('{type}', marker.type),
+					iconSize: [28, 28],
+					iconAnchor: [14, 28]
 				});
 				// add the marker with the icon
-				marker.object = this.config.leaflet.marker(
+				marker.object = _this.config.leaflet.marker(
 					[marker.lat, marker.lon],
 					{'icon': icon}
 				);
-				marker.object.addTo(this.config.map.object);
-				// add the popup to the marker
-				marker.popup = marker.object.bindPopup(marker.description);
-				// add the click handler
-				marker.object.on('click', this.onMarkerClicked(marker));
+				marker.object.addTo(_this.config.map.object);
+				// if there is a desciption
+				if (marker.description) {
+					// add the popup to the marker
+					marker.popup = marker.object.bindPopup(marker.description);
+					// add the click handler
+					marker.object.on('click', _this.onMarkerClicked(marker));
+				}
 			}
-		}
+		});
 	};
 
 	this.onMarkerClicked = function (marker) {
@@ -55,4 +48,5 @@ Photomap.prototype.Markers = function (parent) {
 			marker.object.openPopup();
 		};
 	};
+
 };

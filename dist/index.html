@@ -57,20 +57,21 @@
 						'zoom' : 13,
 						'minZoom' : 10,
 						'maxZoom' : 15,
-						'markers' : {
-							'start' : {
-								'icon' : './img/marker-train.png',
-								'description' : 'Transport to this location: <a href="http://131500.com.au">131500.com.au</a>'
-							},
-							'end' : {
-								'icon' : './img/marker-train.png',
-								'description' : 'Transport from this location: <a href="http://131500.com.au">131500.com.au</a>'
-							}
-						},
-						'indicator' : {
-							'icon' : './img/marker-photo.png',
-							'description' : 'Photo taken at this location.'
-						}
+						'markers' : [{
+							"location": "Cowan",
+							"type": "train",
+							"description": "Get the train to Cowan using <a href=\"https://transportnsw.info/trip#/?to=Cowan\">transportnsw.info</a>.",
+							"lon": 151.171966553,
+							"lat": -33.593074799
+						},{
+							"location": "Hawkesbury River",
+							"type": "train",
+							"description": "Plan your return trip from Hawkesbury River at <a href=\"https://transportnsw.info/trip#/?from=Hawkesbury River\">transportnsw.info</a>.",
+							"lon": 151.22668457,
+							"lat": -33.54686355600001
+						}],
+						'marker': './img/marker-{type}.png',
+						'indicator': './img/marker-photo.png'
 					});
 				//-->
 				</script>

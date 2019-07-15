@@ -8,55 +8,46 @@ Photomap.prototype.Indicator = function (parent) {
 
 	// METHODS
 
-	this.add = function () {
-		var icon, map = this.config.map, indicator = this.config.indicator;
+	this.add = function (lat, lon) {
+		var icon;
+		var map = this.config.map;
+		var indicator = this.config.indicator;
 		// if the indicator has coordinates
-		if (indicator.lon && indicator.lat) {
+		if (lon && lat) {
+			// store the coordinates
+			this.lon = lon;
+			this.lat = lat;
 			// remove any previous indicator
-			if (indicator.object) {
-				map.object.removeLayer(indicator.object);
+			if (this.object) {
+				map.object.removeLayer(this.object);
 			}
 			// create the icon
 			icon = this.config.leaflet.icon({
-				iconUrl: indicator.icon,
-				iconSize: [32, 32],
-				iconAnchor: [16, 32]
+				iconUrl: this.config.indicator,
+				iconSize: [28, 28],
+				iconAnchor: [14, 28]
 			});
 			// report the location for reference
-			console.log('location:', indicator);
+			console.log('location:', lat, lon);
 			// add the marker with the icon
-			indicator.object = this.config.leaflet.marker(
-				[indicator.lat, indicator.lon],
+			this.object = this.config.leaflet.marker(
+				[this.lat, this.lon],
 				{'icon': icon}
 			);
-			indicator.object.addTo(map.object);
-			// add the popup to the marker
-			indicator.popup = indicator.object.bindPopup(indicator.description);
-			// add the click handler
-			indicator.object.on('click', this.onIndicatorClicked(indicator));
+			this.object.addTo(map.object);
 			// focus the map on the indicator
 			this.focus();
 		}
 	};
 
-	this.onIndicatorClicked = function (indicator) {
-		var _this = this;
-		return function (evt) {
-			// trigger the click event
-			if (indicator.clicked) { indicator.clicked(evt, indicator); }
-			// or show the indicator message in a balloon
-			else if (indicator.object) { indicator.object.openPopup(); }
-		};
-	};
-
 	this.remove = function () {
-		var map = this.config.map, indicator = this.config.indicator;
-		// remove the balloon
-		indicator.object.closePopup();
+		var map = this.config.map;
 		// remove the indicator
-		if (indicator.object) {
-			map.object.removeLayer(indicator.object);
-			indicator.object = null;
+		if (this.object) {
+			// remove the balloon
+			this.object.closePopup();
+			map.object.removeLayer(this.object);
+			this.object = null;
 		}
 		// unfocus the indicator
 		this.unfocus();
@@ -64,14 +55,14 @@ Photomap.prototype.Indicator = function (parent) {
 
 	this.focus = function () {
 		// focus the map on the indicator
-		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom + 2);
+		this.config.map.object.setView([this.lat, this.lon], this.config.zoom + 2);
 		// call for a  redraw
 		this.parent.redraw();
 	};
 
 	this.unfocus = function () {
 		// focus the map on the indicator
-		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom);
+		this.config.map.object.setView([this.lat, this.lon], this.config.zoom);
 		// call for a  redraw
 		this.parent.redraw();
 	};

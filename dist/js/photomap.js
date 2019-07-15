@@ -1,9 +1,13 @@
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20180510, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+	Dependencies:
+	http://www.leaflet.com/
+	https://github.com/mapbox/togeojson
 */
 
 // establish the class
@@ -68,7 +72,6 @@ Photomap.prototype.Exif = function (parent) {
 		var _this = this, path = url.split('/'), name = path[path.length - 1];
 		// if the lat and lon have been cached in exifData
 		if (this.config.exifData && this.config.exifData[name] && this.config.exifData[name].lat && this.config.exifData[name].lon) {
-			console.log('PhotomapExif: from cached');
 			// send back the stored coordinates from the exifData
 			onComplete({
 				'lat' : this.config.exifData[name].lat,
@@ -76,7 +79,7 @@ Photomap.prototype.Exif = function (parent) {
 			});
 		// else
 		} else {
-			console.log('PhotomapExif: using ajax');
+			console.log('PhotomapExif: ajax');
 			// retrieve the exif data of a photo
 			requests.send({
 				url : this.config.exif.replace('{src}', url),
@@ -91,7 +94,6 @@ Photomap.prototype.Exif = function (parent) {
 					var json = requests.decode(reply.responseText);
 					var latLon = _this.convert(json);
 					// exifData the values
-					_this.config.exifData = _this.config.exifData || {};
 					_this.config.exifData[name] = json;
 					// call back the values
 					onComplete(latLon);
@@ -148,12 +150,10 @@ Photomap.prototype.Gpx = function (parent) {
 		var _this = this;
 		// if the GPX have been cached in gpxData
 		if (this.config.gpxData) {
-			console.log('PhotomapGpx: from cache');
 			// call back
 			oncomplete();
 		// lead it from disk
 		} else {
-			console.log('PhotomapGpx: using ajax');
 			// show the busy indicator
 			parent.busy.show();
 			// onload
@@ -207,55 +207,46 @@ Photomap.prototype.Indicator = function (parent) {
 
 	// METHODS
 
-	this.add = function () {
-		var icon, map = this.config.map, indicator = this.config.indicator;
+	this.add = function (lat, lon) {
+		var icon;
+		var map = this.config.map;
+		var indicator = this.config.indicator;
 		// if the indicator has coordinates
-		if (indicator.lon && indicator.lat) {
+		if (lon && lat) {
+			// store the coordinates
+			this.lon = lon;
+			this.lat = lat;
 			// remove any previous indicator
-			if (indicator.object) {
-				map.object.removeLayer(indicator.object);
+			if (this.object) {
+				map.object.removeLayer(this.object);
 			}
 			// create the icon
 			icon = this.config.leaflet.icon({
-				iconUrl: indicator.icon,
-				iconSize: [32, 32],
-				iconAnchor: [16, 32]
+				iconUrl: this.config.indicator,
+				iconSize: [28, 28],
+				iconAnchor: [14, 28]
 			});
 			// report the location for reference
-			console.log('location:', indicator);
+			console.log('location:', lat, lon);
 			// add the marker with the icon
-			indicator.object = this.config.leaflet.marker(
-				[indicator.lat, indicator.lon],
+			this.object = this.config.leaflet.marker(
+				[this.lat, this.lon],
 				{'icon': icon}
 			);
-			indicator.object.addTo(map.object);
-			// add the popup to the marker
-			indicator.popup = indicator.object.bindPopup(indicator.description);
-			// add the click handler
-			indicator.object.on('click', this.onIndicatorClicked(indicator));
+			this.object.addTo(map.object);
 			// focus the map on the indicator
 			this.focus();
 		}
 	};
 
-	this.onIndicatorClicked = function (indicator) {
-		var _this = this;
-		return function (evt) {
-			// trigger the click event
-			if (indicator.clicked) { indicator.clicked(evt, indicator); }
-			// or show the indicator message in a balloon
-			else if (indicator.object) { indicator.object.openPopup(); }
-		};
-	};
-
 	this.remove = function () {
-		var map = this.config.map, indicator = this.config.indicator;
-		// remove the balloon
-		indicator.object.closePopup();
+		var map = this.config.map;
 		// remove the indicator
-		if (indicator.object) {
-			map.object.removeLayer(indicator.object);
-			indicator.object = null;
+		if (this.object) {
+			// remove the balloon
+			this.object.closePopup();
+			map.object.removeLayer(this.object);
+			this.object = null;
 		}
 		// unfocus the indicator
 		this.unfocus();
@@ -263,14 +254,14 @@ Photomap.prototype.Indicator = function (parent) {
 
 	this.focus = function () {
 		// focus the map on the indicator
-		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom + 2);
+		this.config.map.object.setView([this.lat, this.lon], this.config.zoom + 2);
 		// call for a  redraw
 		this.parent.redraw();
 	};
 
 	this.unfocus = function () {
 		// focus the map on the indicator
-		this.config.map.object.setView([this.config.indicator.lat, this.config.indicator.lon], this.config.zoom);
+		this.config.map.object.setView([this.lat, this.lon], this.config.zoom);
 		// call for a  redraw
 		this.parent.redraw();
 	};
@@ -319,17 +310,16 @@ Photomap.prototype.Location = function (parent) {
 	this.onGeoSuccess = function () {
 		var _this = this, _config = this.parent.config;
 		return function (geo) {
-			console.log('geolocation succeeded', geo);
 			// if the marker doesn't exist yet
 			if (_this.object === null) {
 				// create the icon
-				var icon = _config.leaflet.icon({
+				var icon = _this.config.leaflet.icon({
 					iconUrl: _config.pointer,
-					iconSize: [32, 32],
-					iconAnchor: [16, 32]
+					iconSize: [28, 28],
+					iconAnchor: [14, 28]
 				});
 				// add the marker with the icon
-				_this.object = _config.leaflet.marker(
+				_this.object = _this.config.leaflet.marker(
 					[geo.coords.latitude, geo.coords.longitude],
 					{'icon': icon}
 				);
@@ -346,6 +336,7 @@ Photomap.prototype.Location = function (parent) {
 			console.log('geolocation failed');
 		};
 	};
+
 };
 
 // extend the class
@@ -386,11 +377,13 @@ Photomap.prototype.Main = function (config, context) {
 		clearTimeout(this.config.redrawTimeout);
 		this.config.redrawTimeout = setTimeout(function () {
 			// redraw the map
-			_this.route.redraw();
+			//_this.map.redraw();
 			// redraw the plotted route
 			_this.route.redraw();
 		}, 500);
 	};
+
+	// PUBLIC
 
 	this.indicate = function (element) {
 		var _this = this,
@@ -398,9 +391,7 @@ Photomap.prototype.Main = function (config, context) {
 			url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
 			title = element.getAttribute('data-title') || element.getAttribute('title');
 		this.exif.load(url, function (coords) {
-			config.indicator.lat = coords.lat;
-			config.indicator.lon = coords.lon;
-			_this.indicator.add();
+			_this.indicator.add(coords.lat, coords.lon);
 		});
 	};
 
@@ -444,6 +435,8 @@ Photomap.prototype.Map = function (parent) {
 		// define the map
 		this.config.map = {};
 		this.config.map.object = this.config.leaflet.map(id);
+		// add the scale
+		this.config.leaflet.control.scale({imperial:false}).addTo(this.config.map.object);
 		// add the tiles
 		var tileLayer = this.config.leaflet.tileLayer(this.config.tiles, {
 			attribution: this.config.credit,
@@ -519,16 +512,12 @@ Photomap.prototype.Map = function (parent) {
 
 	this.centre = function () {
 		var a, b, points,
-			minLat = 999, minLon = 999, maxLat = 0, maxLon = 0, totLat = 0, totLon = 0;
+			totLat = 0, totLon = 0;
 		// for all navigation points
 		points = this.parent.gpx.coordinates();
 		for (a = 0 , b = points.length; a < b; a += 1) {
 			totLon += points[a][0];
 			totLat += points[a][1];
-			minLon = (points[a][0] < minLon) ? points[a][0] : minLon;
-			minLat = (points[a][1] < minLat) ? points[a][1] : minLat;
-			maxLon = (points[a][0] > maxLon) ? points[a][0] : maxLon;
-			maxLat = (points[a][1] > maxLat) ? points[a][1] : maxLat;
 		}
 		// average the centre
 		this.config.map.centre = {
@@ -563,6 +552,7 @@ Photomap.prototype.Map = function (parent) {
 			});
 		};
 	};
+
 };
 
 // extend the class
@@ -581,38 +571,31 @@ Photomap.prototype.Markers = function (parent) {
 		// get the track points from the GPX file
 		var points = this.parent.gpx.coordinates();
 		// for all markers
-		for (name in this.config.markers) {
-			if (this.config.markers.hasOwnProperty(name)) {
-				marker = this.config.markers[name];
-				// special markers
-				switch (name) {
-					case 'start' :
-						marker.lon = marker.lon || points[0][0];
-						marker.lat = marker.lat || points[0][1];
-						break;
-					case 'end' :
-						marker.lon = marker.lon || points[points.length - 1][0];
-						marker.lat = marker.lat || points[points.length - 1][1];
-						break;
-				}
+		var _this = this;
+		this.config.markers.map(function (marker, index) {
+			// disregard the waypoints with photos
+			if (!marker.photo) {
 				// create the icon
-				icon = this.config.leaflet.icon({
-					iconUrl: marker.icon,
-					iconSize: [32, 32],
-					iconAnchor: [16, 32]
+				icon = _this.config.leaflet.icon({
+					iconUrl: _this.config.marker.replace('{type}', marker.type),
+					iconSize: [28, 28],
+					iconAnchor: [14, 28]
 				});
 				// add the marker with the icon
-				marker.object = this.config.leaflet.marker(
+				marker.object = _this.config.leaflet.marker(
 					[marker.lat, marker.lon],
 					{'icon': icon}
 				);
-				marker.object.addTo(this.config.map.object);
-				// add the popup to the marker
-				marker.popup = marker.object.bindPopup(marker.description);
-				// add the click handler
-				marker.object.on('click', this.onMarkerClicked(marker));
+				marker.object.addTo(_this.config.map.object);
+				// if there is a desciption
+				if (marker.description) {
+					// add the popup to the marker
+					marker.popup = marker.object.bindPopup(marker.description);
+					// add the click handler
+					marker.object.on('click', _this.onMarkerClicked(marker));
+				}
 			}
-		}
+		});
 	};
 
 	this.onMarkerClicked = function (marker) {
@@ -622,6 +605,7 @@ Photomap.prototype.Markers = function (parent) {
 			marker.object.openPopup();
 		};
 	};
+
 };
 
 // extend the class

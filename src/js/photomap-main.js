@@ -36,11 +36,13 @@ Photomap.prototype.Main = function (config, context) {
 		clearTimeout(this.config.redrawTimeout);
 		this.config.redrawTimeout = setTimeout(function () {
 			// redraw the map
-			_this.route.redraw();
+			//_this.map.redraw();
 			// redraw the plotted route
 			_this.route.redraw();
 		}, 500);
 	};
+
+	// PUBLIC
 
 	this.indicate = function (element) {
 		var _this = this,
@@ -48,9 +50,7 @@ Photomap.prototype.Main = function (config, context) {
 			url = element.getAttribute('data-url') || element.getAttribute('src') || element.getAttribute('href'),
 			title = element.getAttribute('data-title') || element.getAttribute('title');
 		this.exif.load(url, function (coords) {
-			config.indicator.lat = coords.lat;
-			config.indicator.lon = coords.lon;
-			_this.indicator.add();
+			_this.indicator.add(coords.lat, coords.lon);
 		});
 	};
 

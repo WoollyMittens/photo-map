@@ -1,9 +1,13 @@
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20180510, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.photomap.js: Plots the GPS data of the photos in a slideshow on a map", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+	Dependencies:
+	http://www.leaflet.com/
+	https://github.com/mapbox/togeojson
 */
 
 // establish the class
