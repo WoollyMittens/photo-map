@@ -1,1 +1,26 @@
-/Users/mauricevancreij/Sites/Personal/woollymittens-website/useful/package.json
+{
+	"name": "gulp-boilerplate",
+	"version": "0.0.0",
+	"devDependencies": {
+		"canvas": "",
+		"del": "",
+		"exif": "",
+		"fs": "",
+		"gm": "",
+		"gulp": "",
+		"gulp-autoprefixer": "",
+		"gulp-clean": "",
+		"gulp-concat": "",
+		"gulp-connect": "",
+		"gulp-connect-php": "",
+		"gulp-imagemin": "",
+		"gulp-sass": "",
+		"gulp-sourcemaps": "",
+		"gulp-special-html": "",
+		"gulp-uglify": "",
+		"imagemin-pngquant": "",
+		"jsdom": "",
+		"request": "",
+		"xmldom": ""
+	}
+}
