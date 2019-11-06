@@ -122,7 +122,9 @@ function task_styles_dev(cb) {
   	.pipe(sourcemaps.init())
 		.pipe(sass())
 		.on('error', sass.logError)
-		.pipe(autoprefixer())
+		.pipe(autoprefixer({
+			cascade: false
+		}))
   	.pipe(sourcemaps.write())
 		.pipe(gulp.dest('dist/css/'));
 	cb();
@@ -133,7 +135,9 @@ function task_styles_dist(cb) {
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
-		.pipe(autoprefixer())
+		.pipe(autoprefixer({
+			cascade: false
+		}))
 		.pipe(gulp.dest('dist/css/'));
 	cb();
 }
