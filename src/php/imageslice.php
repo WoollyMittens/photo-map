@@ -19,12 +19,12 @@
 			if($cropBottom == '') $cropBottom = 1;
 
 			// get the image dimensions
-			list($imageWidth, $imageHeight) = getimagesize($imageSrc);
+			list($imageWidth, $imageHeight) = getimagesize("../" . $imageSrc);
 			$this->imageWidth = $imageWidth;
 			$this->imageHeight = $imageHeight;
 
 			// create image from the jpeg
-			$this->myImage = imagecreatefromjpeg($imageSrc) or die("Error: Cannot find image!");
+			$this->myImage = imagecreatefromjpeg("../" . $imageSrc) or die("Error: Cannot find image!");
 
 			// get a pixel value for the position of the crop
 			$this->cropLeft = $imageWidth * $cropLeft;
@@ -74,6 +74,6 @@
 	$image->createSlice(@$_REQUEST['width'], @$_REQUEST['height']);
 	$image->renderImage();
 
-	// http://localhost/~Woolly/Useful/webservices/imageslice.php?src=../img/figure_6a.jpg&width=320&height=240&left=0.1&top=0.1&right=0.9&bottom=0.9
+	// http://localhost/~Woolly/Useful/webservices/imageslice.php?src=img/figure_6a.jpg&width=320&height=240&left=0.1&top=0.1&right=0.9&bottom=0.9
 
 ?>

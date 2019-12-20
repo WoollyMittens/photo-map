@@ -15,7 +15,7 @@
 			$imageSrc = explode(",", $imageSrc);
 			for($a=0, $b=count($imageSrc); $a<$b; $a++)
 			{
-				list($this->imageWidth[$a], $this->imageHeight[$a]) = getimagesize($imageSrc[$a]);
+				list($this->imageWidth[$a], $this->imageHeight[$a]) = getimagesize("../" . $imageSrc[$a]);
 			}
 		}
 
@@ -33,6 +33,6 @@
 	$image->getImage(@$_REQUEST['src']);
 	$image->writeSize(@$_REQUEST['callback']);
 
-	// http://localhost/~Woolly/Useful/webservices/imagesize.php?src=../img/figure_6a.jpg,../img/figure_7a.jpg&callback=alert
+	// http://localhost/~Woolly/Useful/webservices/imagesize.php?src=img/figure_6a.jpg,img/figure_7a.jpg&callback=alert
 
 ?>

@@ -63,7 +63,7 @@ var photomap = new Photomap({
 	'offlineTiles' : './tiles/{z}/{x}/{y}.png',
 	'gpx' : './xml/cowan-taffyslookout-brooklyn.xml',
 	'gpxData' : GpxData['cowan-taffyslookout-brooklyn'],
-	'exif' : 'php/imageexif.php?src=../{src}',
+	'exif' : 'php/imageexif.php?src={src}',
 	'exifData' : ExifData['cowan-taffyslookout-brooklyn'],
 	'pointer' : './img/marker-location.png',
 	'missing' : './img/missing.png',
