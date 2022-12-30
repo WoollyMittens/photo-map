@@ -2,8 +2,6 @@
 
 Plots the GPS data of the photos in a slideshow on a map.
 
-Try the <a href="http://www.woollymittens.nl/default.php?url=useful-photomap">demo</a>.
-
 ## How to include the script
 
 The stylesheet is best included in the header of the document.
