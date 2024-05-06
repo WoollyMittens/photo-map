@@ -1,8 +1,8 @@
 // constants
 var ex = require('exif');
 var fs = require('fs');
-var source = './src/img/';
-var destination = './src/json/exif-data.js';
+var source = './img/';
+var destination = './data/exif-data.js';
 var exifs = {};
 
 // generates a resize queue

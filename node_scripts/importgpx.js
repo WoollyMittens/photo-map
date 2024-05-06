@@ -2,8 +2,8 @@
 var fs = require('fs');
 var tg = require('../src/lib/togeojson.js');
 var jd = require('jsdom').jsdom;
-var source = './src/xml/';
-var destination = './src/json/gpx-data.js';
+var source = './xml/';
+var destination = './data/gpx-data.js';
 var geojsons = {};
 
 // generates a resize queue

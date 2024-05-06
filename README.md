@@ -1,5 +1,7 @@
 # photomap.js: Photo Map
 
+*DEPRICATION WARNING: the functionality in this script is now part of [useful-localmap](https://github.com/WoollyMittens/useful-localmap).*
+
 Plots the GPS data of the photos in a slideshow on a map.
 
 ## How to include the script
@@ -36,15 +38,15 @@ requirejs([
 });
 ```
 
-Or import into an MVC framework.
+Or use imported as a component in existing projects.
 
 ```js
-var Leaflet = require('lib/leaflet-src.js');
-var requests = require('lib/requests.js');
-var toGeoJSON = require('lib/togeojson.js');
-var ExifData = require('data/exif-data.js');
-var GpxData = require('data/gpx-data.js');
-var Photomap = require('js/photomap.js');
+@import {Leaflet = require('lib/leaflet-src.js";
+@import {requests = require('lib/requests.js";
+@import {toGeoJSON = require('lib/togeojson.js";
+@import {ExifData = require('data/exif-data.js";
+@import {GpxData = require('data/gpx-data.js";
+@import {Photomap} from "js/photomap.js";
 ```
 
 ## How to start the script
@@ -165,4 +167,4 @@ The following commands are available for development:
 
 ## License
 
-This work is licensed under a [MIT License](https://opensource.org/licenses/MIT). The latest version of this and other scripts by the same author can be found on [Github](https://github.com/WoollyMittens) and at [WoollyMittens.nl](https://www.woollymittens.nl/).
+This work is licensed under a [MIT License](https://opensource.org/licenses/MIT). The latest version of this and other scripts by the same author can be found on [Github](https://github.com/WoollyMittens).
