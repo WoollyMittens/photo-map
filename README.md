@@ -41,11 +41,11 @@ requirejs([
 Or use imported as a component in existing projects.
 
 ```js
-@import {Leaflet = require('lib/leaflet-src.js";
-@import {requests = require('lib/requests.js";
-@import {toGeoJSON = require('lib/togeojson.js";
-@import {ExifData = require('data/exif-data.js";
-@import {GpxData = require('data/gpx-data.js";
+@import {Leaflet} from "lib/leaflet-src.js";
+@import {requests} from "lib/requests.js";
+@import {toGeoJSON} from "lib/togeojson.js";
+@import {ExifData} from "data/exif-data.js";
+@import {GpxData} from "data/gpx-data.js";
 @import {Photomap} from "js/photomap.js";
 ```
 
@@ -152,16 +152,7 @@ This project uses leaflet.js from http://leafletjs.com/
 
 This project uses node.js from http://nodejs.org/
 
-This project uses gulp.js from http://gulpjs.com/
-
 The following commands are available for development:
-+ `npm install` - Installs the prerequisites.
-+ `gulp import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
-+ `gulp dev` - Builds the project for development purposes.
-+ `gulp dist` - Builds the project for deployment purposes.
-+ `gulp watch` - Continuously recompiles updated files during development sessions.
-+ `gulp serve` - Serves the project on a temporary web server at http://localhost:8500/.
-+ `gulp php` - Serves the project on a temporary php server at http://localhost:8500/.
 + `node node_scripts/importexif.js` - Imports EXIF data and creates a JSON cache file.
 + `node node_scripts/importgpx.js` - Imports GPS data and creates a JSON cache file.
 
